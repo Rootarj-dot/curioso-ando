@@ -1,31 +1,179 @@
-import { useAuth } from "@/_core/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { Loader2 } from "lucide-react";
-import { getLoginUrl } from "@/const";
-import { Streamdown } from 'streamdown';
+import { Link } from "wouter";
+import { trpc } from "@/lib/trpc";
+import { Navbar } from "@/components/Navbar";
+import { Footer } from "@/components/Footer";
+import { ArticleCard } from "@/components/ArticleCard";
+import { AdSlot } from "@/components/AdSense";
+import { ArrowRight, TrendingUp } from "lucide-react";
 
-/**
- * All content in this page are only for example, replace with your own feature implementation
- * When building pages, remember your instructions in Frontend Workflow, Frontend Best Practices, Design Guide and Common Pitfalls
- */
 export default function Home() {
-  // The userAuth hooks provides authentication state
-  // To implement login/logout functionality, simply call logout() or redirect to getLoginUrl()
-  let { user, loading, error, isAuthenticated, logout } = useAuth();
-
-  // If theme is switchable in App.tsx, we can implement theme toggling like this:
-  // const { theme, toggleTheme } = useTheme();
+  const { data: featuredArticle, isLoading: featuredLoading } = trpc.articles.featured.useQuery();
+  const { data: articles, isLoading: articlesLoading } = trpc.articles.list.useQuery({ limit: 12 });
+  const { data: categories } = trpc.categories.list.useQuery();
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <main>
-        {/* Example: lucide-react for icons */}
-        <Loader2 className="animate-spin" />
-        Example Page
-        {/* Example: Streamdown for markdown rendering */}
-        <Streamdown>Any **markdown** content</Streamdown>
-        <Button variant="default">Example Button</Button>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#252728" }}>
+      <Navbar />
+
+      {/* AdSense Header */}
+      <div className="container py-3">
+        <AdSlot slot="header" />
+      </div>
+
+      {/* Hero Section */}
+      <section className="ca-gradient-hero py-12 md:py-20">
+        <div className="container">
+          <div className="max-w-3xl">
+            <span className="ca-badge mb-4">Portal de Noticias</span>
+            <h1 className="text-white font-bold text-4xl md:text-6xl leading-tight mb-4" style={{ fontFamily: "Poppins, sans-serif" }}>
+              Curioso Ando
+            </h1>
+            <p className="text-lg md:text-xl mb-6" style={{ color: "#D0C0FF" }}>
+              Datos raros, curiosos y sorprendentes. Noticias, entretenimiento, geek y tecnología en un solo lugar.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              {categories?.map((cat) => (
+                <Link
+                  key={cat.slug}
+                  href={`/categoria/${cat.slug}`}
+                  className="px-4 py-2 rounded-full text-sm font-medium no-underline transition-all"
+                  style={{ background: "rgba(255,255,255,0.15)", color: "#FFFFFF", backdropFilter: "blur(4px)" }}
+                >
+                  {cat.name}
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <main className="flex-1">
+        <div className="container py-10">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            {/* Main content */}
+            <div className="lg:col-span-3">
+
+              {/* Featured Article */}
+              {(featuredLoading || featuredArticle) && (
+                <section className="mb-10">
+                  <div className="flex items-center gap-2 mb-5">
+                    <TrendingUp className="w-5 h-5" style={{ color: "#5B2C8F" }} />
+                    <h2 className="text-white font-bold text-xl" style={{ fontFamily: "Poppins, sans-serif" }}>
+                      Nota Destacada
+                    </h2>
+                  </div>
+                  {featuredLoading ? (
+                    <div className="rounded-xl animate-pulse" style={{ height: 420, backgroundColor: "#2E3032" }} />
+                  ) : featuredArticle ? (
+                    <ArticleCard {...featuredArticle} size="large" />
+                  ) : null}
+                </section>
+              )}
+
+              {/* Recent Articles Grid */}
+              <section>
+                <div className="flex items-center justify-between mb-5">
+                  <h2 className="text-white font-bold text-xl" style={{ fontFamily: "Poppins, sans-serif" }}>
+                    Notas Recientes
+                  </h2>
+                  <Link href="/articulos" className="flex items-center gap-1 text-sm no-underline" style={{ color: "#7B4FB8" }}>
+                    Ver todas <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+
+                {articlesLoading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <div key={i} className="rounded-xl animate-pulse" style={{ height: 280, backgroundColor: "#2E3032" }} />
+                    ))}
+                  </div>
+                ) : articles && articles.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                    {articles.map((article) => (
+                      <ArticleCard key={article.id} {...article} />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="rounded-xl p-12 text-center" style={{ backgroundColor: "#2E3032", border: "1px solid #3B3D3E" }}>
+                    <p className="text-lg font-semibold text-white mb-2">Próximamente</p>
+                    <p style={{ color: "#A0A0A0" }}>Los artículos aparecerán aquí una vez publicados.</p>
+                  </div>
+                )}
+              </section>
+
+              {/* Category Sections */}
+              {categories?.map((cat) => {
+                return <CategorySection key={cat.slug} categorySlug={cat.slug} categoryName={cat.name} />;
+              })}
+            </div>
+
+            {/* Sidebar */}
+            <aside className="lg:col-span-1">
+              <div className="sticky top-24 flex flex-col gap-6">
+                {/* AdSense Sidebar */}
+                <AdSlot slot="sidebar" />
+
+                {/* Categories Widget */}
+                <div className="ca-card p-5">
+                  <h3 className="text-white font-bold text-base mb-4" style={{ fontFamily: "Poppins, sans-serif" }}>
+                    Categorías
+                  </h3>
+                  <div className="flex flex-col gap-2">
+                    {categories?.map((cat) => (
+                      <Link
+                        key={cat.slug}
+                        href={`/categoria/${cat.slug}`}
+                        className="flex items-center justify-between px-3 py-2 rounded-lg no-underline transition-colors"
+                        style={{ color: "#A0A0A0" }}
+                      >
+                        <span className="text-sm font-medium">{cat.name}</span>
+                        <ArrowRight className="w-3 h-3" />
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+
+                {/* About Widget */}
+                <div className="ca-card p-5">
+                  <h3 className="text-white font-bold text-base mb-3" style={{ fontFamily: "Poppins, sans-serif" }}>
+                    Sobre Curioso Ando
+                  </h3>
+                  <p className="text-sm" style={{ color: "#A0A0A0" }}>
+                    Datos raros, curiosos y sorprendentes en un scroll. Aprende, ríe y di "¡no lo sabía!".
+                  </p>
+                </div>
+              </div>
+            </aside>
+          </div>
+        </div>
       </main>
+
+      <Footer />
     </div>
+  );
+}
+
+function CategorySection({ categorySlug, categoryName }: { categorySlug: string; categoryName: string }) {
+  const { data: articles } = trpc.articles.list.useQuery({ categorySlug, limit: 3 });
+  if (!articles || articles.length === 0) return null;
+  return (
+    <section className="mt-10">
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <div className="w-1 h-6 rounded-full" style={{ background: "linear-gradient(to bottom, #2B037D, #5B2C8F)" }} />
+          <h2 className="text-white font-bold text-xl" style={{ fontFamily: "Poppins, sans-serif" }}>
+            {categoryName}
+          </h2>
+        </div>
+        <Link href={`/categoria/${categorySlug}`} className="flex items-center gap-1 text-sm no-underline" style={{ color: "#7B4FB8" }}>
+          Ver más <ArrowRight className="w-4 h-4" />
+        </Link>
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {articles.map((article) => (
+          <ArticleCard key={article.id} {...article} />
+        ))}
+      </div>
+    </section>
   );
 }

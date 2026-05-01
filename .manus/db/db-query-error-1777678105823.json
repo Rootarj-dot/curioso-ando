@@ -1,0 +1,19 @@
+{
+  "query": "CREATE TABLE `articles` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`title` varchar(255) NOT NULL,\n\t`slug` varchar(255) NOT NULL,\n\t`excerpt` text,\n\t`content` text NOT NULL DEFAULT ('{}'),\n\t`featuredImage` text,\n\t`ogTitle` varchar(255),\n\t`ogDescription` text,\n\t`ogImage` text,\n\t`status` enum('draft','published') NOT NULL DEFAULT 'draft',\n\t`featured` boolean NOT NULL DEFAULT false,\n\t`categoryId` int,\n\t`authorId` int NOT NULL,\n\t`publishedAt` timestamp,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `articles_id` PRIMARY KEY(`id`),\n\tCONSTRAINT `articles_slug_unique` UNIQUE(`slug`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user VPX1UD4TNxPsUWM.5f6a1643c048 --database VvgGpyGf3Jb2Riey6L2ysE --execute CREATE TABLE `articles` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`title` varchar(255) NOT NULL,\n\t`slug` varchar(255) NOT NULL,\n\t`excerpt` text,\n\t`content` text NOT NULL DEFAULT ('{}'),\n\t`featuredImage` text,\n\t`ogTitle` varchar(255),\n\t`ogDescription` text,\n\t`ogImage` text,\n\t`status` enum('draft','published') NOT NULL DEFAULT 'draft',\n\t`featured` boolean NOT NULL DEFAULT false,\n\t`categoryId` int,\n\t`authorId` int NOT NULL,\n\t`publishedAt` timestamp,\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `articles_id` PRIMARY KEY(`id`),\n\tCONSTRAINT `articles_slug_unique` UNIQUE(`slug`)\n);",
+  "returncode": 1,
+  "logs": [
+    "ERROR 1064 (42000) at line 1: You have an error in your SQL syntax; check the manual that corresponds to your TiDB version for the right syntax to use line 6 column 39 near \"'{}'),",
+    "\t`featuredImage` text,",
+    "\t`ogTitle` varchar(255),",
+    "\t`ogDescription` text,",
+    "\t`ogImage` text,",
+    "\t`status` enum('draft','published') NOT NULL DEFAULT 'draft',",
+    "\t`featured` boolean NOT NULL DEFAULT false,",
+    "\t`categoryId` int,",
+    "\t`authorId` int NOT NULL,",
+    "\t`publishedAt` timestamp,",
+    "\t`createdAt` timestamp NOT NULL DEFAULT (now()),",
+    "\t`updatedAt` timestamp NOT NULL DEFAULT (now()"
+  ]
+}

@@ -5,33 +5,41 @@ import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import ArticlePage from "./pages/ArticlePage";
+import CategoryPage from "./pages/CategoryPage";
+import AdminDashboard from "./pages/Admin/AdminDashboard";
+import AdminArticles from "./pages/Admin/AdminArticles";
+import ArticleEditor from "./pages/Admin/ArticleEditor";
+import AdminMedia from "./pages/Admin/AdminMedia";
 
 function Router() {
-  // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
+      {/* Public routes */}
+      <Route path="/" component={Home} />
+      <Route path="/articulo/:slug" component={ArticlePage} />
+      <Route path="/categoria/:slug" component={CategoryPage} />
+
+      {/* Admin routes */}
+      <Route path="/admin" component={AdminDashboard} />
+      <Route path="/admin/articulos" component={AdminArticles} />
+      <Route path="/admin/nuevo" component={ArticleEditor} />
+      <Route path="/admin/editar/:id" component={ArticleEditor} />
+      <Route path="/admin/medios" component={AdminMedia} />
+
+      {/* 404 */}
+      <Route path="/404" component={NotFound} />
       <Route component={NotFound} />
     </Switch>
   );
 }
 
-// NOTE: About Theme
-// - First choose a default theme according to your design style (dark or light bg), than change color palette in index.css
-//   to keep consistent foreground/background color across components
-// - If you want to make theme switchable, pass `switchable` ThemeProvider and use `useTheme` hook
-
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider
-        defaultTheme="light"
-        // switchable
-      >
+      <ThemeProvider defaultTheme="dark">
         <TooltipProvider>
-          <Toaster />
+          <Toaster richColors position="top-right" />
           <Router />
         </TooltipProvider>
       </ThemeProvider>
