@@ -105,7 +105,7 @@ export const appRouter = router({
         title: z.string().min(1),
         slug: z.string().optional(),
         excerpt: z.string().optional(),
-        content: z.string().default("{}"),
+        content: z.string().optional(),
         featuredImage: z.string().optional(),
         ogTitle: z.string().optional(),
         ogDescription: z.string().optional(),

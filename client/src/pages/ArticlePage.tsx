@@ -267,7 +267,7 @@ export default function ArticlePage() {
                 {/* Content */}
                 <div
                   className="article-content"
-                  dangerouslySetInnerHTML={{ __html: renderContent(article.content) }}
+                  dangerouslySetInnerHTML={{ __html: renderContent(article.content ?? "{}") }}
                 />
 
                 {/* Mid-content AdSense */}

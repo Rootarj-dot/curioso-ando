@@ -41,7 +41,7 @@ export const articles = mysqlTable("articles", {
   title: varchar("title", { length: 255 }).notNull(),
   slug: varchar("slug", { length: 255 }).notNull().unique(),
   excerpt: text("excerpt"),
-  content: text("content").notNull().default("{}"),
+  content: text("content"),
   featuredImage: text("featuredImage"),
   ogTitle: varchar("ogTitle", { length: 255 }),
   ogDescription: text("ogDescription"),
