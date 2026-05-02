@@ -25,6 +25,7 @@ import { INSERT_ORDERED_LIST_COMMAND, INSERT_UNORDERED_LIST_COMMAND, ListNode, L
 import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { $createImageNode, ImageNode } from "./ImageNode";
 import { Bold, Italic, Underline, List, ListOrdered, Quote, Image as ImageIcon, Type } from "lucide-react";
+import { $getRoot } from "lexical";
 
 interface BlockEditorProps {
   initialContent?: string;
@@ -264,6 +265,27 @@ function EditorRefPlugin({ onReady }: { onReady: (editor: LexicalEditor) => void
   return null;
 }
 
+// Plugin to load content after editor mounts (for async data)
+function ContentLoaderPlugin({ content }: { content: string }) {
+  const [editor] = useLexicalComposerContext();
+  const loadedRef = useRef(false);
+  useEffect(() => {
+    if (!content || content === "{}" || loadedRef.current) return;
+    try {
+      const parsed = JSON.parse(content);
+      if (!parsed?.root) return;
+      editor.update(() => {
+        const editorState = editor.parseEditorState(content);
+        editor.setEditorState(editorState);
+      });
+      loadedRef.current = true;
+    } catch (e) {
+      console.warn("[Editor] No se pudo cargar el contenido:", e);
+    }
+  }, [content, editor]);
+  return null;
+}
+
 export function insertImageIntoEditor(editor: LexicalEditor, src: string, altText: string = "") {
   editor.update(() => {
     const imageNode = $createImageNode({ src, altText, maxWidth: 800 });
@@ -277,7 +299,7 @@ export function BlockEditor({ initialContent, onChange, onInsertImageRequest, on
     theme,
     onError: (error: Error) => console.error("[Editor]", error),
     nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, LinkNode, AutoLinkNode, ImageNode],
-    editorState: initialContent && initialContent !== "{}" ? initialContent : undefined,
+    // No pasamos editorState aquí — lo cargamos con ContentLoaderPlugin para soportar datos async
   };
 
   const handleChange = (editorState: EditorState) => {
@@ -319,6 +341,7 @@ export function BlockEditor({ initialContent, onChange, onInsertImageRequest, on
         <LinkPlugin />
         <OnChangePlugin onChange={handleChange} />
         {onEditorReady && <EditorRefPlugin onReady={handleEditorReady} />}
+        {initialContent && initialContent !== "{}" && <ContentLoaderPlugin content={initialContent} />}
       </div>
     </LexicalComposer>
   );

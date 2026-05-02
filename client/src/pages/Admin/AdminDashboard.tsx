@@ -15,7 +15,7 @@ export default function AdminDashboard() {
     <AdminLayout>
       <div className="p-6">
         <div className="mb-8">
-          <h1 className="text-white font-bold text-2xl" style={{ fontFamily: "Poppins, sans-serif" }}>
+          <h1 className="font-bold text-2xl" style={{ fontFamily: "Poppins, sans-serif" }}>
             Dashboard
           </h1>
           <p style={{ color: "#6B6B6B" }}>Bienvenido al panel de administración de Curioso Ando.</p>
@@ -50,7 +50,7 @@ export default function AdminDashboard() {
               <Plus className="w-6 h-6 text-white" />
             </div>
             <div>
-              <p className="text-white font-bold">Nuevo Artículo</p>
+              <p className="font-bold">Nuevo Artículo</p>
               <p className="text-sm" style={{ color: "#6B6B6B" }}>Crear y publicar contenido</p>
             </div>
           </Link>
@@ -62,7 +62,7 @@ export default function AdminDashboard() {
               <Image className="w-6 h-6 text-white" />
             </div>
             <div>
-              <p className="text-white font-bold">Galería de Medios</p>
+              <p className="font-bold">Galería de Medios</p>
               <p className="text-sm" style={{ color: "#6B6B6B" }}>{media?.length ?? 0} imágenes subidas</p>
             </div>
           </Link>
@@ -71,7 +71,7 @@ export default function AdminDashboard() {
         {/* Recent articles */}
         <div className="ca-card overflow-hidden">
           <div className="flex items-center justify-between p-4" style={{ borderBottom: "1px solid #E5E3DE" }}>
-            <h2 className="text-white font-bold">Artículos Recientes</h2>
+            <h2 className="font-bold">Artículos Recientes</h2>
             <Link href="/admin/articulos" className="text-sm no-underline" style={{ color: "#7B4FB8" }}>
               Ver todos
             </Link>

@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
-import { LayoutDashboard, FileText, Image, Search, LogOut, Home, Plus } from "lucide-react";
+import { LayoutDashboard, FileText, Image, Search, LogOut, Home, Plus, Users } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
 const NAV_ITEMS = [
@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { href: "/admin/articulos", label: "Artículos", icon: FileText },
   { href: "/admin/nuevo", label: "Nuevo Artículo", icon: Plus },
   { href: "/admin/medios", label: "Medios", icon: Image },
+  { href: "/admin/usuarios", label: "Usuarios", icon: Users },
 ];
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -33,12 +34,12 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)" }}>
             <Search className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-white font-bold text-2xl mb-2" style={{ fontFamily: "Poppins, sans-serif" }}>Curioso Ando</h1>
+          <h1 className="font-bold text-2xl mb-2" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>Curioso Ando</h1>
           <p className="mb-6" style={{ color: "#6B6B6B" }}>Debes iniciar sesión para acceder al panel.</p>
           <a
             href={getLoginUrl()}
             className="px-6 py-3 rounded-lg font-medium no-underline"
-            style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#1A1A1A" }}
+            style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#FFFFFF" }}
           >
             Iniciar sesión
           </a>
@@ -58,7 +59,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               <Search className="w-4 h-4 text-white" />
             </div>
             <div>
-              <p className="text-white font-bold text-sm" style={{ fontFamily: "Poppins, sans-serif" }}>Curioso Ando</p>
+              <p className="font-bold text-sm" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>Curioso Ando</p>
               <p className="text-xs" style={{ color: "#6B6B6B" }}>Panel Admin</p>
             </div>
           </div>
@@ -74,7 +75,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
                 href={href}
                 className="flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 no-underline text-sm font-medium transition-colors"
                 style={{
-                  color: active ? "#FFFFFF" : "#A0A0A0",
+                  color: active ? "#FFFFFF" : "#4A4A4A",
                   background: active ? "linear-gradient(135deg, #2B037D, #5B2C8F)" : "transparent",
                 }}
               >
@@ -92,7 +93,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               {user?.name?.[0]?.toUpperCase() || "U"}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-white text-sm font-medium truncate">{user?.name || "Usuario"}</p>
+              <p className="text-sm font-medium truncate" style={{ color: "#1A1A1A" }}>{user?.name || "Usuario"}</p>
               <p className="text-xs truncate" style={{ color: "#6B6B6B" }}>{user?.role}</p>
             </div>
           </div>

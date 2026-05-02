@@ -156,7 +156,7 @@ export default function ArticleEditor() {
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <h1 className="text-white font-bold text-xl" style={{ fontFamily: "Poppins, sans-serif" }}>
+              <h1 className="font-bold text-xl" style={{ fontFamily: "Poppins, sans-serif" }}>
                 {isEditing ? "Editar Artículo" : "Nuevo Artículo"}
               </h1>
             </div>
@@ -187,7 +187,7 @@ export default function ArticleEditor() {
               onClick={() => handleSave("published")}
               disabled={isSaving}
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
-              style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#1A1A1A" }}
+              style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#FFFFFF" }}
             >
               {isSaving ? "Guardando..." : "Publicar"}
             </button>
@@ -238,7 +238,7 @@ export default function ArticleEditor() {
           <div className="flex flex-col gap-4">
             {/* Publish settings */}
             <div className="ca-card p-4">
-              <h3 className="text-white font-semibold text-sm mb-4">Publicación</h3>
+              <h3 className="font-semibold text-sm mb-4">Publicación</h3>
               <div className="flex flex-col gap-3">
                 <div>
                   <label className="block text-xs mb-1.5" style={{ color: "#6B6B6B" }}>Estado</label>
@@ -302,7 +302,7 @@ export default function ArticleEditor() {
 
             {/* Featured Image */}
             <div className="ca-card p-4">
-              <h3 className="text-white font-semibold text-sm mb-3">Imagen Destacada</h3>
+              <h3 className="font-semibold text-sm mb-3">Imagen Destacada</h3>
               {featuredImage ? (
                 <div className="relative rounded-lg overflow-hidden mb-2" style={{ aspectRatio: "16/9" }}>
                   <img src={featuredImage} alt="" className="w-full h-full object-cover" />
@@ -334,7 +334,7 @@ export default function ArticleEditor() {
 
             {/* Open Graph */}
             <div className="ca-card p-4">
-              <h3 className="text-white font-semibold text-sm mb-3">Open Graph (Facebook)</h3>
+              <h3 className="font-semibold text-sm mb-3">Open Graph (Facebook)</h3>
               <div className="flex flex-col gap-3">
                 <div>
                   <label className="block text-xs mb-1.5" style={{ color: "#6B6B6B" }}>OG Title</label>

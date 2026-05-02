@@ -32,7 +32,7 @@ export default function AdminArticles() {
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-white font-bold text-2xl" style={{ fontFamily: "Poppins, sans-serif" }}>Artículos</h1>
+            <h1 className="font-bold text-2xl" style={{ fontFamily: "Poppins, sans-serif" }}>Artículos</h1>
             <p style={{ color: "#6B6B6B" }}>{articles?.length ?? 0} artículos en total</p>
           </div>
           <Link

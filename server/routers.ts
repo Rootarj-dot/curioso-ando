@@ -18,6 +18,8 @@ import {
   createMedia,
   deleteMedia,
   getMediaById,
+  getAllUsers,
+  updateUserRole,
 } from "./db";
 import { uploadToCloudinary, deleteFromCloudinary } from "./cloudinaryStorage";
 import { nanoid } from "nanoid";
@@ -219,6 +221,21 @@ export const appRouter = router({
           }
         }
         await deleteMedia(input.id);
+        return { success: true };
+      }),
+  }),  // end media
+
+  users: router({
+    list: adminProcedure.query(async () => {
+      return await getAllUsers();
+    }),
+    updateRole: adminProcedure
+      .input(z.object({ id: z.number(), role: z.enum(["user", "admin"]) }))
+      .mutation(async ({ input, ctx }) => {
+        if (input.id === ctx.user.id) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "No puedes cambiar tu propio rol" });
+        }
+        await updateUserRole(input.id, input.role);
         return { success: true };
       }),
   }),

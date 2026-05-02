@@ -11,6 +11,7 @@ import AdminDashboard from "./pages/Admin/AdminDashboard";
 import AdminArticles from "./pages/Admin/AdminArticles";
 import ArticleEditor from "./pages/Admin/ArticleEditor";
 import AdminMedia from "./pages/Admin/AdminMedia";
+import AdminUsers from "./pages/Admin/AdminUsers";
 
 function Router() {
   return (
@@ -26,6 +27,7 @@ function Router() {
       <Route path="/admin/nuevo" component={ArticleEditor} />
       <Route path="/admin/editar/:id" component={ArticleEditor} />
       <Route path="/admin/medios" component={AdminMedia} />
+      <Route path="/admin/usuarios" component={AdminUsers} />
 
       {/* 404 */}
       <Route path="/404" component={NotFound} />
@@ -37,7 +39,7 @@ function Router() {
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider defaultTheme="dark">
+      <ThemeProvider defaultTheme="light">
         <TooltipProvider>
           <Toaster richColors position="top-right" />
           <Router />

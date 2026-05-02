@@ -69,7 +69,7 @@ export default function AdminMedia() {
       <div className="p-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-white font-bold text-2xl" style={{ fontFamily: "Poppins, sans-serif" }}>Galería de Medios</h1>
+            <h1 className="font-bold text-2xl" style={{ fontFamily: "Poppins, sans-serif" }}>Galería de Medios</h1>
             <p style={{ color: "#6B6B6B" }}>{mediaList?.length ?? 0} imágenes</p>
           </div>
           <button
@@ -91,7 +91,7 @@ export default function AdminMedia() {
             onClick={() => fileInputRef.current?.click()}
           >
             <ImageIcon className="w-16 h-16 mb-4 opacity-20 text-white" />
-            <p className="text-white font-semibold mb-1">Sin imágenes</p>
+            <p className="font-semibold mb-1">Sin imágenes</p>
             <p style={{ color: "#6B6B6B" }}>Haz clic para subir tu primera imagen</p>
           </div>
         ) : (

@@ -284,3 +284,24 @@ export async function countUsers(): Promise<number> {
   const result = await db.select({ count: sql<number>`count(*)` }).from(users);
   return Number(result[0]?.count ?? 0);
 }
+
+export async function getAllUsers() {
+  const db = await getDb();
+  if (!db) return [];
+  const result = await db.select({
+    id: users.id,
+    name: users.name,
+    email: users.email,
+    role: users.role,
+    loginMethod: users.loginMethod,
+    createdAt: users.createdAt,
+    lastSignedIn: users.lastSignedIn,
+  }).from(users).orderBy(users.createdAt);
+  return result;
+}
+
+export async function updateUserRole(id: number, role: "user" | "admin") {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(users).set({ role }).where(eq(users.id, id));
+}
