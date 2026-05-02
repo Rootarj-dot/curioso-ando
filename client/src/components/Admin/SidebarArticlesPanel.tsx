@@ -151,7 +151,7 @@ function ArticleSelector({ label, selectedIds, allArticles, onChange }: SectionP
 }
 
 export function SidebarArticlesPanel() {
-  const { data: adminArticles } = trpc.articles.adminList.useQuery();
+  const { data: adminArticles } = trpc.articles.list.useQuery({ limit: 100 });
   const { data: currentConfig } = trpc.siteConfig.getSidebarArticles.useQuery();
   const utils = trpc.useUtils();
 

@@ -86,7 +86,7 @@
 - [x] Corregir carga de .env: --env-file falla en Windows, usar dotenv programático con ruta absoluta desde import.meta.url
 
 ## Panel de Artículos Globales
-- [ ] Tabla site_config en DB para guardar configuración global (artículos destacados/recomendados)
-- [ ] Procedimientos tRPC: getSiteConfig, setSiteConfig (admin)
-- [ ] Panel en sidebar del editor: seleccionar artículos específicos para mostrar globalmente
-- [ ] Renderizar artículos globales seleccionados en el sidebar de todas las notas
+- [x] Tabla site_config en DB para guardar configuración global (artículos destacados/recomendados)
+- [x] Procedimientos tRPC: getSiteConfig, setSiteConfig (admin)
+- [x] Panel en sidebar del editor: seleccionar artículos específicos para mostrar globalmente
+- [x] Renderizar artículos globales seleccionados en el sidebar de todas las notas
