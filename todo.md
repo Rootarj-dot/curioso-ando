@@ -77,3 +77,9 @@
 - [x] Actualizar frontend para flujo de login Google
 - [x] Script de migración de tablas para MySQL local
 - [x] Actualizar .env con nuevas credenciales
+
+## Bugs arranque local
+- [x] Eliminar error OAUTH_SERVER_URL de Manus del servidor
+- [x] Corregir 404 en página principal en entorno local
+- [x] Asegurar que dotenv carga .env correctamente
+- [x] Corregir carga de .env con ruta explícita para compatibilidad con Windows
