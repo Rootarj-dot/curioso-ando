@@ -9,6 +9,7 @@ import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { serveStatic, setupVite } from "./vite";
 import { registerSeoRoutes } from "../seo";
+import { setupGoogleAuth } from "../auth/googleAuth";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -36,7 +37,8 @@ async function startServer() {
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   registerStorageProxy(app);
-  registerOAuthRoutes(app);
+  setupGoogleAuth(app); // Google OAuth 2.0
+  registerOAuthRoutes(app); // Legacy Manus OAuth (fallback)
   registerSeoRoutes(app);
   // tRPC API
   app.use(

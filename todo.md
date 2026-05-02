@@ -68,3 +68,12 @@
 
 ## Compatibilidad Windows
 - [x] Instalar cross-env y actualizar scripts de package.json para compatibilidad con Windows
+
+## Migración a Stack Independiente
+- [x] Instalar passport-google-oauth20, cloudinary, multer
+- [x] Migrar auth de Manus OAuth a Google OAuth 2.0
+- [x] Migrar almacenamiento de imágenes a Cloudinary
+- [x] Actualizar conexión DB a MySQL local (XAMPP)
+- [x] Actualizar frontend para flujo de login Google
+- [x] Script de migración de tablas para MySQL local
+- [x] Actualizar .env con nuevas credenciales

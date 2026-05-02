@@ -277,3 +277,10 @@ export async function getMediaById(id: number) {
   const result = await db.select().from(media).where(eq(media.id, id)).limit(1);
   return result[0] ?? null;
 }
+
+export async function countUsers(): Promise<number> {
+  const db = await getDb();
+  if (!db) return 0;
+  const result = await db.select({ count: sql<number>`count(*)` }).from(users);
+  return Number(result[0]?.count ?? 0);
+}

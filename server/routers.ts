@@ -17,8 +17,9 @@ import {
   getAllMedia,
   createMedia,
   deleteMedia,
+  getMediaById,
 } from "./db";
-import { storagePut } from "./storage";
+import { uploadToCloudinary, deleteFromCloudinary } from "./cloudinaryStorage";
 import { nanoid } from "nanoid";
 
 // Helper: admin-only guard
@@ -188,29 +189,38 @@ export const appRouter = router({
       }))
       .mutation(async ({ input, ctx }) => {
         const buffer = Buffer.from(input.base64, "base64");
-        const key = `media/${ctx.user.id}/${Date.now()}-${input.filename}`;
-        const { url } = await storagePut(key, buffer, input.mimeType);
+        const { url, publicId, width, height } = await uploadToCloudinary(buffer, {
+          folder: `curioso-ando/media/${ctx.user.id}`,
+          mimeType: input.mimeType,
+        });
         await createMedia({
           filename: input.filename,
           originalName: input.originalName,
           url,
-          storageKey: key,
+          storageKey: publicId,
           mimeType: input.mimeType,
           size: input.size,
-          width: input.width,
-          height: input.height,
+          width: width ?? input.width,
+          height: height ?? input.height,
           uploadedBy: ctx.user.id,
         });
-        return { url, key };
+        return { url, key: publicId };
       }),
 
-    delete: protectedProcedure
+     delete: protectedProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
+        const mediaItem = await getMediaById(input.id);
+        if (mediaItem?.storageKey) {
+          try {
+            await deleteFromCloudinary(mediaItem.storageKey);
+          } catch (err) {
+            console.warn("[Media] Could not delete from Cloudinary:", err);
+          }
+        }
         await deleteMedia(input.id);
         return { success: true };
       }),
   }),
 });
-
 export type AppRouter = typeof appRouter;
