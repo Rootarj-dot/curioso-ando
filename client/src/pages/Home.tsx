@@ -147,26 +147,6 @@ export default function Home() {
             <aside className="lg:col-span-1">
               <div className="sticky top-24 flex flex-col gap-6">
 
-                {/* Categories Widget */}
-                <div className="ca-card p-5">
-                  <h3 className="font-bold text-base mb-4" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
-                    Categorías
-                  </h3>
-                  <div className="flex flex-col gap-2">
-                    {categories?.map((cat) => (
-                      <Link
-                        key={cat.slug}
-                        href={`/categoria/${cat.slug}`}
-                        className="flex items-center justify-between px-3 py-2 rounded-lg no-underline transition-colors"
-                        style={{ color: "#6B6B6B" }}
-                      >
-                        <span className="text-sm font-medium">{cat.name}</span>
-                        <ArrowRight className="w-3 h-3" />
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-
                 {/* About Widget */}
                 <div className="ca-card p-5">
                   <h3 className="font-bold text-base mb-3" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
