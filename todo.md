@@ -90,3 +90,9 @@
 - [x] Procedimientos tRPC: getSiteConfig, setSiteConfig (admin)
 - [x] Panel en sidebar del editor: seleccionar artículos específicos para mostrar globalmente
 - [x] Renderizar artículos globales seleccionados en el sidebar de todas las notas
+
+## Gestión de Categorías
+- [x] Procedimientos tRPC para CRUD de categorías (create, update, delete)
+- [x] Página /admin/categorias con tabla editable (crear, renombrar, eliminar con confirmación)
+- [x] Navbar carga categorías dinámicamente desde la DB (ya no están hardcodeadas)
+- [x] Recomendados movidos debajo del contenido del artículo (sección full-width con grid de tarjetas)

@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
-import { LayoutDashboard, FileText, Image, Search, LogOut, Home, Plus, Users } from "lucide-react";
+import { LayoutDashboard, FileText, Image, Search, LogOut, Home, Plus, Users, Tag } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
 const NAV_ITEMS = [
@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { href: "/admin/articulos", label: "Artículos", icon: FileText },
   { href: "/admin/nuevo", label: "Nuevo Artículo", icon: Plus },
   { href: "/admin/medios", label: "Medios", icon: Image },
+  { href: "/admin/categorias", label: "Categorías", icon: Tag },
   { href: "/admin/usuarios", label: "Usuarios", icon: Users },
 ];
 

@@ -6,6 +6,9 @@ import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
 import {
   getAllCategories,
+  createCategory,
+  updateCategory,
+  deleteCategory,
   getPublishedArticles,
   getFeaturedArticle,
   getArticleBySlug,
@@ -71,6 +74,29 @@ export const appRouter = router({
     list: publicProcedure.query(async () => {
       return getAllCategories();
     }),
+
+    create: adminProcedure
+      .input(z.object({ name: z.string().min(1).max(100) }))
+      .mutation(async ({ input }) => {
+        const slug = slugify(input.name);
+        if (!slug) throw new TRPCError({ code: "BAD_REQUEST", message: "Nombre inválido para generar slug" });
+        return createCategory(input.name.trim(), slug);
+      }),
+
+    update: adminProcedure
+      .input(z.object({ id: z.number(), name: z.string().min(1).max(100) }))
+      .mutation(async ({ input }) => {
+        const slug = slugify(input.name);
+        if (!slug) throw new TRPCError({ code: "BAD_REQUEST", message: "Nombre inválido para generar slug" });
+        return updateCategory(input.id, input.name.trim(), slug);
+      }),
+
+    delete: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await deleteCategory(input.id);
+        return { success: true };
+      }),
   }),
 
   // ─── Articles (public) ──────────────────────────────────────────────────────

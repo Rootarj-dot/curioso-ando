@@ -3,18 +3,13 @@ import { Link, useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { Menu, X, Search, User } from "lucide-react";
-
-const CATEGORIES = [
-  { name: "Noticias", slug: "noticias" },
-  { name: "Entretenimiento", slug: "entretenimiento" },
-  { name: "Geek", slug: "geek" },
-  { name: "Tecnología", slug: "tecnologia" },
-];
+import { trpc } from "@/lib/trpc";
 
 export function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [location] = useLocation();
   const { user, isAuthenticated } = useAuth();
+  const { data: categories } = trpc.categories.list.useQuery(undefined, { staleTime: 60_000 });
 
   return (
     <header className="sticky top-0 z-50" style={{ backgroundColor: "#FFFFFF", borderBottom: "1px solid #E5E3DE" }}>
@@ -33,7 +28,7 @@ export function Navbar() {
 
           {/* Desktop nav */}
           <nav className="hidden md:flex items-center gap-1">
-            {CATEGORIES.map((cat) => (
+            {(categories ?? []).map((cat) => (
               <Link
                 key={cat.slug}
                 href={`/categoria/${cat.slug}`}
@@ -89,7 +84,7 @@ export function Navbar() {
       {menuOpen && (
         <div className="md:hidden" style={{ backgroundColor: "#FFFFFF", borderTop: "1px solid #E5E3DE" }}>
           <div className="container py-3 flex flex-col gap-1">
-            {CATEGORIES.map((cat) => (
+            {(categories ?? []).map((cat) => (
               <Link
                 key={cat.slug}
                 href={`/categoria/${cat.slug}`}

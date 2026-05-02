@@ -12,6 +12,7 @@ import AdminArticles from "./pages/Admin/AdminArticles";
 import ArticleEditor from "./pages/Admin/ArticleEditor";
 import AdminMedia from "./pages/Admin/AdminMedia";
 import AdminUsers from "./pages/Admin/AdminUsers";
+import AdminCategorias from "./pages/Admin/AdminCategorias";
 
 function Router() {
   return (
@@ -28,6 +29,7 @@ function Router() {
       <Route path="/admin/editar/:id" component={ArticleEditor} />
       <Route path="/admin/medios" component={AdminMedia} />
       <Route path="/admin/usuarios" component={AdminUsers} />
+      <Route path="/admin/categorias" component={AdminCategorias} />
 
       {/* 404 */}
       <Route path="/404" component={NotFound} />

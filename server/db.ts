@@ -363,3 +363,25 @@ export async function getArticlesByIds(ids: number[]) {
   }
   return results;
 }
+
+export async function createCategory(name: string, slug: string) {
+  const db = await getDb();
+  if (!db) throw new Error("DB not available");
+  await db.insert(categories).values({ name, slug });
+  const result = await db.select().from(categories).where(eq(categories.slug, slug)).limit(1);
+  return result[0];
+}
+
+export async function updateCategory(id: number, name: string, slug: string) {
+  const db = await getDb();
+  if (!db) throw new Error("DB not available");
+  await db.update(categories).set({ name, slug }).where(eq(categories.id, id));
+  const result = await db.select().from(categories).where(eq(categories.id, id)).limit(1);
+  return result[0];
+}
+
+export async function deleteCategory(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB not available");
+  await db.delete(categories).where(eq(categories.id, id));
+}
