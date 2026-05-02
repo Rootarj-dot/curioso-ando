@@ -204,7 +204,7 @@ export default function ArticleEditor() {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Título del artículo..."
-                className="w-full bg-transparent text-white text-2xl font-bold border-0 border-b-2 pb-3 outline-none placeholder:text-gray-600"
+                className="w-full bg-transparent text-2xl font-bold border-0 border-b-2 pb-3 outline-none placeholder:text-gray-400"
                 style={{ borderColor: "#E5E3DE", fontFamily: "Poppins, sans-serif" }}
               />
             </div>
@@ -217,8 +217,8 @@ export default function ArticleEditor() {
                 onChange={(e) => setExcerpt(e.target.value)}
                 placeholder="Breve descripción del artículo..."
                 rows={2}
-                className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none resize-none"
-                style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E3DE" }}
+                className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none"
+                style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E3DE", color: "#1A1A1A" }}
               />
             </div>
 
@@ -245,8 +245,8 @@ export default function ArticleEditor() {
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value as "draft" | "published")}
-                    className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
-                    style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE" }}
+                    className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+                    style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE", color: "#1A1A1A" }}
                   >
                     <option value="draft">Borrador</option>
                     <option value="published">Publicado</option>
@@ -258,8 +258,8 @@ export default function ArticleEditor() {
                     type="datetime-local"
                     value={publishedAt}
                     onChange={(e) => setPublishedAt(e.target.value)}
-                    className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
-                    style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE" }}
+                    className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+                    style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE", color: "#1A1A1A" }}
                   />
                 </div>
                 <div>
@@ -267,8 +267,8 @@ export default function ArticleEditor() {
                   <select
                     value={categoryId ?? ""}
                     onChange={(e) => setCategoryId(e.target.value ? parseInt(e.target.value) : undefined)}
-                    className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
-                    style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE" }}
+                    className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+                    style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE", color: "#1A1A1A" }}
                   >
                     <option value="">Sin categoría</option>
                     {categories?.map((cat) => (
@@ -283,8 +283,8 @@ export default function ArticleEditor() {
                     value={slug}
                     onChange={(e) => setSlug(e.target.value)}
                     placeholder="mi-articulo"
-                    className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
-                    style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE" }}
+                    className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+                    style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE", color: "#1A1A1A" }}
                   />
                 </div>
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -295,7 +295,7 @@ export default function ArticleEditor() {
                     className="w-4 h-4 rounded"
                     style={{ accentColor: "#5B2C8F" }}
                   />
-                  <span className="text-sm text-white">Artículo destacado</span>
+                  <span className="text-sm" style={{ color: "#1A1A1A" }}>Artículo destacado</span>
                 </label>
               </div>
             </div>
@@ -343,8 +343,8 @@ export default function ArticleEditor() {
                     value={ogTitle}
                     onChange={(e) => setOgTitle(e.target.value)}
                     placeholder={title || "Título para redes sociales"}
-                    className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
-                    style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE" }}
+                    className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+                    style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE", color: "#1A1A1A" }}
                   />
                 </div>
                 <div>
@@ -354,8 +354,8 @@ export default function ArticleEditor() {
                     onChange={(e) => setOgDescription(e.target.value)}
                     placeholder={excerpt || "Descripción para redes sociales"}
                     rows={2}
-                    className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none resize-none"
-                    style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE" }}
+                    className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none"
+                    style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE", color: "#1A1A1A" }}
                   />
                 </div>
                 <div>
