@@ -69,18 +69,31 @@ export function setupGoogleAuth(app: Express) {
           const email = profile.emails?.[0]?.value ?? null;
           const name = profile.displayName ?? null;
 
-          // El primer usuario registrado (o el que coincide con OWNER_OPEN_ID) es admin
+          // Verificar si el usuario ya existe en la DB
+          let existingUser = null;
           let existingUsers = 0;
           try {
+            existingUser = await db.getUserByOpenId(openId);
             existingUsers = await db.countUsers();
-            console.log("[GoogleAuth] Usuarios existentes en DB:", existingUsers);
+            console.log("[GoogleAuth] Usuarios existentes en DB:", existingUsers, "| Usuario ya existe:", !!existingUser, "| Rol actual:", existingUser?.role);
           } catch (dbErr) {
-            console.error("[GoogleAuth] ❌ Error al contar usuarios (¿DB no configurada?):", dbErr);
+            console.error("[GoogleAuth] ❌ Error al consultar DB (¿DB no configurada?):", dbErr);
             return done(new Error(`Error de base de datos: ${String(dbErr)}`));
           }
 
-          const isOwner = openId === OWNER_OPEN_ID || existingUsers === 0;
-          console.log("[GoogleAuth] ¿Es admin?", isOwner, "| openId:", openId);
+          // Si el usuario ya existe, NO cambiar su rol (preservar el rol asignado manualmente)
+          // Si es nuevo, asignar admin si es el primero o si coincide con OWNER_OPEN_ID
+          let roleToAssign: "admin" | "user" | undefined;
+          if (existingUser) {
+            // Usuario ya existe: no tocar el rol
+            roleToAssign = undefined;
+            console.log("[GoogleAuth] Usuario existente, preservando rol:", existingUser.role);
+          } else {
+            // Usuario nuevo: es admin si es el primero o si coincide con OWNER_OPEN_ID
+            const isOwner = openId === OWNER_OPEN_ID || existingUsers === 0;
+            roleToAssign = isOwner ? "admin" : "user";
+            console.log("[GoogleAuth] Usuario nuevo, asignando rol:", roleToAssign);
+          }
 
           try {
             await db.upsertUser({
@@ -89,7 +102,7 @@ export function setupGoogleAuth(app: Express) {
               email,
               loginMethod: "google",
               lastSignedIn: new Date(),
-              role: isOwner ? "admin" : "user",
+              ...(roleToAssign !== undefined ? { role: roleToAssign } : {}),
             });
             console.log("[GoogleAuth] ✅ Usuario guardado en DB");
           } catch (upsertErr) {
@@ -156,8 +169,23 @@ export function setupGoogleAuth(app: Express) {
         console.log("[GoogleAuth] req.hostname:", req.hostname, "| req.protocol:", req.protocol);
 
         res.cookie(COOKIE_NAME, token, { ...cookieOptions, maxAge: ONE_YEAR_MS });
-        console.log("[GoogleAuth] ✅ Cookie establecida. Redirigiendo a /");
-        res.redirect("/");
+        console.log("[GoogleAuth] ✅ Cookie establecida. Enviando página de redirección.");
+        // Usar una página HTML intermedia en lugar de redirect 302
+        // Esto garantiza que el navegador guarda la cookie antes de navegar
+        res.send(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Iniciando sesión...</title>
+  <script>
+    // Redirigir después de que el navegador procese la cookie
+    window.location.replace('/');
+  </script>
+</head>
+<body>
+  <p>Iniciando sesión, por favor espera...</p>
+</body>
+</html>`);
       } catch (error) {
         console.error("[GoogleAuth] ❌ Error en callback final:", error);
         res.redirect(`/?error=auth_failed&detail=callback_error`);
