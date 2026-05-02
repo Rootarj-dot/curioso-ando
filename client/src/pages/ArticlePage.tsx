@@ -1,11 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { Link, useParams } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArticleCard } from "@/components/ArticleCard";
-import { AdSlot } from "@/components/AdSense";
-import { Calendar, User, ArrowLeft, Share2, Facebook } from "lucide-react";
+import { Calendar, User, ArrowLeft, Facebook } from "lucide-react";
 
 function formatDate(date: Date | null | undefined): string {
   if (!date) return "";
@@ -23,9 +22,7 @@ function setMetaTags(opts: {
   url: string;
   type?: string;
 }) {
-  // Title
   document.title = `${opts.title} | Curioso Ando`;
-
   const setMeta = (attr: string, value: string, content: string) => {
     let el = document.querySelector(`meta[${attr}="${value}"]`) as HTMLMetaElement | null;
     if (!el) {
@@ -35,11 +32,7 @@ function setMetaTags(opts: {
     }
     el.setAttribute("content", content);
   };
-
-  // Standard
   setMeta("name", "description", opts.description);
-
-  // Open Graph
   setMeta("property", "og:title", opts.title);
   setMeta("property", "og:description", opts.description);
   setMeta("property", "og:image", opts.image);
@@ -48,72 +41,166 @@ function setMetaTags(opts: {
   setMeta("property", "og:url", opts.url);
   setMeta("property", "og:type", opts.type || "article");
   setMeta("property", "og:site_name", "Curioso Ando");
-
-  // Twitter Card
   setMeta("name", "twitter:card", "summary_large_image");
   setMeta("name", "twitter:title", opts.title);
   setMeta("name", "twitter:description", opts.description);
   setMeta("name", "twitter:image", opts.image);
 }
 
-function renderContent(content: string): string {
-  try {
-    const parsed = JSON.parse(content);
-    // If it's a Lexical JSON, render it as HTML
-    if (parsed.root && parsed.root.children) {
-      return renderLexicalNodes(parsed.root.children);
-    }
-    // Fallback: treat as plain text
-    return `<p>${content}</p>`;
-  } catch {
-    // Plain HTML or text
-    return content || "<p>Sin contenido</p>";
-  }
+// ─── Inline Articles Block ────────────────────────────────────────────────────
+function InlineArticlesBlock({
+  blockType,
+  count,
+  currentSlug,
+}: {
+  blockType: "recent" | "recommended";
+  count: number;
+  currentSlug: string;
+}) {
+  const { data: articles } = trpc.articles.list.useQuery(
+    { limit: count + 1 },
+    { staleTime: 60_000 }
+  );
+
+  const filtered = (articles || []).filter((a) => a.slug !== currentSlug).slice(0, count);
+
+  if (!filtered.length) return null;
+
+  const label = blockType === "recent" ? "Artículos Recientes" : "Artículos Recomendados";
+  const cols =
+    count === 2
+      ? "grid-cols-1 sm:grid-cols-2"
+      : count === 3
+      ? "grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
+      : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4";
+
+  return (
+    <div className="my-8 py-6" style={{ borderTop: "2px solid #E5E3DE", borderBottom: "2px solid #E5E3DE" }}>
+      <h3
+        className="font-bold text-lg mb-4"
+        style={{ fontFamily: "Poppins, sans-serif", color: "#2B037D" }}
+      >
+        {label}
+      </h3>
+      <div className={`grid ${cols} gap-4`}>
+        {filtered.map((a) => (
+          <ArticleCard key={a.id} {...a} />
+        ))}
+      </div>
+    </div>
+  );
 }
 
-function renderLexicalNodes(nodes: any[]): string {
-  if (!nodes) return "";
-  return nodes
-    .map((node) => {
-      if (node.type === "paragraph") {
-        const text = renderLexicalNodes(node.children || []);
-        return `<p>${text}</p>`;
-      }
-      if (node.type === "heading") {
-        const tag = node.tag || "h2";
-        const text = renderLexicalNodes(node.children || []);
-        return `<${tag}>${text}</${tag}>`;
-      }
-      if (node.type === "list") {
-        const tag = node.listType === "number" ? "ol" : "ul";
-        const items = renderLexicalNodes(node.children || []);
-        return `<${tag}>${items}</${tag}>`;
-      }
-      if (node.type === "listitem") {
-        const text = renderLexicalNodes(node.children || []);
-        return `<li>${text}</li>`;
-      }
-      if (node.type === "quote") {
-        const text = renderLexicalNodes(node.children || []);
-        return `<blockquote>${text}</blockquote>`;
-      }
-      if (node.type === "image") {
-        return `<img src="${node.src}" alt="${node.altText || ""}" />`;
-      }
-      if (node.type === "text") {
-        let text = node.text || "";
-        if (node.format & 1) text = `<strong>${text}</strong>`;
-        if (node.format & 2) text = `<em>${text}</em>`;
-        if (node.format & 8) text = `<u>${text}</u>`;
-        return text;
-      }
-      if (node.type === "linebreak") return "<br/>";
-      if (node.children) return renderLexicalNodes(node.children);
+// ─── Lexical Content Renderer ─────────────────────────────────────────────────
+function renderTextNode(node: any): string {
+  let text = node.text || "";
+  if (node.format & 1) text = `<strong>${text}</strong>`;
+  if (node.format & 2) text = `<em>${text}</em>`;
+  if (node.format & 8) text = `<u>${text}</u>`;
+  return text;
+}
+
+function renderInlineNodes(nodes: any[]): string {
+  return (nodes || [])
+    .map((n) => {
+      if (n.type === "text") return renderTextNode(n);
+      if (n.type === "linebreak") return "<br/>";
+      if (n.children) return renderInlineNodes(n.children);
       return "";
     })
     .join("");
 }
 
+// Splits Lexical root children into segments: either HTML strings or articles-block descriptors
+function splitContentSegments(
+  nodes: any[]
+): Array<{ kind: "html"; html: string } | { kind: "articles-block"; blockType: "recent" | "recommended"; count: number }> {
+  const segments: Array<
+    { kind: "html"; html: string } | { kind: "articles-block"; blockType: "recent" | "recommended"; count: number }
+  > = [];
+
+  let htmlBuffer = "";
+
+  const flush = () => {
+    if (htmlBuffer.trim()) {
+      segments.push({ kind: "html", html: htmlBuffer });
+      htmlBuffer = "";
+    }
+  };
+
+  for (const node of nodes || []) {
+    if (node.type === "articles-block") {
+      flush();
+      segments.push({
+        kind: "articles-block",
+        blockType: node.blockType as "recent" | "recommended",
+        count: node.count || 3,
+      });
+    } else if (node.type === "paragraph") {
+      htmlBuffer += `<p>${renderInlineNodes(node.children || [])}</p>`;
+    } else if (node.type === "heading") {
+      const tag = node.tag || "h2";
+      htmlBuffer += `<${tag}>${renderInlineNodes(node.children || [])}</${tag}>`;
+    } else if (node.type === "list") {
+      const tag = node.listType === "number" ? "ol" : "ul";
+      const items = (node.children || [])
+        .map((li: any) => `<li>${renderInlineNodes(li.children || [])}</li>`)
+        .join("");
+      htmlBuffer += `<${tag}>${items}</${tag}>`;
+    } else if (node.type === "quote") {
+      htmlBuffer += `<blockquote>${renderInlineNodes(node.children || [])}</blockquote>`;
+    } else if (node.type === "image") {
+      htmlBuffer += `<img src="${node.src}" alt="${node.altText || ""}" />`;
+    } else if (node.type === "linebreak") {
+      htmlBuffer += "<br/>";
+    } else if (node.children) {
+      htmlBuffer += renderInlineNodes(node.children);
+    }
+  }
+
+  flush();
+  return segments;
+}
+
+function ArticleContent({ content, currentSlug }: { content: string; currentSlug: string }) {
+  let segments: ReturnType<typeof splitContentSegments> = [];
+  try {
+    const parsed = JSON.parse(content);
+    if (parsed?.root?.children) {
+      segments = splitContentSegments(parsed.root.children);
+    } else {
+      segments = [{ kind: "html", html: `<p>${content}</p>` }];
+    }
+  } catch {
+    segments = [{ kind: "html", html: content || "<p>Sin contenido</p>" }];
+  }
+
+  return (
+    <>
+      {segments.map((seg, i) => {
+        if (seg.kind === "html") {
+          return (
+            <div
+              key={i}
+              className="article-content"
+              dangerouslySetInnerHTML={{ __html: seg.html }}
+            />
+          );
+        }
+        return (
+          <InlineArticlesBlock
+            key={i}
+            blockType={seg.blockType}
+            count={seg.count}
+            currentSlug={currentSlug}
+          />
+        );
+      })}
+    </>
+  );
+}
+
+// ─── Main Page ────────────────────────────────────────────────────────────────
 export default function ArticlePage() {
   const params = useParams<{ slug: string }>();
   const slug = params.slug;
@@ -123,7 +210,7 @@ export default function ArticlePage() {
     { enabled: !!slug }
   );
   const { data: relatedArticles } = trpc.articles.list.useQuery(
-    { categorySlug: article?.categorySlug || undefined, limit: 3 },
+    { categorySlug: article?.categorySlug || undefined, limit: 4 },
     { enabled: !!article?.categorySlug }
   );
 
@@ -133,23 +220,15 @@ export default function ArticlePage() {
       const ogTitle = article.ogTitle || article.title;
       const ogDesc = article.ogDescription || article.excerpt || "";
       const ogUrl = `${window.location.origin}/articulo/${article.slug}`;
-      setMetaTags({
-        title: ogTitle,
-        description: ogDesc,
-        image: ogImage,
-        url: ogUrl,
-        type: "article",
-      });
+      setMetaTags({ title: ogTitle, description: ogDesc, image: ogImage, url: ogUrl, type: "article" });
     }
-    return () => {
-      document.title = "Curioso Ando - Blog de Noticias";
-    };
+    return () => { document.title = "Curioso Ando - Blog de Noticias"; };
   }, [article]);
 
-  const shareOnFacebook = () => {
+  const shareOnFacebook = useCallback(() => {
     const url = encodeURIComponent(window.location.href);
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank", "width=600,height=400");
-  };
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#F8F7F4" }}>
@@ -176,7 +255,7 @@ export default function ArticlePage() {
         <div className="container py-20 text-center">
           <h1 className="text-2xl font-bold mb-4">Artículo no encontrado</h1>
           <p style={{ color: "#6B6B6B" }} className="mb-6">El artículo que buscas no existe o fue eliminado.</p>
-          <Link href="/" className="px-6 py-2 rounded-lg no-underline font-medium" style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#1A1A1A" }}>
+          <Link href="/" className="px-6 py-2 rounded-lg no-underline font-medium" style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#fff" }}>
             Volver al inicio
           </Link>
         </div>
@@ -229,13 +308,13 @@ export default function ArticlePage() {
                 )}
 
                 {/* Title */}
-                <h1 className="font-bold text-3xl md:text-4xl leading-tight mt-3 mb-4" style={{ fontFamily: "Poppins, sans-serif" }}>
+                <h1 className="font-bold text-3xl md:text-4xl leading-tight mt-3 mb-4" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
                   {article.title}
                 </h1>
 
                 {/* Excerpt */}
                 {article.excerpt && (
-                  <p className="text-lg mb-6" style={{ color: "#C0C0C0" }}>{article.excerpt}</p>
+                  <p className="text-lg mb-6" style={{ color: "#6B6B6B" }}>{article.excerpt}</p>
                 )}
 
                 {/* Meta */}
@@ -243,7 +322,7 @@ export default function ArticlePage() {
                   {article.authorName && (
                     <span className="flex items-center gap-2 text-sm" style={{ color: "#6B6B6B" }}>
                       <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)" }}>
-                        <User className="w-3.5 h-3.5" style={{ color: "#6B6B6B" }} />
+                        <User className="w-3.5 h-3.5 text-white" />
                       </div>
                       {article.authorName}
                     </span>
@@ -257,23 +336,15 @@ export default function ArticlePage() {
                   <button
                     onClick={shareOnFacebook}
                     className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium ml-auto transition-opacity hover:opacity-80"
-                    style={{ background: "#1877F2", color: "#1A1A1A" }}
+                    style={{ background: "#1877F2", color: "#fff" }}
                   >
                     <Facebook className="w-4 h-4" />
                     Compartir
                   </button>
                 </div>
 
-                {/* Content */}
-                <div
-                  className="article-content"
-                  dangerouslySetInnerHTML={{ __html: renderContent(article.content ?? "{}") }}
-                />
-
-                {/* Mid-content AdSense */}
-                <div className="my-8">
-                  <AdSlot slot="mid-content" />
-                </div>
+                {/* Content — supports inline articles blocks */}
+                <ArticleContent content={article.content ?? "{}"} currentSlug={slug || ""} />
 
                 {/* Share footer */}
                 <div className="mt-8 pt-6 flex items-center gap-4" style={{ borderTop: "1px solid #E5E3DE" }}>
@@ -281,7 +352,7 @@ export default function ArticlePage() {
                   <button
                     onClick={shareOnFacebook}
                     className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-opacity hover:opacity-80"
-                    style={{ background: "#1877F2", color: "#1A1A1A" }}
+                    style={{ background: "#1877F2", color: "#fff" }}
                   >
                     <Facebook className="w-4 h-4" />
                     Facebook
@@ -300,15 +371,15 @@ export default function ArticlePage() {
               {/* Sidebar */}
               <aside className="lg:col-span-1">
                 <div className="sticky top-24 flex flex-col gap-6">
-                  <AdSlot slot="sidebar" />
+                  {/* Sidebar disponible para contenido futuro */}
                 </div>
               </aside>
             </div>
 
             {/* Related Articles */}
-            {relatedArticles && relatedArticles.filter(a => a.slug !== slug).length > 0 && (
+            {relatedArticles && relatedArticles.filter((a) => a.slug !== slug).length > 0 && (
               <section className="mt-12 pt-8" style={{ borderTop: "1px solid #E5E3DE" }}>
-                <h2 className="font-bold text-xl mb-6" style={{ fontFamily: "Poppins, sans-serif" }}>
+                <h2 className="font-bold text-xl mb-6" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
                   Artículos Relacionados
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">

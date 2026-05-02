@@ -3,7 +3,6 @@ import { trpc } from "@/lib/trpc";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArticleCard } from "@/components/ArticleCard";
-import { AdSlot } from "@/components/AdSense";
 import { ArrowRight, TrendingUp, AlertCircle, X } from "lucide-react";
 import { useState } from "react";
 
@@ -56,11 +55,6 @@ export default function Home() {
           </div>
         </div>
       )}
-
-      {/* AdSense Header */}
-      <div className="container py-3">
-        <AdSlot slot="header" />
-      </div>
 
       {/* Hero Section */}
       <section className="ca-gradient-hero py-12 md:py-20">
@@ -152,8 +146,6 @@ export default function Home() {
             {/* Sidebar */}
             <aside className="lg:col-span-1">
               <div className="sticky top-24 flex flex-col gap-6">
-                {/* AdSense Sidebar */}
-                <AdSlot slot="sidebar" />
 
                 {/* Categories Widget */}
                 <div className="ca-card p-5">

@@ -3,7 +3,6 @@ import { trpc } from "@/lib/trpc";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArticleCard } from "@/components/ArticleCard";
-import { AdSlot } from "@/components/AdSense";
 
 const CATEGORY_LABELS: Record<string, string> = {
   noticias: "Noticias",
@@ -33,11 +32,6 @@ export default function CategoryPage() {
         </div>
       </section>
 
-      {/* AdSense Header */}
-      <div className="container py-4">
-        <AdSlot slot="header" />
-      </div>
-
       <main className="flex-1">
         <div className="container py-8">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -63,7 +57,6 @@ export default function CategoryPage() {
             </div>
             <aside className="lg:col-span-1">
               <div className="sticky top-24">
-                <AdSlot slot="sidebar" />
               </div>
             </aside>
           </div>
