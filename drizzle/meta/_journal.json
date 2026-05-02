@@ -15,6 +15,13 @@
       "when": 1777678093007,
       "tag": "0001_public_gorgon",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1777738836969,
+      "tag": "0002_ambiguous_the_twelve",
+      "breakpoints": true
     }
   ]
 }

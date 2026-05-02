@@ -6,6 +6,7 @@ import { BlockEditor, insertImageIntoEditor } from "@/components/Editor/BlockEdi
 import { MediaGallery } from "@/components/MediaGallery";
 import { toast } from "sonner";
 import { Save, Eye, ArrowLeft, Image as ImageIcon } from "lucide-react";
+import { SidebarArticlesPanel } from "@/components/Admin/SidebarArticlesPanel";
 import type { LexicalEditor } from "lexical";
 
 export default function ArticleEditor() {
@@ -384,6 +385,10 @@ export default function ArticleEditor() {
                 </div>
               </div>
             </div>
+
+            {/* Sidebar Articles Panel */}
+            <SidebarArticlesPanel />
+
           </div>
         </div>
       </div>

@@ -118,6 +118,18 @@ try {
   `);
   console.log("✅ Tabla 'media' lista");
 
+  // Crear tabla site_config
+  await connection.execute(`
+    CREATE TABLE IF NOT EXISTS site_config (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      \`key\` VARCHAR(100) NOT NULL,
+      value TEXT NOT NULL,
+      updatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      UNIQUE KEY site_config_key_unique (\`key\`)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
+  `);
+  console.log("✅ Tabla 'site_config' lista");
+
   // Insertar categorías base si no existen
   const categories = [
     { name: "Noticias", slug: "noticias", description: "Últimas noticias del mundo" },

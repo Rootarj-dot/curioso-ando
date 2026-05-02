@@ -20,6 +20,9 @@ import {
   getMediaById,
   getAllUsers,
   updateUserRole,
+  getSiteConfigValue,
+  setSiteConfigValue,
+  getArticlesByIds,
 } from "./db";
 import { uploadToCloudinary, deleteFromCloudinary } from "./cloudinaryStorage";
 import { nanoid } from "nanoid";
@@ -236,6 +239,42 @@ export const appRouter = router({
           throw new TRPCError({ code: "BAD_REQUEST", message: "No puedes cambiar tu propio rol" });
         }
         await updateUserRole(input.id, input.role);
+        return { success: true };
+      }),
+  }),
+
+  siteConfig: router({
+    // Get the global sidebar articles config
+    getSidebarArticles: publicProcedure.query(async () => {
+      const raw = await getSiteConfigValue("sidebar_articles");
+      if (!raw) return { recentIds: [], recommendedIds: [] };
+      try {
+        return JSON.parse(raw) as { recentIds: number[]; recommendedIds: number[] };
+      } catch {
+        return { recentIds: [], recommendedIds: [] };
+      }
+    }),
+    // Get the actual article data for sidebar
+    getSidebarArticleData: publicProcedure.query(async () => {
+      const raw = await getSiteConfigValue("sidebar_articles");
+      let ids: { recentIds: number[]; recommendedIds: number[] } = { recentIds: [], recommendedIds: [] };
+      if (raw) {
+        try { ids = JSON.parse(raw); } catch {}
+      }
+      const [recentArticles, recommendedArticles] = await Promise.all([
+        getArticlesByIds(ids.recentIds),
+        getArticlesByIds(ids.recommendedIds),
+      ]);
+      return { recentArticles, recommendedArticles };
+    }),
+    // Save the global sidebar articles config
+    setSidebarArticles: adminProcedure
+      .input(z.object({
+        recentIds: z.array(z.number()),
+        recommendedIds: z.array(z.number()),
+      }))
+      .mutation(async ({ input }) => {
+        await setSiteConfigValue("sidebar_articles", JSON.stringify(input));
         return { success: true };
       }),
   }),

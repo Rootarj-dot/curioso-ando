@@ -305,3 +305,59 @@ export async function updateUserRole(id: number, role: "user" | "admin") {
   if (!db) return;
   await db.update(users).set({ role }).where(eq(users.id, id));
 }
+
+// ─── Site Config ─────────────────────────────────────────────────────────────
+
+export async function getSiteConfigValue(key: string): Promise<string | null> {
+  const db = await getDb();
+  if (!db) return null;
+  try {
+    const { siteConfig } = await import("../drizzle/schema");
+    const result = await db.select().from(siteConfig).where(eq(siteConfig.key, key)).limit(1);
+    return result[0]?.value ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export async function setSiteConfigValue(key: string, value: string): Promise<void> {
+  const db = await getDb();
+  if (!db) return;
+  const { siteConfig } = await import("../drizzle/schema");
+  await db.insert(siteConfig).values({ key, value })
+    .onDuplicateKeyUpdate({ set: { value } });
+}
+
+export async function getArticlesByIds(ids: number[]) {
+  if (!ids.length) return [];
+  const db = await getDb();
+  if (!db) return [];
+  const results = [];
+  for (const id of ids) {
+    const rows = await db
+      .select({
+        id: articles.id,
+        title: articles.title,
+        slug: articles.slug,
+        excerpt: articles.excerpt,
+        featuredImage: articles.featuredImage,
+        ogImage: articles.ogImage,
+        status: articles.status,
+        featured: articles.featured,
+        publishedAt: articles.publishedAt,
+        createdAt: articles.createdAt,
+        categoryId: articles.categoryId,
+        categoryName: categories.name,
+        categorySlug: categories.slug,
+        authorId: articles.authorId,
+        authorName: users.name,
+      })
+      .from(articles)
+      .leftJoin(categories, eq(articles.categoryId, categories.id))
+      .leftJoin(users, eq(articles.authorId, users.id))
+      .where(and(eq(articles.id, id), eq(articles.status, "published")))
+      .limit(1);
+    if (rows[0]) results.push(rows[0]);
+  }
+  return results;
+}

@@ -75,3 +75,12 @@ export const media = mysqlTable("media", {
 
 export type Media = typeof media.$inferSelect;
 export type InsertMedia = typeof media.$inferInsert;
+
+// ─── Site Config ─────────────────────────────────────────────────────────────
+export const siteConfig = mysqlTable("site_config", {
+  id: int("id").autoincrement().primaryKey(),
+  key: varchar("key", { length: 100 }).notNull().unique(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+export type SiteConfig = typeof siteConfig.$inferSelect;
