@@ -65,3 +65,6 @@
 
 ## Google Analytics
 - [x] Integración GA4 (script en index.html)
+
+## Compatibilidad Windows
+- [x] Instalar cross-env y actualizar scripts de package.json para compatibilidad con Windows
