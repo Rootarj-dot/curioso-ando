@@ -215,6 +215,8 @@ export async function getAllArticlesAdmin() {
       slug: articles.slug,
       status: articles.status,
       featured: articles.featured,
+      featuredImage: articles.featuredImage,
+      ogImage: articles.ogImage,
       publishedAt: articles.publishedAt,
       createdAt: articles.createdAt,
       categoryId: articles.categoryId,

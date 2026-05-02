@@ -151,7 +151,9 @@ function ArticleSelector({ label, selectedIds, allArticles, onChange }: SectionP
 }
 
 export function SidebarArticlesPanel() {
-  const { data: adminArticles } = trpc.articles.list.useQuery({ limit: 100 });
+  const { data: adminArticlesRaw } = trpc.articles.adminList.useQuery();
+  // Solo mostrar artículos publicados en el panel de selección
+  const adminArticles = adminArticlesRaw?.filter((a) => a.status === "published");
   const { data: currentConfig } = trpc.siteConfig.getSidebarArticles.useQuery();
   const utils = trpc.useUtils();
 
