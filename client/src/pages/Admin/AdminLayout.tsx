@@ -20,7 +20,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#252728" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#F8F7F4" }}>
         <div className="w-8 h-8 rounded-full border-2 border-purple-500 border-t-transparent animate-spin" />
       </div>
     );
@@ -28,17 +28,17 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
 
   if (!isAuthenticated || (user && user.role !== 'admin')) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#252728" }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#F8F7F4" }}>
         <div className="text-center">
           <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)" }}>
             <Search className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-white font-bold text-2xl mb-2" style={{ fontFamily: "Poppins, sans-serif" }}>Curioso Ando</h1>
-          <p className="mb-6" style={{ color: "#A0A0A0" }}>Debes iniciar sesión para acceder al panel.</p>
+          <p className="mb-6" style={{ color: "#6B6B6B" }}>Debes iniciar sesión para acceder al panel.</p>
           <a
             href={getLoginUrl()}
             className="px-6 py-3 rounded-lg font-medium no-underline"
-            style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#FFFFFF" }}
+            style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#1A1A1A" }}
           >
             Iniciar sesión
           </a>
@@ -48,18 +48,18 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen flex" style={{ backgroundColor: "#252728" }}>
+    <div className="min-h-screen flex" style={{ backgroundColor: "#F8F7F4" }}>
       {/* Sidebar */}
-      <aside className="w-64 flex-shrink-0 flex flex-col" style={{ backgroundColor: "#1C1C1D", borderRight: "1px solid #3B3D3E" }}>
+      <aside className="w-64 flex-shrink-0 flex flex-col" style={{ backgroundColor: "#FFFFFF", borderRight: "1px solid #E5E3DE" }}>
         {/* Logo */}
-        <div className="p-5" style={{ borderBottom: "1px solid #3B3D3E" }}>
+        <div className="p-5" style={{ borderBottom: "1px solid #E5E3DE" }}>
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)" }}>
               <Search className="w-4 h-4 text-white" />
             </div>
             <div>
               <p className="text-white font-bold text-sm" style={{ fontFamily: "Poppins, sans-serif" }}>Curioso Ando</p>
-              <p className="text-xs" style={{ color: "#A0A0A0" }}>Panel Admin</p>
+              <p className="text-xs" style={{ color: "#6B6B6B" }}>Panel Admin</p>
             </div>
           </div>
         </div>
@@ -86,17 +86,17 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* User */}
-        <div className="p-3" style={{ borderTop: "1px solid #3B3D3E" }}>
+        <div className="p-3" style={{ borderTop: "1px solid #E5E3DE" }}>
           <div className="flex items-center gap-3 px-3 py-2 mb-2">
             <div className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold" style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)" }}>
               {user?.name?.[0]?.toUpperCase() || "U"}
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-white text-sm font-medium truncate">{user?.name || "Usuario"}</p>
-              <p className="text-xs truncate" style={{ color: "#A0A0A0" }}>{user?.role}</p>
+              <p className="text-xs truncate" style={{ color: "#6B6B6B" }}>{user?.role}</p>
             </div>
           </div>
-          <Link href="/" className="flex items-center gap-3 px-3 py-2 rounded-lg no-underline text-sm" style={{ color: "#A0A0A0" }}>
+          <Link href="/" className="flex items-center gap-3 px-3 py-2 rounded-lg no-underline text-sm" style={{ color: "#6B6B6B" }}>
             <Home className="w-4 h-4" />
             Ver sitio
           </Link>

@@ -43,53 +43,53 @@
 }
 
 :root {
-  /* Curioso Ando Brand Palette */
+  /* ── Curioso Ando Brand Palette (Light Theme) ── */
   --ca-purple-deep:   #2B037D;
   --ca-purple-mid:    #3D0FA0;
   --ca-purple-light:  #5B2C8F;
-  --ca-bg:            #252728;
-  --ca-bg-dark:       #1C1C1D;
-  --ca-bg-card:       #2E3032;
-  --ca-border:        #3B3D3E;
-  --ca-text:          #FFFFFF;
-  --ca-text-muted:    #A0A0A0;
+
+  /* Fondo off-white cálido — suave, no lastima los ojos */
+  --ca-bg:            #F8F7F4;
+  --ca-bg-dark:       #FFFFFF;
+  --ca-bg-card:       #FFFFFF;
+  --ca-border:        #E5E3DE;
+  --ca-text:          #1A1A1A;
+  --ca-text-muted:    #6B6B6B;
 
   --radius: 0.5rem;
   --primary:              oklch(28% 0.24 290);
   --primary-foreground:   oklch(98% 0 0);
-  --background:           oklch(17.5% 0.005 250);
-  --foreground:           oklch(98% 0 0);
-  --card:                 oklch(19.5% 0.006 250);
-  --card-foreground:      oklch(98% 0 0);
-  --popover:              oklch(19.5% 0.006 250);
-  --popover-foreground:   oklch(98% 0 0);
-  --secondary:            oklch(22% 0.01 250);
-  --secondary-foreground: oklch(90% 0 0);
-  --muted:                oklch(22% 0.01 250);
-  --muted-foreground:     oklch(62% 0 0);
+  --background:           oklch(98% 0.005 80);
+  --foreground:           oklch(15% 0.005 250);
+  --card:                 oklch(100% 0 0);
+  --card-foreground:      oklch(15% 0.005 250);
+  --popover:              oklch(100% 0 0);
+  --popover-foreground:   oklch(15% 0.005 250);
+  --secondary:            oklch(95% 0.005 80);
+  --secondary-foreground: oklch(25% 0.005 250);
+  --muted:                oklch(95% 0.005 80);
+  --muted-foreground:     oklch(50% 0.005 250);
   --accent:               oklch(38% 0.22 290);
   --accent-foreground:    oklch(98% 0 0);
   --destructive:          oklch(55% 0.22 25);
   --destructive-foreground: oklch(98% 0 0);
-  --border:               oklch(25% 0.01 250);
-  --input:                oklch(25% 0.01 250);
+  --border:               oklch(90% 0.005 80);
+  --input:                oklch(90% 0.005 80);
   --ring:                 oklch(38% 0.22 290);
   --chart-1:              oklch(50% 0.22 290);
   --chart-2:              oklch(60% 0.18 200);
   --chart-3:              oklch(65% 0.15 150);
   --chart-4:              oklch(70% 0.18 60);
   --chart-5:              oklch(55% 0.22 25);
-  --sidebar:              oklch(15% 0.005 250);
-  --sidebar-foreground:   oklch(98% 0 0);
+  --sidebar:              oklch(97% 0.005 80);
+  --sidebar-foreground:   oklch(15% 0.005 250);
   --sidebar-primary:      oklch(28% 0.24 290);
   --sidebar-primary-foreground: oklch(98% 0 0);
-  --sidebar-accent:       oklch(22% 0.01 250);
-  --sidebar-accent-foreground: oklch(90% 0 0);
-  --sidebar-border:       oklch(22% 0.01 250);
+  --sidebar-accent:       oklch(93% 0.005 80);
+  --sidebar-accent-foreground: oklch(25% 0.005 250);
+  --sidebar-border:       oklch(90% 0.005 80);
   --sidebar-ring:         oklch(38% 0.22 290);
 }
-
-/* Dark mode inherits root — already dark by default */
 
 @layer base {
   * {
@@ -97,8 +97,8 @@
   }
   body {
     @apply bg-background text-foreground;
-    background-color: #252728;
-    color: #FFFFFF;
+    background-color: #F8F7F4;
+    color: #1A1A1A;
     font-family: 'Inter', 'Poppins', system-ui, sans-serif;
   }
   button:not(:disabled),
@@ -115,24 +115,11 @@
 }
 
 @layer components {
-  /**
-   * Custom container utility that centers content and adds responsive padding.
-   *
-   * This overrides Tailwind's default container behavior to:
-   * - Auto-center content (mx-auto)
-   * - Add responsive horizontal padding
-   * - Set max-width for large screens
-   *
-   * Usage: <div className="container">...</div>
-   *
-   * For custom widths, use max-w-* utilities directly:
-   * <div className="max-w-6xl mx-auto px-4">...</div>
-   */
   .container {
     width: 100%;
     margin-left: auto;
     margin-right: auto;
-    padding-left: 1rem; /* 16px - mobile padding */
+    padding-left: 1rem;
     padding-right: 1rem;
   }
 
@@ -143,19 +130,20 @@
 
   @media (min-width: 640px) {
     .container {
-      padding-left: 1.5rem; /* 24px - tablet padding */
+      padding-left: 1.5rem;
       padding-right: 1.5rem;
     }
   }
 
   @media (min-width: 1024px) {
     .container {
-      padding-left: 2rem; /* 32px - desktop padding */
+      padding-left: 2rem;
       padding-right: 2rem;
-      max-width: 1280px; /* Standard content width */
+      max-width: 1280px;
     }
   }
 }
+
 /* ─── Curioso Ando Utility Classes ─────────────────────────────────────────── */
 .ca-gradient {
   background: linear-gradient(135deg, #2B037D 0%, #5B2C8F 100%);
@@ -164,12 +152,13 @@
   background: linear-gradient(135deg, #2B037D 0%, #3D0FA0 50%, #5B2C8F 100%);
 }
 .ca-gradient-overlay {
-  background: linear-gradient(to bottom, rgba(43, 3, 125, 0.7), rgba(28, 28, 29, 0.95));
+  background: linear-gradient(to bottom, rgba(43, 3, 125, 0.6), rgba(248, 247, 244, 0.95));
 }
 .ca-card {
-  background-color: #2E3032;
-  border: 1px solid #3B3D3E;
+  background-color: #FFFFFF;
+  border: 1px solid #E5E3DE;
   border-radius: 0.75rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 .ca-badge {
   background: linear-gradient(135deg, #2B037D, #5B2C8F);
@@ -185,13 +174,13 @@
 
 /* ─── AdSense Placeholder Styles ───────────────────────────────────────────── */
 .adsense-slot {
-  background: #2E3032;
-  border: 1px dashed #3B3D3E;
+  background: #F0EEE9;
+  border: 1px dashed #C8C5BE;
   border-radius: 0.5rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #A0A0A0;
+  color: #9B9890;
   font-size: 0.75rem;
   font-weight: 500;
   text-transform: uppercase;
@@ -203,7 +192,7 @@
 .article-content h2,
 .article-content h3,
 .article-content h4 {
-  color: #FFFFFF;
+  color: #1A1A1A;
   font-weight: 700;
   margin-top: 1.5rem;
   margin-bottom: 0.75rem;
@@ -213,24 +202,27 @@
 .article-content h2 { font-size: 1.5rem; }
 .article-content h3 { font-size: 1.25rem; }
 .article-content p {
-  color: #D0D0D0;
+  color: #3A3A3A;
   line-height: 1.8;
   margin-bottom: 1rem;
 }
 .article-content ul, .article-content ol {
-  color: #D0D0D0;
+  color: #3A3A3A;
   padding-left: 1.5rem;
   margin-bottom: 1rem;
 }
 .article-content li { margin-bottom: 0.25rem; }
-.article-content strong { color: #FFFFFF; font-weight: 700; }
+.article-content strong { color: #1A1A1A; font-weight: 700; }
 .article-content em { font-style: italic; }
 .article-content blockquote {
   border-left: 4px solid #5B2C8F;
   padding-left: 1rem;
-  color: #A0A0A0;
+  color: #6B6B6B;
   font-style: italic;
   margin: 1.5rem 0;
+  background: #F0EEE9;
+  border-radius: 0 0.5rem 0.5rem 0;
+  padding: 0.75rem 1rem;
 }
 .article-content img {
   max-width: 100%;
@@ -238,47 +230,48 @@
   margin: 1rem 0;
 }
 .article-content a {
-  color: #7B4FB8;
+  color: #2B037D;
   text-decoration: underline;
 }
 
 /* ─── Editor Styles ─────────────────────────────────────────────────────────── */
 .editor-container {
-  background: #2E3032;
-  border: 1px solid #3B3D3E;
+  background: #FFFFFF;
+  border: 1px solid #E5E3DE;
   border-radius: 0.75rem;
   overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 .editor-content {
   min-height: 400px;
   padding: 1.5rem;
   outline: none;
-  color: #FFFFFF;
+  color: #1A1A1A;
   font-size: 1rem;
   line-height: 1.8;
 }
 .editor-content:focus { outline: none; }
 .editor-content [data-placeholder]:empty::before {
   content: attr(data-placeholder);
-  color: #5A5C5E;
+  color: #B0ADA8;
   pointer-events: none;
 }
 .floating-toolbar {
   position: fixed;
-  background: #1C1C1D;
-  border: 1px solid #3B3D3E;
+  background: #FFFFFF;
+  border: 1px solid #E5E3DE;
   border-radius: 0.5rem;
   padding: 0.25rem;
   display: flex;
   gap: 0.25rem;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
   z-index: 1000;
   transform: translateX(-50%);
 }
 .floating-toolbar button {
   background: transparent;
   border: none;
-  color: #FFFFFF;
+  color: #1A1A1A;
   padding: 0.25rem 0.5rem;
   border-radius: 0.25rem;
   cursor: pointer;
@@ -288,4 +281,5 @@
 .floating-toolbar button:hover,
 .floating-toolbar button.active {
   background: #2B037D;
+  color: #FFFFFF;
 }

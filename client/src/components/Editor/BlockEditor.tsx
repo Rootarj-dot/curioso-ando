@@ -140,14 +140,14 @@ function FloatingToolbar({ onInsertImageRequest }: { onInsertImageRequest?: () =
       <button onClick={() => format("underline")} className={formats.underline ? "active" : ""} title="Subrayado">
         <Underline className="w-4 h-4" />
       </button>
-      <div style={{ width: 1, background: "#3B3D3E", margin: "0 2px" }} />
+      <div style={{ width: 1, background: "#E5E3DE", margin: "0 2px" }} />
       <button onClick={() => setHeading("h2")} title="Título H2">
         <span className="text-xs font-bold">H2</span>
       </button>
       <button onClick={() => setHeading("h3")} title="Título H3">
         <span className="text-xs font-bold">H3</span>
       </button>
-      <div style={{ width: 1, background: "#3B3D3E", margin: "0 2px" }} />
+      <div style={{ width: 1, background: "#E5E3DE", margin: "0 2px" }} />
       <button onClick={() => insertList("bullet")} title="Lista">
         <List className="w-4 h-4" />
       </button>
@@ -159,7 +159,7 @@ function FloatingToolbar({ onInsertImageRequest }: { onInsertImageRequest?: () =
       </button>
       {onInsertImageRequest && (
         <>
-          <div style={{ width: 1, background: "#3B3D3E", margin: "0 2px" }} />
+          <div style={{ width: 1, background: "#E5E3DE", margin: "0 2px" }} />
           <button onClick={onInsertImageRequest} title="Insertar imagen">
             <ImageIcon className="w-4 h-4" />
           </button>
@@ -197,29 +197,29 @@ function Toolbar({ onInsertImageRequest }: { onInsertImageRequest?: () => void }
   return (
     <div
       className="flex flex-wrap items-center gap-1 p-2"
-      style={{ borderBottom: "1px solid #3B3D3E", backgroundColor: "#252728" }}
+      style={{ borderBottom: "1px solid #E5E3DE", backgroundColor: "#F8F7F4" }}
     >
-      <button onClick={setParagraph} className="px-2 py-1 rounded text-xs font-medium transition-colors" style={{ color: "#A0A0A0" }} title="Párrafo">
+      <button onClick={setParagraph} className="px-2 py-1 rounded text-xs font-medium transition-colors" style={{ color: "#6B6B6B" }} title="Párrafo">
         <Type className="w-4 h-4" />
       </button>
-      <button onClick={() => setHeading("h1")} className="px-2 py-1 rounded text-xs font-bold transition-colors" style={{ color: "#A0A0A0" }}>H1</button>
-      <button onClick={() => setHeading("h2")} className="px-2 py-1 rounded text-xs font-bold transition-colors" style={{ color: "#A0A0A0" }}>H2</button>
-      <button onClick={() => setHeading("h3")} className="px-2 py-1 rounded text-xs font-bold transition-colors" style={{ color: "#A0A0A0" }}>H3</button>
-      <div style={{ width: 1, height: 20, background: "#3B3D3E", margin: "0 4px" }} />
-      <button onClick={() => format("bold")} className="px-2 py-1 rounded transition-colors" style={{ color: "#A0A0A0" }} title="Negrita">
+      <button onClick={() => setHeading("h1")} className="px-2 py-1 rounded text-xs font-bold transition-colors" style={{ color: "#6B6B6B" }}>H1</button>
+      <button onClick={() => setHeading("h2")} className="px-2 py-1 rounded text-xs font-bold transition-colors" style={{ color: "#6B6B6B" }}>H2</button>
+      <button onClick={() => setHeading("h3")} className="px-2 py-1 rounded text-xs font-bold transition-colors" style={{ color: "#6B6B6B" }}>H3</button>
+      <div style={{ width: 1, height: 20, background: "#E5E3DE", margin: "0 4px" }} />
+      <button onClick={() => format("bold")} className="px-2 py-1 rounded transition-colors" style={{ color: "#6B6B6B" }} title="Negrita">
         <Bold className="w-4 h-4" />
       </button>
-      <button onClick={() => format("italic")} className="px-2 py-1 rounded transition-colors" style={{ color: "#A0A0A0" }} title="Cursiva">
+      <button onClick={() => format("italic")} className="px-2 py-1 rounded transition-colors" style={{ color: "#6B6B6B" }} title="Cursiva">
         <Italic className="w-4 h-4" />
       </button>
-      <button onClick={() => format("underline")} className="px-2 py-1 rounded transition-colors" style={{ color: "#A0A0A0" }} title="Subrayado">
+      <button onClick={() => format("underline")} className="px-2 py-1 rounded transition-colors" style={{ color: "#6B6B6B" }} title="Subrayado">
         <Underline className="w-4 h-4" />
       </button>
-      <div style={{ width: 1, height: 20, background: "#3B3D3E", margin: "0 4px" }} />
-      <button onClick={() => editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)} className="px-2 py-1 rounded transition-colors" style={{ color: "#A0A0A0" }} title="Lista">
+      <div style={{ width: 1, height: 20, background: "#E5E3DE", margin: "0 4px" }} />
+      <button onClick={() => editor.dispatchCommand(INSERT_UNORDERED_LIST_COMMAND, undefined)} className="px-2 py-1 rounded transition-colors" style={{ color: "#6B6B6B" }} title="Lista">
         <List className="w-4 h-4" />
       </button>
-      <button onClick={() => editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)} className="px-2 py-1 rounded transition-colors" style={{ color: "#A0A0A0" }} title="Lista numerada">
+      <button onClick={() => editor.dispatchCommand(INSERT_ORDERED_LIST_COMMAND, undefined)} className="px-2 py-1 rounded transition-colors" style={{ color: "#6B6B6B" }} title="Lista numerada">
         <ListOrdered className="w-4 h-4" />
       </button>
       <button
@@ -232,18 +232,18 @@ function Toolbar({ onInsertImageRequest }: { onInsertImageRequest?: () => void }
           });
         }}
         className="px-2 py-1 rounded transition-colors"
-        style={{ color: "#A0A0A0" }}
+        style={{ color: "#6B6B6B" }}
         title="Cita"
       >
         <Quote className="w-4 h-4" />
       </button>
       {onInsertImageRequest && (
         <>
-          <div style={{ width: 1, height: 20, background: "#3B3D3E", margin: "0 4px" }} />
+          <div style={{ width: 1, height: 20, background: "#E5E3DE", margin: "0 4px" }} />
           <button
             onClick={onInsertImageRequest}
             className="px-2 py-1 rounded transition-colors flex items-center gap-1 text-xs"
-            style={{ color: "#A0A0A0" }}
+            style={{ color: "#6B6B6B" }}
             title="Insertar imagen"
           >
             <ImageIcon className="w-4 h-4" />

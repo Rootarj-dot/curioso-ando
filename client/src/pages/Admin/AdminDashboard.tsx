@@ -18,7 +18,7 @@ export default function AdminDashboard() {
           <h1 className="text-white font-bold text-2xl" style={{ fontFamily: "Poppins, sans-serif" }}>
             Dashboard
           </h1>
-          <p style={{ color: "#A0A0A0" }}>Bienvenido al panel de administración de Curioso Ando.</p>
+          <p style={{ color: "#6B6B6B" }}>Bienvenido al panel de administración de Curioso Ando.</p>
         </div>
 
         {/* Stats */}
@@ -34,7 +34,7 @@ export default function AdminDashboard() {
               </div>
               <div>
                 <p className="text-2xl font-bold text-white">{value}</p>
-                <p className="text-sm" style={{ color: "#A0A0A0" }}>{label}</p>
+                <p className="text-sm" style={{ color: "#6B6B6B" }}>{label}</p>
               </div>
             </div>
           ))}
@@ -51,7 +51,7 @@ export default function AdminDashboard() {
             </div>
             <div>
               <p className="text-white font-bold">Nuevo Artículo</p>
-              <p className="text-sm" style={{ color: "#A0A0A0" }}>Crear y publicar contenido</p>
+              <p className="text-sm" style={{ color: "#6B6B6B" }}>Crear y publicar contenido</p>
             </div>
           </Link>
           <Link
@@ -63,14 +63,14 @@ export default function AdminDashboard() {
             </div>
             <div>
               <p className="text-white font-bold">Galería de Medios</p>
-              <p className="text-sm" style={{ color: "#A0A0A0" }}>{media?.length ?? 0} imágenes subidas</p>
+              <p className="text-sm" style={{ color: "#6B6B6B" }}>{media?.length ?? 0} imágenes subidas</p>
             </div>
           </Link>
         </div>
 
         {/* Recent articles */}
         <div className="ca-card overflow-hidden">
-          <div className="flex items-center justify-between p-4" style={{ borderBottom: "1px solid #3B3D3E" }}>
+          <div className="flex items-center justify-between p-4" style={{ borderBottom: "1px solid #E5E3DE" }}>
             <h2 className="text-white font-bold">Artículos Recientes</h2>
             <Link href="/admin/articulos" className="text-sm no-underline" style={{ color: "#7B4FB8" }}>
               Ver todos
@@ -78,7 +78,7 @@ export default function AdminDashboard() {
           </div>
           <div>
             {!articles || articles.length === 0 ? (
-              <div className="p-8 text-center" style={{ color: "#A0A0A0" }}>
+              <div className="p-8 text-center" style={{ color: "#6B6B6B" }}>
                 <p>No hay artículos aún.</p>
               </div>
             ) : (
@@ -86,11 +86,11 @@ export default function AdminDashboard() {
                 <div
                   key={article.id}
                   className="flex items-center gap-4 p-4 transition-colors"
-                  style={{ borderBottom: "1px solid #3B3D3E" }}
+                  style={{ borderBottom: "1px solid #E5E3DE" }}
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-white font-medium text-sm truncate">{article.title}</p>
-                    <p className="text-xs mt-0.5" style={{ color: "#A0A0A0" }}>
+                    <p className="text-xs mt-0.5" style={{ color: "#6B6B6B" }}>
                       {article.categoryName || "Sin categoría"} ·{" "}
                       {new Date(article.createdAt).toLocaleDateString("es-ES")}
                     </p>
@@ -104,7 +104,7 @@ export default function AdminDashboard() {
                   >
                     {article.status === "published" ? "Publicado" : "Borrador"}
                   </span>
-                  <Link href={`/admin/editar/${article.id}`} className="p-1.5 rounded no-underline" style={{ color: "#A0A0A0" }}>
+                  <Link href={`/admin/editar/${article.id}`} className="p-1.5 rounded no-underline" style={{ color: "#6B6B6B" }}>
                     <Edit className="w-4 h-4" />
                   </Link>
                 </div>

@@ -33,12 +33,12 @@ export default function AdminArticles() {
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-white font-bold text-2xl" style={{ fontFamily: "Poppins, sans-serif" }}>Artículos</h1>
-            <p style={{ color: "#A0A0A0" }}>{articles?.length ?? 0} artículos en total</p>
+            <p style={{ color: "#6B6B6B" }}>{articles?.length ?? 0} artículos en total</p>
           </div>
           <Link
             href="/admin/nuevo"
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium no-underline"
-            style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#FFFFFF" }}
+            style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#1A1A1A" }}
           >
             <Plus className="w-4 h-4" />
             Nuevo
@@ -47,10 +47,10 @@ export default function AdminArticles() {
 
         <div className="ca-card overflow-hidden">
           {!articles || articles.length === 0 ? (
-            <div className="p-12 text-center" style={{ color: "#A0A0A0" }}>
+            <div className="p-12 text-center" style={{ color: "#6B6B6B" }}>
               <p className="text-lg font-semibold text-white mb-2">Sin artículos</p>
               <p className="mb-4">Crea tu primer artículo para comenzar.</p>
-              <Link href="/admin/nuevo" className="px-4 py-2 rounded-lg text-sm font-medium no-underline" style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#FFFFFF" }}>
+              <Link href="/admin/nuevo" className="px-4 py-2 rounded-lg text-sm font-medium no-underline" style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#1A1A1A" }}>
                 Crear artículo
               </Link>
             </div>
@@ -58,15 +58,15 @@ export default function AdminArticles() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
-                  <tr style={{ borderBottom: "1px solid #3B3D3E" }}>
+                  <tr style={{ borderBottom: "1px solid #E5E3DE" }}>
                     {["Título", "Categoría", "Estado", "Destacado", "Fecha", "Acciones"].map((h) => (
-                      <th key={h} className="text-left px-4 py-3 font-semibold" style={{ color: "#A0A0A0" }}>{h}</th>
+                      <th key={h} className="text-left px-4 py-3 font-semibold" style={{ color: "#6B6B6B" }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {articles.map((article) => (
-                    <tr key={article.id} style={{ borderBottom: "1px solid #3B3D3E" }}>
+                    <tr key={article.id} style={{ borderBottom: "1px solid #E5E3DE" }}>
                       <td className="px-4 py-3">
                         <p className="text-white font-medium line-clamp-1 max-w-xs">{article.title}</p>
                         <p className="text-xs mt-0.5" style={{ color: "#5A5C5E" }}>/{article.slug}</p>
@@ -96,7 +96,7 @@ export default function AdminArticles() {
                           <Star className="w-4 h-4" fill={article.featured ? "#f59e0b" : "none"} />
                         </button>
                       </td>
-                      <td className="px-4 py-3" style={{ color: "#A0A0A0" }}>
+                      <td className="px-4 py-3" style={{ color: "#6B6B6B" }}>
                         {new Date(article.createdAt).toLocaleDateString("es-ES")}
                       </td>
                       <td className="px-4 py-3">
@@ -104,7 +104,7 @@ export default function AdminArticles() {
                           <Link
                             href={`/articulo/${article.slug}`}
                             className="p-1.5 rounded no-underline transition-colors"
-                            style={{ color: "#A0A0A0" }}
+                            style={{ color: "#6B6B6B" }}
                           >
                             <Eye className="w-4 h-4" />
                           </Link>

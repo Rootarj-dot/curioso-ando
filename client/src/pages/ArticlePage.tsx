@@ -152,19 +152,19 @@ export default function ArticlePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#252728" }}>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#F8F7F4" }}>
       <Navbar />
 
       {isLoading && (
         <div className="container py-12">
           <div className="max-w-3xl mx-auto">
             <div className="animate-pulse space-y-4">
-              <div className="h-8 rounded" style={{ backgroundColor: "#2E3032", width: "60%" }} />
-              <div className="h-4 rounded" style={{ backgroundColor: "#2E3032", width: "40%" }} />
-              <div className="h-64 rounded-xl" style={{ backgroundColor: "#2E3032" }} />
+              <div className="h-8 rounded" style={{ backgroundColor: "#FFFFFF", width: "60%" }} />
+              <div className="h-4 rounded" style={{ backgroundColor: "#FFFFFF", width: "40%" }} />
+              <div className="h-64 rounded-xl" style={{ backgroundColor: "#FFFFFF" }} />
               <div className="space-y-2">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="h-4 rounded" style={{ backgroundColor: "#2E3032" }} />
+                  <div key={i} className="h-4 rounded" style={{ backgroundColor: "#FFFFFF" }} />
                 ))}
               </div>
             </div>
@@ -174,9 +174,9 @@ export default function ArticlePage() {
 
       {error && (
         <div className="container py-20 text-center">
-          <h1 className="text-white text-2xl font-bold mb-4">Artículo no encontrado</h1>
-          <p style={{ color: "#A0A0A0" }} className="mb-6">El artículo que buscas no existe o fue eliminado.</p>
-          <Link href="/" className="px-6 py-2 rounded-lg no-underline font-medium" style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#FFFFFF" }}>
+          <h1 className="text-2xl font-bold mb-4">Artículo no encontrado</h1>
+          <p style={{ color: "#6B6B6B" }} className="mb-6">El artículo que buscas no existe o fue eliminado.</p>
+          <Link href="/" className="px-6 py-2 rounded-lg no-underline font-medium" style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#1A1A1A" }}>
             Volver al inicio
           </Link>
         </div>
@@ -201,8 +201,8 @@ export default function ArticlePage() {
               {/* Article */}
               <article className="lg:col-span-3">
                 {/* Breadcrumb */}
-                <div className="flex items-center gap-2 mb-6 text-sm" style={{ color: "#A0A0A0" }}>
-                  <Link href="/" className="no-underline hover:text-white transition-colors" style={{ color: "#A0A0A0" }}>
+                <div className="flex items-center gap-2 mb-6 text-sm" style={{ color: "#6B6B6B" }}>
+                  <Link href="/" className="no-underline hover:text-purple-700 transition-colors" style={{ color: "#6B6B6B" }}>
                     Inicio
                   </Link>
                   <span>/</span>
@@ -210,15 +210,15 @@ export default function ArticlePage() {
                     <>
                       <Link
                         href={`/categoria/${article.categorySlug}`}
-                        className="no-underline hover:text-white transition-colors capitalize"
-                        style={{ color: "#A0A0A0" }}
+                        className="no-underline hover:text-purple-700 transition-colors capitalize"
+                        style={{ color: "#6B6B6B" }}
                       >
                         {article.categoryName}
                       </Link>
                       <span>/</span>
                     </>
                   )}
-                  <span className="text-white line-clamp-1">{article.title}</span>
+                  <span className="line-clamp-1" style={{ color: "#1A1A1A" }}>{article.title}</span>
                 </div>
 
                 {/* Category badge */}
@@ -229,7 +229,7 @@ export default function ArticlePage() {
                 )}
 
                 {/* Title */}
-                <h1 className="text-white font-bold text-3xl md:text-4xl leading-tight mt-3 mb-4" style={{ fontFamily: "Poppins, sans-serif" }}>
+                <h1 className="font-bold text-3xl md:text-4xl leading-tight mt-3 mb-4" style={{ fontFamily: "Poppins, sans-serif" }}>
                   {article.title}
                 </h1>
 
@@ -239,17 +239,17 @@ export default function ArticlePage() {
                 )}
 
                 {/* Meta */}
-                <div className="flex flex-wrap items-center gap-4 pb-6 mb-6" style={{ borderBottom: "1px solid #3B3D3E" }}>
+                <div className="flex flex-wrap items-center gap-4 pb-6 mb-6" style={{ borderBottom: "1px solid #E5E3DE" }}>
                   {article.authorName && (
-                    <span className="flex items-center gap-2 text-sm" style={{ color: "#A0A0A0" }}>
+                    <span className="flex items-center gap-2 text-sm" style={{ color: "#6B6B6B" }}>
                       <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)" }}>
-                        <User className="w-3.5 h-3.5 text-white" />
+                        <User className="w-3.5 h-3.5" style={{ color: "#6B6B6B" }} />
                       </div>
                       {article.authorName}
                     </span>
                   )}
                   {article.publishedAt && (
-                    <span className="flex items-center gap-1.5 text-sm" style={{ color: "#A0A0A0" }}>
+                    <span className="flex items-center gap-1.5 text-sm" style={{ color: "#6B6B6B" }}>
                       <Calendar className="w-4 h-4" />
                       {formatDate(article.publishedAt)}
                     </span>
@@ -257,7 +257,7 @@ export default function ArticlePage() {
                   <button
                     onClick={shareOnFacebook}
                     className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium ml-auto transition-opacity hover:opacity-80"
-                    style={{ background: "#1877F2", color: "#FFFFFF" }}
+                    style={{ background: "#1877F2", color: "#1A1A1A" }}
                   >
                     <Facebook className="w-4 h-4" />
                     Compartir
@@ -276,12 +276,12 @@ export default function ArticlePage() {
                 </div>
 
                 {/* Share footer */}
-                <div className="mt-8 pt-6 flex items-center gap-4" style={{ borderTop: "1px solid #3B3D3E" }}>
-                  <span className="text-sm font-medium text-white">Compartir:</span>
+                <div className="mt-8 pt-6 flex items-center gap-4" style={{ borderTop: "1px solid #E5E3DE" }}>
+                  <span className="text-sm font-medium" style={{ color: "#1A1A1A" }}>Compartir:</span>
                   <button
                     onClick={shareOnFacebook}
                     className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-opacity hover:opacity-80"
-                    style={{ background: "#1877F2", color: "#FFFFFF" }}
+                    style={{ background: "#1877F2", color: "#1A1A1A" }}
                   >
                     <Facebook className="w-4 h-4" />
                     Facebook
@@ -307,8 +307,8 @@ export default function ArticlePage() {
 
             {/* Related Articles */}
             {relatedArticles && relatedArticles.filter(a => a.slug !== slug).length > 0 && (
-              <section className="mt-12 pt-8" style={{ borderTop: "1px solid #3B3D3E" }}>
-                <h2 className="text-white font-bold text-xl mb-6" style={{ fontFamily: "Poppins, sans-serif" }}>
+              <section className="mt-12 pt-8" style={{ borderTop: "1px solid #E5E3DE" }}>
+                <h2 className="font-bold text-xl mb-6" style={{ fontFamily: "Poppins, sans-serif" }}>
                   Artículos Relacionados
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">

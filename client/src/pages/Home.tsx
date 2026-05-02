@@ -29,7 +29,7 @@ export default function Home() {
   const { data: categories } = trpc.categories.list.useQuery();
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#252728" }}>
+    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#F8F7F4" }}>
       <Navbar />
 
       {/* Banner de error de login */}
@@ -79,7 +79,7 @@ export default function Home() {
                   key={cat.slug}
                   href={`/categoria/${cat.slug}`}
                   className="px-4 py-2 rounded-full text-sm font-medium no-underline transition-all"
-                  style={{ background: "rgba(255,255,255,0.15)", color: "#FFFFFF", backdropFilter: "blur(4px)" }}
+                  style={{ background: "rgba(255,255,255,0.20)", color: "#FFFFFF", backdropFilter: "blur(4px)", border: "1px solid rgba(255,255,255,0.3)" }}
                 >
                   {cat.name}
                 </Link>
@@ -100,12 +100,12 @@ export default function Home() {
                 <section className="mb-10">
                   <div className="flex items-center gap-2 mb-5">
                     <TrendingUp className="w-5 h-5" style={{ color: "#5B2C8F" }} />
-                    <h2 className="text-white font-bold text-xl" style={{ fontFamily: "Poppins, sans-serif" }}>
+                    <h2 className="font-bold text-xl" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
                       Nota Destacada
                     </h2>
                   </div>
                   {featuredLoading ? (
-                    <div className="rounded-xl animate-pulse" style={{ height: 420, backgroundColor: "#2E3032" }} />
+                    <div className="rounded-xl animate-pulse" style={{ height: 420, backgroundColor: "#FFFFFF" }} />
                   ) : featuredArticle ? (
                     <ArticleCard {...featuredArticle} size="large" />
                   ) : null}
@@ -115,7 +115,7 @@ export default function Home() {
               {/* Recent Articles Grid */}
               <section>
                 <div className="flex items-center justify-between mb-5">
-                  <h2 className="text-white font-bold text-xl" style={{ fontFamily: "Poppins, sans-serif" }}>
+                  <h2 className="font-bold text-xl" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
                     Notas Recientes
                   </h2>
                   <Link href="/articulos" className="flex items-center gap-1 text-sm no-underline" style={{ color: "#7B4FB8" }}>
@@ -126,7 +126,7 @@ export default function Home() {
                 {articlesLoading ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                     {Array.from({ length: 6 }).map((_, i) => (
-                      <div key={i} className="rounded-xl animate-pulse" style={{ height: 280, backgroundColor: "#2E3032" }} />
+                      <div key={i} className="rounded-xl animate-pulse" style={{ height: 280, backgroundColor: "#FFFFFF" }} />
                     ))}
                   </div>
                 ) : articles && articles.length > 0 ? (
@@ -136,9 +136,9 @@ export default function Home() {
                     ))}
                   </div>
                 ) : (
-                  <div className="rounded-xl p-12 text-center" style={{ backgroundColor: "#2E3032", border: "1px solid #3B3D3E" }}>
-                    <p className="text-lg font-semibold text-white mb-2">Próximamente</p>
-                    <p style={{ color: "#A0A0A0" }}>Los artículos aparecerán aquí una vez publicados.</p>
+                  <div className="rounded-xl p-12 text-center" style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E3DE" }}>
+                    <p className="text-lg font-semibold mb-2" style={{ color: "#1A1A1A" }}>Próximamente</p>
+                    <p style={{ color: "#6B6B6B" }}>Los artículos aparecerán aquí una vez publicados.</p>
                   </div>
                 )}
               </section>
@@ -157,7 +157,7 @@ export default function Home() {
 
                 {/* Categories Widget */}
                 <div className="ca-card p-5">
-                  <h3 className="text-white font-bold text-base mb-4" style={{ fontFamily: "Poppins, sans-serif" }}>
+                  <h3 className="font-bold text-base mb-4" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
                     Categorías
                   </h3>
                   <div className="flex flex-col gap-2">
@@ -166,7 +166,7 @@ export default function Home() {
                         key={cat.slug}
                         href={`/categoria/${cat.slug}`}
                         className="flex items-center justify-between px-3 py-2 rounded-lg no-underline transition-colors"
-                        style={{ color: "#A0A0A0" }}
+                        style={{ color: "#6B6B6B" }}
                       >
                         <span className="text-sm font-medium">{cat.name}</span>
                         <ArrowRight className="w-3 h-3" />
@@ -177,10 +177,10 @@ export default function Home() {
 
                 {/* About Widget */}
                 <div className="ca-card p-5">
-                  <h3 className="text-white font-bold text-base mb-3" style={{ fontFamily: "Poppins, sans-serif" }}>
+                  <h3 className="font-bold text-base mb-3" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
                     Sobre Curioso Ando
                   </h3>
-                  <p className="text-sm" style={{ color: "#A0A0A0" }}>
+                  <p className="text-sm" style={{ color: "#6B6B6B" }}>
                     Datos raros, curiosos y sorprendentes en un scroll. Aprende, ríe y di "¡no lo sabía!".
                   </p>
                 </div>
@@ -203,7 +203,7 @@ function CategorySection({ categorySlug, categoryName }: { categorySlug: string;
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
           <div className="w-1 h-6 rounded-full" style={{ background: "linear-gradient(to bottom, #2B037D, #5B2C8F)" }} />
-          <h2 className="text-white font-bold text-xl" style={{ fontFamily: "Poppins, sans-serif" }}>
+          <h2 className="font-bold text-xl" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
             {categoryName}
           </h2>
         </div>

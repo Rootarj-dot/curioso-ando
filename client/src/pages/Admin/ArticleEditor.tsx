@@ -151,7 +151,7 @@ export default function ArticleEditor() {
             <button
               onClick={() => navigate("/admin/articulos")}
               className="p-2 rounded-lg transition-colors"
-              style={{ color: "#A0A0A0" }}
+              style={{ color: "#6B6B6B" }}
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
@@ -168,7 +168,7 @@ export default function ArticleEditor() {
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm no-underline"
-                style={{ color: "#A0A0A0", border: "1px solid #3B3D3E" }}
+                style={{ color: "#6B6B6B", border: "1px solid #E5E3DE" }}
               >
                 <Eye className="w-4 h-4" />
                 Vista previa
@@ -178,7 +178,7 @@ export default function ArticleEditor() {
               onClick={() => handleSave("draft")}
               disabled={isSaving}
               className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium"
-              style={{ color: "#A0A0A0", border: "1px solid #3B3D3E" }}
+              style={{ color: "#6B6B6B", border: "1px solid #E5E3DE" }}
             >
               <Save className="w-4 h-4" />
               Borrador
@@ -187,7 +187,7 @@ export default function ArticleEditor() {
               onClick={() => handleSave("published")}
               disabled={isSaving}
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
-              style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#FFFFFF" }}
+              style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#1A1A1A" }}
             >
               {isSaving ? "Guardando..." : "Publicar"}
             </button>
@@ -205,26 +205,26 @@ export default function ArticleEditor() {
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Título del artículo..."
                 className="w-full bg-transparent text-white text-2xl font-bold border-0 border-b-2 pb-3 outline-none placeholder:text-gray-600"
-                style={{ borderColor: "#3B3D3E", fontFamily: "Poppins, sans-serif" }}
+                style={{ borderColor: "#E5E3DE", fontFamily: "Poppins, sans-serif" }}
               />
             </div>
 
             {/* Excerpt */}
             <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: "#A0A0A0" }}>Extracto / Descripción corta</label>
+              <label className="block text-xs font-medium mb-1.5" style={{ color: "#6B6B6B" }}>Extracto / Descripción corta</label>
               <textarea
                 value={excerpt}
                 onChange={(e) => setExcerpt(e.target.value)}
                 placeholder="Breve descripción del artículo..."
                 rows={2}
                 className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none resize-none"
-                style={{ backgroundColor: "#2E3032", border: "1px solid #3B3D3E" }}
+                style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E3DE" }}
               />
             </div>
 
             {/* Block Editor */}
             <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: "#A0A0A0" }}>Contenido</label>
+              <label className="block text-xs font-medium mb-1.5" style={{ color: "#6B6B6B" }}>Contenido</label>
               <BlockEditor
                 initialContent={content !== "{}" ? content : undefined}
                 onChange={setContent}
@@ -241,34 +241,34 @@ export default function ArticleEditor() {
               <h3 className="text-white font-semibold text-sm mb-4">Publicación</h3>
               <div className="flex flex-col gap-3">
                 <div>
-                  <label className="block text-xs mb-1.5" style={{ color: "#A0A0A0" }}>Estado</label>
+                  <label className="block text-xs mb-1.5" style={{ color: "#6B6B6B" }}>Estado</label>
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value as "draft" | "published")}
                     className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
-                    style={{ backgroundColor: "#252728", border: "1px solid #3B3D3E" }}
+                    style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE" }}
                   >
                     <option value="draft">Borrador</option>
                     <option value="published">Publicado</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs mb-1.5" style={{ color: "#A0A0A0" }}>Fecha de publicación</label>
+                  <label className="block text-xs mb-1.5" style={{ color: "#6B6B6B" }}>Fecha de publicación</label>
                   <input
                     type="datetime-local"
                     value={publishedAt}
                     onChange={(e) => setPublishedAt(e.target.value)}
                     className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
-                    style={{ backgroundColor: "#252728", border: "1px solid #3B3D3E" }}
+                    style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE" }}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs mb-1.5" style={{ color: "#A0A0A0" }}>Categoría</label>
+                  <label className="block text-xs mb-1.5" style={{ color: "#6B6B6B" }}>Categoría</label>
                   <select
                     value={categoryId ?? ""}
                     onChange={(e) => setCategoryId(e.target.value ? parseInt(e.target.value) : undefined)}
                     className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
-                    style={{ backgroundColor: "#252728", border: "1px solid #3B3D3E" }}
+                    style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE" }}
                   >
                     <option value="">Sin categoría</option>
                     {categories?.map((cat) => (
@@ -277,14 +277,14 @@ export default function ArticleEditor() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs mb-1.5" style={{ color: "#A0A0A0" }}>Slug (URL)</label>
+                  <label className="block text-xs mb-1.5" style={{ color: "#6B6B6B" }}>Slug (URL)</label>
                   <input
                     type="text"
                     value={slug}
                     onChange={(e) => setSlug(e.target.value)}
                     placeholder="mi-articulo"
                     className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
-                    style={{ backgroundColor: "#252728", border: "1px solid #3B3D3E" }}
+                    style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE" }}
                   />
                 </div>
                 <label className="flex items-center gap-2 cursor-pointer">
@@ -317,7 +317,7 @@ export default function ArticleEditor() {
               ) : (
                 <div
                   className="rounded-lg flex items-center justify-center cursor-pointer mb-2"
-                  style={{ aspectRatio: "16/9", backgroundColor: "#252728", border: "1px dashed #3B3D3E" }}
+                  style={{ aspectRatio: "16/9", backgroundColor: "#F8F7F4", border: "1px dashed #E5E3DE" }}
                   onClick={() => openGallery("featured")}
                 >
                   <ImageIcon className="w-8 h-8" style={{ color: "#5A5C5E" }} />
@@ -326,7 +326,7 @@ export default function ArticleEditor() {
               <button
                 onClick={() => openGallery("featured")}
                 className="w-full py-2 rounded-lg text-sm font-medium"
-                style={{ border: "1px solid #3B3D3E", color: "#A0A0A0" }}
+                style={{ border: "1px solid #E5E3DE", color: "#6B6B6B" }}
               >
                 {featuredImage ? "Cambiar imagen" : "Seleccionar imagen"}
               </button>
@@ -337,29 +337,29 @@ export default function ArticleEditor() {
               <h3 className="text-white font-semibold text-sm mb-3">Open Graph (Facebook)</h3>
               <div className="flex flex-col gap-3">
                 <div>
-                  <label className="block text-xs mb-1.5" style={{ color: "#A0A0A0" }}>OG Title</label>
+                  <label className="block text-xs mb-1.5" style={{ color: "#6B6B6B" }}>OG Title</label>
                   <input
                     type="text"
                     value={ogTitle}
                     onChange={(e) => setOgTitle(e.target.value)}
                     placeholder={title || "Título para redes sociales"}
                     className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none"
-                    style={{ backgroundColor: "#252728", border: "1px solid #3B3D3E" }}
+                    style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE" }}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs mb-1.5" style={{ color: "#A0A0A0" }}>OG Description</label>
+                  <label className="block text-xs mb-1.5" style={{ color: "#6B6B6B" }}>OG Description</label>
                   <textarea
                     value={ogDescription}
                     onChange={(e) => setOgDescription(e.target.value)}
                     placeholder={excerpt || "Descripción para redes sociales"}
                     rows={2}
                     className="w-full rounded-lg px-3 py-2 text-sm text-white outline-none resize-none"
-                    style={{ backgroundColor: "#252728", border: "1px solid #3B3D3E" }}
+                    style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE" }}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs mb-1.5" style={{ color: "#A0A0A0" }}>
+                  <label className="block text-xs mb-1.5" style={{ color: "#6B6B6B" }}>
                     OG Image (1200×630)
                   </label>
                   {ogImage ? (
@@ -377,7 +377,7 @@ export default function ArticleEditor() {
                   <button
                     onClick={() => openGallery("og")}
                     className="w-full py-2 rounded-lg text-sm font-medium"
-                    style={{ border: "1px solid #3B3D3E", color: "#A0A0A0" }}
+                    style={{ border: "1px solid #E5E3DE", color: "#6B6B6B" }}
                   >
                     {ogImage ? "Cambiar OG Image" : "Seleccionar OG Image"}
                   </button>

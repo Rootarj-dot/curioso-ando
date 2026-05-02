@@ -57,13 +57,13 @@ export function ArticleCard({
             {categoryName && (
               <span className="ca-badge mb-3">{categoryName}</span>
             )}
-            <h2 className="text-white font-bold text-2xl md:text-3xl leading-tight mb-2 group-hover:text-purple-300 transition-colors">
+            <h2 className="font-bold text-2xl md:text-3xl leading-tight mb-2 group-hover:text-purple-300 transition-colors" style={{ color: "#FFFFFF" }}>
               {title}
             </h2>
             {excerpt && (
-              <p className="text-sm mb-3 line-clamp-2" style={{ color: "#C0C0C0" }}>{excerpt}</p>
+              <p className="text-sm mb-3 line-clamp-2" style={{ color: "#E0D8FF" }}>{excerpt}</p>
             )}
-            <div className="flex items-center gap-4 text-xs" style={{ color: "#A0A0A0" }}>
+            <div className="flex items-center gap-4 text-xs" style={{ color: "#C0B8E8" }}>
               {authorName && (
                 <span className="flex items-center gap-1">
                   <User className="w-3 h-3" />
@@ -106,13 +106,13 @@ export function ArticleCard({
           )}
         </div>
         <div className="p-4 flex flex-col flex-1">
-          <h3 className="text-white font-bold text-base leading-snug mb-2 group-hover:text-purple-300 transition-colors line-clamp-2">
+          <h3 className="font-bold text-base leading-snug mb-2 group-hover:text-purple-600 transition-colors line-clamp-2" style={{ color: "#1A1A1A" }}>
             {title}
           </h3>
           {excerpt && (
-            <p className="text-sm mb-3 line-clamp-2 flex-1" style={{ color: "#A0A0A0" }}>{excerpt}</p>
+            <p className="text-sm mb-3 line-clamp-2 flex-1" style={{ color: "#6B6B6B" }}>{excerpt}</p>
           )}
-          <div className="flex items-center gap-3 text-xs mt-auto" style={{ color: "#5A5C5E" }}>
+          <div className="flex items-center gap-3 text-xs mt-auto" style={{ color: "#9B9890" }}>
             {authorName && (
               <span className="flex items-center gap-1">
                 <User className="w-3 h-3" />

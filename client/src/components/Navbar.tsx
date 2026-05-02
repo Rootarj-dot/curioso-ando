@@ -17,7 +17,7 @@ export function Navbar() {
   const { user, isAuthenticated } = useAuth();
 
   return (
-    <header className="sticky top-0 z-50" style={{ backgroundColor: "#1C1C1D", borderBottom: "1px solid #3B3D3E" }}>
+    <header className="sticky top-0 z-50" style={{ backgroundColor: "#FFFFFF", borderBottom: "1px solid #E5E3DE" }}>
       {/* Top bar */}
       <div className="container">
         <div className="flex items-center justify-between h-16">
@@ -26,7 +26,7 @@ export function Navbar() {
             <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)" }}>
               <Search className="w-4 h-4 text-white" />
             </div>
-            <span className="text-white font-bold text-xl" style={{ fontFamily: "Poppins, sans-serif" }}>
+            <span className="font-bold text-xl" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
               Curioso Ando
             </span>
           </Link>
@@ -39,7 +39,7 @@ export function Navbar() {
                 href={`/categoria/${cat.slug}`}
                 className="px-4 py-2 rounded-md text-sm font-medium transition-colors no-underline"
                 style={{
-                  color: location === `/categoria/${cat.slug}` ? "#FFFFFF" : "#A0A0A0",
+                  color: location === `/categoria/${cat.slug}` ? "#FFFFFF" : "#4A4A4A",
                   background: location === `/categoria/${cat.slug}` ? "#2B037D" : "transparent",
                 }}
               >
@@ -76,7 +76,7 @@ export function Navbar() {
             )}
             <button
               className="md:hidden p-2 rounded-md"
-              style={{ color: "#FFFFFF" }}
+              style={{ color: "#1A1A1A" }}
               onClick={() => setMenuOpen(!menuOpen)}
             >
               {menuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -87,25 +87,25 @@ export function Navbar() {
 
       {/* Mobile menu */}
       {menuOpen && (
-        <div className="md:hidden" style={{ backgroundColor: "#1C1C1D", borderTop: "1px solid #3B3D3E" }}>
+        <div className="md:hidden" style={{ backgroundColor: "#FFFFFF", borderTop: "1px solid #E5E3DE" }}>
           <div className="container py-3 flex flex-col gap-1">
             {CATEGORIES.map((cat) => (
               <Link
                 key={cat.slug}
                 href={`/categoria/${cat.slug}`}
                 className="px-4 py-2.5 rounded-md text-sm font-medium no-underline"
-                style={{ color: "#FFFFFF" }}
+                style={{ color: "#1A1A1A" }}
                 onClick={() => setMenuOpen(false)}
               >
                 {cat.name}
               </Link>
             ))}
-            <div className="border-t mt-2 pt-2" style={{ borderColor: "#3B3D3E" }}>
+            <div className="border-t mt-2 pt-2" style={{ borderColor: "#E5E3DE" }}>
               {isAuthenticated ? (
                 <Link
                   href="/admin"
                   className="px-4 py-2.5 rounded-md text-sm font-medium no-underline flex items-center gap-2"
-                  style={{ color: "#FFFFFF" }}
+                  style={{ color: "#1A1A1A" }}
                   onClick={() => setMenuOpen(false)}
                 >
                   <User className="w-4 h-4" />
@@ -115,7 +115,7 @@ export function Navbar() {
                 <a
                   href={getLoginUrl()}
                   className="px-4 py-2.5 rounded-md text-sm font-medium no-underline flex items-center gap-2"
-                  style={{ color: "#FFFFFF" }}
+                  style={{ color: "#1A1A1A" }}
                 >
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>

@@ -95,26 +95,26 @@ export function MediaGallery({ onSelect, onClose }: MediaGalleryProps) {
     >
       <div
         className="w-full max-w-4xl rounded-xl flex flex-col"
-        style={{ backgroundColor: "#252728", border: "1px solid #3B3D3E", maxHeight: "90vh" }}
+        style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE", maxHeight: "90vh" }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4" style={{ borderBottom: "1px solid #3B3D3E" }}>
+        <div className="flex items-center justify-between p-4" style={{ borderBottom: "1px solid #E5E3DE" }}>
           <div className="flex items-center gap-2">
             <ImageIcon className="w-5 h-5" style={{ color: "#7B4FB8" }} />
             <h2 className="text-white font-bold text-lg">Galería de Medios</h2>
           </div>
-          <button onClick={onClose} className="p-2 rounded-lg transition-colors" style={{ color: "#A0A0A0" }}>
+          <button onClick={onClose} className="p-2 rounded-lg transition-colors" style={{ color: "#6B6B6B" }}>
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Toolbar */}
-        <div className="flex items-center gap-3 p-4" style={{ borderBottom: "1px solid #3B3D3E" }}>
+        <div className="flex items-center gap-3 p-4" style={{ borderBottom: "1px solid #E5E3DE" }}>
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-opacity"
-            style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#FFFFFF" }}
+            style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#1A1A1A" }}
           >
             <Upload className="w-4 h-4" />
             {uploading ? "Subiendo..." : "Subir imágenes"}
@@ -131,7 +131,7 @@ export function MediaGallery({ onSelect, onClose }: MediaGalleryProps) {
             <button
               onClick={handleSelect}
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium ml-auto"
-              style={{ background: "#16a34a", color: "#FFFFFF" }}
+              style={{ background: "#16a34a", color: "#1A1A1A" }}
             >
               <Check className="w-4 h-4" />
               Insertar seleccionada
@@ -142,7 +142,7 @@ export function MediaGallery({ onSelect, onClose }: MediaGalleryProps) {
         {/* Grid */}
         <div className="flex-1 overflow-y-auto p-4">
           {!mediaList || mediaList.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16" style={{ color: "#A0A0A0" }}>
+            <div className="flex flex-col items-center justify-center py-16" style={{ color: "#6B6B6B" }}>
               <ImageIcon className="w-12 h-12 mb-3 opacity-30" />
               <p className="text-sm">No hay imágenes aún. Sube la primera.</p>
             </div>
@@ -154,7 +154,7 @@ export function MediaGallery({ onSelect, onClose }: MediaGalleryProps) {
                   className="relative group cursor-pointer rounded-lg overflow-hidden"
                   style={{
                     border: selectedUrl === item.url ? "2px solid #5B2C8F" : "2px solid transparent",
-                    backgroundColor: "#2E3032",
+                    backgroundColor: "#FFFFFF",
                     aspectRatio: "1",
                   }}
                   onClick={() => setSelectedUrl(selectedUrl === item.url ? null : item.url)}
@@ -184,7 +184,7 @@ export function MediaGallery({ onSelect, onClose }: MediaGalleryProps) {
                   </button>
                   <div
                     className="absolute bottom-0 left-0 right-0 px-2 py-1 text-xs truncate opacity-0 group-hover:opacity-100 transition-opacity"
-                    style={{ background: "rgba(0,0,0,0.8)", color: "#D0D0D0" }}
+                    style={{ background: "rgba(0,0,0,0.8)", color: "#3A3A3A" }}
                   >
                     {item.originalName}
                   </div>
