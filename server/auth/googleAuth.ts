@@ -10,6 +10,8 @@ const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID ?? "";
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET ?? "";
 const JWT_SECRET = process.env.JWT_SECRET ?? "";
 const OWNER_OPEN_ID = process.env.OWNER_OPEN_ID ?? "";
+// Email del propietario del sitio — siempre será admin
+const OWNER_EMAIL = process.env.OWNER_EMAIL ?? "shuraand@gmail.com";
 
 function getJwtSecret() {
   return new TextEncoder().encode(JWT_SECRET);
@@ -81,18 +83,27 @@ export function setupGoogleAuth(app: Express) {
             return done(new Error(`Error de base de datos: ${String(dbErr)}`));
           }
 
-          // Si el usuario ya existe, NO cambiar su rol (preservar el rol asignado manualmente)
-          // Si es nuevo, asignar admin si es el primero o si coincide con OWNER_OPEN_ID
+          // Determinar si este usuario debe ser admin
+          // Es admin si: su email coincide con OWNER_EMAIL, o su openId coincide con OWNER_OPEN_ID,
+          // o es el primer usuario registrado
+          const isOwnerByEmail = OWNER_EMAIL && email === OWNER_EMAIL;
+          const isOwnerByOpenId = OWNER_OPEN_ID && openId === OWNER_OPEN_ID;
+          const isFirstUser = existingUsers === 0;
+          const shouldBeAdmin = isOwnerByEmail || isOwnerByOpenId || isFirstUser;
+
           let roleToAssign: "admin" | "user" | undefined;
-          if (existingUser) {
-            // Usuario ya existe: no tocar el rol
+          if (shouldBeAdmin) {
+            // Si es el owner (por email o openId) o el primer usuario, siempre admin
+            roleToAssign = "admin";
+            console.log("[GoogleAuth] Usuario es owner/primero, asignando rol admin. (email match:", !!isOwnerByEmail, "| openId match:", !!isOwnerByOpenId, "| primer usuario:", isFirstUser, ")");
+          } else if (existingUser) {
+            // Usuario existente no-owner: preservar su rol actual
             roleToAssign = undefined;
-            console.log("[GoogleAuth] Usuario existente, preservando rol:", existingUser.role);
+            console.log("[GoogleAuth] Usuario existente no-owner, preservando rol:", existingUser.role);
           } else {
-            // Usuario nuevo: es admin si es el primero o si coincide con OWNER_OPEN_ID
-            const isOwner = openId === OWNER_OPEN_ID || existingUsers === 0;
-            roleToAssign = isOwner ? "admin" : "user";
-            console.log("[GoogleAuth] Usuario nuevo, asignando rol:", roleToAssign);
+            // Usuario nuevo no-owner: asignar user
+            roleToAssign = "user";
+            console.log("[GoogleAuth] Usuario nuevo no-owner, asignando rol: user");
           }
 
           try {
