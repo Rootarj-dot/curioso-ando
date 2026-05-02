@@ -83,3 +83,4 @@
 - [x] Corregir 404 en página principal en entorno local
 - [x] Asegurar que dotenv carga .env correctamente
 - [x] Corregir carga de .env con ruta explícita para compatibilidad con Windows
+- [x] Corregir carga de .env: --env-file falla en Windows, usar dotenv programático con ruta absoluta desde import.meta.url
