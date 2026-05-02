@@ -1,12 +1,29 @@
-import { Link } from "wouter";
+import { Link, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArticleCard } from "@/components/ArticleCard";
 import { AdSlot } from "@/components/AdSense";
-import { ArrowRight, TrendingUp } from "lucide-react";
+import { ArrowRight, TrendingUp, AlertCircle, X } from "lucide-react";
+import { useState } from "react";
+
+const AUTH_ERRORS: Record<string, string> = {
+  auth_failed: "El inicio de sesión falló. Revisa los logs del servidor (consola donde corre pnpm dev) para ver el error exacto.",
+  google_not_configured: "❌ GOOGLE_CLIENT_ID o GOOGLE_CLIENT_SECRET no están configurados en el archivo .env",
+  jwt_not_configured: "❌ JWT_SECRET no está configurado en el archivo .env",
+  google_denied: "Cancelaste el inicio de sesión con Google.",
+  no_user: "Error interno: no se pudo recuperar el usuario después de autenticar.",
+  callback_error: "Error en el callback de OAuth. Revisa los logs del servidor.",
+};
 
 export default function Home() {
+  const search = useSearch();
+  const params = new URLSearchParams(search);
+  const errorCode = params.get("error");
+  const errorDetail = params.get("detail");
+  const errorMessage = errorCode ? (AUTH_ERRORS[errorCode] ?? `Error desconocido: ${errorCode}`) : null;
+  const [showError, setShowError] = useState(true);
+
   const { data: featuredArticle, isLoading: featuredLoading } = trpc.articles.featured.useQuery();
   const { data: articles, isLoading: articlesLoading } = trpc.articles.list.useQuery({ limit: 12 });
   const { data: categories } = trpc.categories.list.useQuery();
@@ -14,6 +31,31 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#252728" }}>
       <Navbar />
+
+      {/* Banner de error de login */}
+      {errorMessage && showError && (
+        <div className="container py-2">
+          <div
+            className="flex items-start gap-3 p-4 rounded-lg"
+            style={{ backgroundColor: "#3D0000", border: "1px solid #FF4444", color: "#FFAAAA" }}
+          >
+            <AlertCircle className="w-5 h-5 mt-0.5 shrink-0" style={{ color: "#FF4444" }} />
+            <div className="flex-1">
+              <p className="font-semibold text-sm" style={{ color: "#FF6666" }}>Error de inicio de sesión</p>
+              <p className="text-sm mt-0.5">{errorMessage}</p>
+              {errorDetail && (
+                <p className="text-xs mt-1 font-mono" style={{ color: "#FF8888" }}>Detalle: {errorDetail}</p>
+              )}
+              <p className="text-xs mt-2" style={{ color: "#CC8888" }}>
+                Abre la consola donde corre <code className="font-mono">pnpm dev</code> y busca las líneas que empiezan con <code className="font-mono">[GoogleAuth]</code> para ver el error exacto.
+              </p>
+            </div>
+            <button onClick={() => setShowError(false)} style={{ color: "#FF4444" }}>
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* AdSense Header */}
       <div className="container py-3">
