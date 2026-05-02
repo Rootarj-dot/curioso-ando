@@ -15,9 +15,11 @@ interface SectionProps {
   selectedIds: number[];
   allArticles: ArticleOption[];
   onChange: (ids: number[]) => void;
+  isLoading?: boolean;
+  error?: string | null;
 }
 
-function ArticleSelector({ label, selectedIds, allArticles, onChange }: SectionProps) {
+function ArticleSelector({ label, selectedIds, allArticles, onChange, isLoading, error }: SectionProps) {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
 
@@ -110,9 +112,19 @@ function ArticleSelector({ label, selectedIds, allArticles, onChange }: SectionP
               </div>
             </div>
             <div className="max-h-48 overflow-y-auto">
-              {filtered.length === 0 && (
+              {isLoading && (
                 <p className="text-xs text-center py-4" style={{ color: "#9B9B9B" }}>
-                  No hay artículos disponibles
+                  Cargando artículos...
+                </p>
+              )}
+              {error && (
+                <p className="text-xs text-center py-4" style={{ color: "#e53e3e" }}>
+                  Error: {error}
+                </p>
+              )}
+              {!isLoading && !error && filtered.length === 0 && (
+                <p className="text-xs text-center py-4" style={{ color: "#9B9B9B" }}>
+                  {allArticles.length === 0 ? "No hay artículos publicados" : "No hay más artículos"}
                 </p>
               )}
               {filtered.map((a) => (
@@ -151,9 +163,7 @@ function ArticleSelector({ label, selectedIds, allArticles, onChange }: SectionP
 }
 
 export function SidebarArticlesPanel() {
-  const { data: adminArticlesRaw } = trpc.articles.adminList.useQuery();
-  // Solo mostrar artículos publicados en el panel de selección
-  const adminArticles = adminArticlesRaw?.filter((a) => a.status === "published");
+  const { data: adminArticles, error: articlesError, isLoading: articlesLoading } = trpc.articles.adminList.useQuery();
   const { data: currentConfig } = trpc.siteConfig.getSidebarArticles.useQuery();
   const utils = trpc.useUtils();
 
@@ -181,8 +191,8 @@ export function SidebarArticlesPanel() {
     id: a.id,
     title: a.title,
     slug: a.slug,
-    featuredImage: null,
-    ogImage: null,
+    featuredImage: (a as any).featuredImage ?? null,
+    ogImage: (a as any).ogImage ?? null,
   }));
 
   const handleSave = () => {
@@ -206,6 +216,8 @@ export function SidebarArticlesPanel() {
         selectedIds={recentIds}
         allArticles={allArticles}
         onChange={setRecentIds}
+        isLoading={articlesLoading}
+        error={articlesError?.message ?? null}
       />
 
       <ArticleSelector
@@ -213,6 +225,8 @@ export function SidebarArticlesPanel() {
         selectedIds={recommendedIds}
         allArticles={allArticles}
         onChange={setRecommendedIds}
+        isLoading={articlesLoading}
+        error={articlesError?.message ?? null}
       />
 
       <button
