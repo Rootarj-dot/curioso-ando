@@ -403,40 +403,24 @@ export default function ArticlePage() {
                       </div>
                     </div>
                   )}
-                  {/* Recomendados */}
-                  {sidebarData && sidebarData.recommendedArticles.length > 0 && (
-                    <div className="rounded-xl p-4" style={{ background: "#fff", border: "1px solid #E5E3DE" }}>
-                      <h3 className="font-bold text-sm mb-4 uppercase tracking-wide" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
-                        Recomendados
-                      </h3>
-                      <div className="flex flex-col gap-3">
-                        {sidebarData.recommendedArticles.map((a) => (
-                          <Link key={a.id} href={`/articulo/${a.slug}`} className="flex gap-3 items-start no-underline group">
-                            {(a.featuredImage || a.ogImage) && (
-                              <img
-                                src={a.featuredImage || a.ogImage || ""}
-                                alt={a.title}
-                                className="w-16 h-12 object-cover rounded-lg flex-shrink-0"
-                              />
-                            )}
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xs font-medium line-clamp-2 group-hover:text-purple-700 transition-colors" style={{ color: "#1A1A1A" }}>
-                                {a.title}
-                              </p>
-                              {a.publishedAt && (
-                                <p className="text-xs mt-1" style={{ color: "#9B9B9B" }}>
-                                  {formatDate(a.publishedAt)}
-                                </p>
-                              )}
-                            </div>
-                          </Link>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+
                 </div>
               </aside>
             </div>
+
+            {/* Recomendados — sección de ancho completo debajo del artículo */}
+            {sidebarData && sidebarData.recommendedArticles.length > 0 && (
+              <section className="mt-10 pt-8" style={{ borderTop: "2px solid #E5E3DE" }}>
+                <h2 className="font-bold text-xl mb-6" style={{ fontFamily: "Poppins, sans-serif", color: "#2B037D" }}>
+                  Recomendados
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
+                  {sidebarData.recommendedArticles.map((a) => (
+                    <ArticleCard key={a.id} {...a} />
+                  ))}
+                </div>
+              </section>
+            )}
 
             {/* Related Articles */}
             {relatedArticles && relatedArticles.filter((a) => a.slug !== slug).length > 0 && (
