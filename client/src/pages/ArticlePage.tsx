@@ -5,6 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArticleCard } from "@/components/ArticleCard";
 import { Calendar, User, ArrowLeft, Facebook } from "lucide-react";
+import { FlipCard } from "@/components/FlipCard";
 
 function formatDate(date: Date | null | undefined): string {
   if (!date) return "";
@@ -372,7 +373,7 @@ export default function ArticlePage() {
               {/* Sidebar */}
               <aside className="lg:col-span-1">
                 <div className="sticky top-24 flex flex-col gap-6">
-                  {/* Recientes — cards */}
+                  {/* Recientes — FlipCards futuristas */}
                   {sidebarData && sidebarData.recentArticles.length > 0 && (
                     <div>
                       <h3 className="font-bold text-sm mb-3 uppercase tracking-wide" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
@@ -380,45 +381,7 @@ export default function ArticlePage() {
                       </h3>
                       <div className="flex flex-col gap-3">
                         {sidebarData.recentArticles.map((a) => (
-                          <Link
-                            key={a.id}
-                            href={`/articulo/${a.slug}`}
-                            className="no-underline group rounded-xl overflow-hidden block transition-shadow hover:shadow-md"
-                            style={{ background: "#fff", border: "1px solid #E5E3DE" }}
-                          >
-                            {/* Imagen */}
-                            {(a.featuredImage || a.ogImage) ? (
-                              <img
-                                src={a.featuredImage || a.ogImage || ""}
-                                alt={a.title}
-                                className="w-full object-cover"
-                                style={{ height: 110 }}
-                              />
-                            ) : (
-                              <div
-                                className="w-full flex items-center justify-center"
-                                style={{ height: 80, background: "linear-gradient(135deg, #2B037D, #5B2C8F)" }}
-                              >
-                                <span className="text-white font-bold text-lg">CA</span>
-                              </div>
-                            )}
-                            {/* Texto */}
-                            <div className="p-3">
-                              {a.categoryName && (
-                                <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: "#7C3AED" }}>
-                                  {a.categoryName}
-                                </span>
-                              )}
-                              <p className="text-xs font-semibold mt-1 line-clamp-2 group-hover:text-purple-700 transition-colors" style={{ color: "#1A1A1A" }}>
-                                {a.title}
-                              </p>
-                              {a.publishedAt && (
-                                <p className="text-xs mt-1.5" style={{ color: "#9B9B9B" }}>
-                                  {formatDate(a.publishedAt)}
-                                </p>
-                              )}
-                            </div>
-                          </Link>
+                          <FlipCard key={a.id} {...a} />
                         ))}
                       </div>
                     </div>
