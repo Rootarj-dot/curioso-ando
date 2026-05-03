@@ -1,9 +1,128 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
 import { Menu, X, Search, User } from "lucide-react";
 import { trpc } from "@/lib/trpc";
+
+function NavSearch() {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  const { data: results, isFetching } = trpc.articles.search.useQuery(
+    { q: query },
+    { enabled: query.trim().length >= 2 }
+  );
+
+  // Close on outside click
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setOpen(false);
+        setQuery("");
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const handleOpen = () => {
+    setOpen(true);
+    setTimeout(() => inputRef.current?.focus(), 50);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+    setQuery("");
+  };
+
+  return (
+    <div ref={wrapperRef} className="relative">
+      {!open ? (
+        /* Collapsed: just the icon button */
+        <button
+          onClick={handleOpen}
+          className="p-2 rounded-md transition-colors hover:bg-gray-100"
+          style={{ color: "#4A4A4A" }}
+          aria-label="Buscar artículos"
+        >
+          <Search className="w-5 h-5" />
+        </button>
+      ) : (
+        /* Expanded: search input */
+        <div
+          className="flex items-center gap-2 px-3 py-1.5 rounded-lg"
+          style={{ background: "#F8F7F4", border: "1px solid #D0C8E8", width: 260 }}
+        >
+          <Search className="w-4 h-4 flex-shrink-0" style={{ color: "#9B9B9B" }} />
+          <input
+            ref={inputRef}
+            type="text"
+            placeholder="Buscar artículos..."
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="flex-1 bg-transparent outline-none text-sm"
+            style={{ color: "#1A1A1A" }}
+          />
+          <button onClick={handleClose} style={{ color: "#9B9B9B" }}>
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+      )}
+
+      {/* Dropdown results */}
+      {open && query.trim().length >= 2 && (
+        <div
+          className="absolute right-0 top-full mt-2 rounded-xl overflow-hidden z-50"
+          style={{ width: 320, background: "#FFFFFF", boxShadow: "0 8px 32px rgba(0,0,0,0.14)", border: "1px solid #E5E3DE" }}
+        >
+          {isFetching ? (
+            <div className="p-4 text-sm text-center" style={{ color: "#9B9B9B" }}>Buscando...</div>
+          ) : results && results.length > 0 ? (
+            <ul>
+              {results.map((r) => (
+                <li key={r.id} style={{ borderBottom: "1px solid #F0EEE9" }}>
+                  <Link
+                    href={`/articulo/${r.slug}`}
+                    onClick={handleClose}
+                    className="flex items-center gap-3 px-4 py-3 no-underline hover:bg-gray-50 transition-colors"
+                  >
+                    {(r.ogImage || r.featuredImage) ? (
+                      <img
+                        src={r.ogImage || r.featuredImage || ""}
+                        alt={r.title}
+                        className="w-12 h-9 object-cover rounded-lg flex-shrink-0"
+                      />
+                    ) : (
+                      <div
+                        className="w-12 h-9 rounded-lg flex-shrink-0 flex items-center justify-center"
+                        style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)" }}
+                      >
+                        <span className="text-white text-xs font-bold">CA</span>
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate" style={{ color: "#1A1A1A" }}>{r.title}</p>
+                      {r.categoryName && (
+                        <p className="text-xs mt-0.5" style={{ color: "#9B9B9B" }}>{r.categoryName}</p>
+                      )}
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="p-4 text-sm text-center" style={{ color: "#9B9B9B" }}>
+              Sin resultados para "{query}"
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -43,8 +162,13 @@ export function Navbar() {
             ))}
           </nav>
 
-          {/* Right side */}
-          <div className="flex items-center gap-3">
+          {/* Right side: search + auth */}
+          <div className="flex items-center gap-2">
+            {/* Search — desktop only */}
+            <div className="hidden md:block">
+              <NavSearch />
+            </div>
+
             {isAuthenticated ? (
               <Link
                 href="/admin"
@@ -69,6 +193,8 @@ export function Navbar() {
                 Ingresar con Google
               </a>
             )}
+
+            {/* Mobile hamburger */}
             <button
               className="md:hidden p-2 rounded-md"
               style={{ color: "#1A1A1A" }}
@@ -84,6 +210,10 @@ export function Navbar() {
       {menuOpen && (
         <div className="md:hidden" style={{ backgroundColor: "#FFFFFF", borderTop: "1px solid #E5E3DE" }}>
           <div className="container py-3 flex flex-col gap-1">
+            {/* Mobile search */}
+            <div className="px-1 pb-2" style={{ borderBottom: "1px solid #E5E3DE" }}>
+              <MobileSearch onClose={() => setMenuOpen(false)} />
+            </div>
             {(categories ?? []).map((cat) => (
               <Link
                 key={cat.slug}
@@ -126,5 +256,59 @@ export function Navbar() {
         </div>
       )}
     </header>
+  );
+}
+
+// Simple inline search for mobile menu
+function MobileSearch({ onClose }: { onClose: () => void }) {
+  const [query, setQuery] = useState("");
+  const { data: results, isFetching } = trpc.articles.search.useQuery(
+    { q: query },
+    { enabled: query.trim().length >= 2 }
+  );
+
+  return (
+    <div>
+      <div
+        className="flex items-center gap-2 px-3 py-2 rounded-lg"
+        style={{ background: "#F8F7F4", border: "1px solid #E5E3DE" }}
+      >
+        <Search className="w-4 h-4 flex-shrink-0" style={{ color: "#9B9B9B" }} />
+        <input
+          type="text"
+          placeholder="Buscar artículos..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="flex-1 bg-transparent outline-none text-sm"
+          style={{ color: "#1A1A1A" }}
+        />
+        {query && (
+          <button onClick={() => setQuery("")} style={{ color: "#9B9B9B" }}>
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+      {query.trim().length >= 2 && (
+        <div className="mt-2 rounded-lg overflow-hidden" style={{ border: "1px solid #E5E3DE" }}>
+          {isFetching ? (
+            <p className="p-3 text-sm text-center" style={{ color: "#9B9B9B" }}>Buscando...</p>
+          ) : results && results.length > 0 ? (
+            results.map((r) => (
+              <Link
+                key={r.id}
+                href={`/articulo/${r.slug}`}
+                onClick={onClose}
+                className="flex items-center gap-2 px-3 py-2 no-underline hover:bg-gray-50"
+                style={{ borderBottom: "1px solid #F0EEE9" }}
+              >
+                <p className="text-sm font-medium truncate" style={{ color: "#1A1A1A" }}>{r.title}</p>
+              </Link>
+            ))
+          ) : (
+            <p className="p-3 text-sm text-center" style={{ color: "#9B9B9B" }}>Sin resultados</p>
+          )}
+        </div>
+      )}
+    </div>
   );
 }

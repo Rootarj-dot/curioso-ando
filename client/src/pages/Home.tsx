@@ -1,10 +1,10 @@
-import { Link, useSearch, useLocation } from "wouter";
+import { Link, useSearch } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArticleCard } from "@/components/ArticleCard";
-import { ArrowRight, TrendingUp, Clock, AlertCircle, X, Search } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { ArrowRight, TrendingUp, Clock, AlertCircle, X } from "lucide-react";
+import { useState } from "react";
 
 const AUTH_ERRORS: Record<string, string> = {
   auth_failed: "El inicio de sesión falló. Revisa los logs del servidor (consola donde corre pnpm dev) para ver el error exacto.",
@@ -14,102 +14,6 @@ const AUTH_ERRORS: Record<string, string> = {
   no_user: "Error interno: no se pudo recuperar el usuario después de autenticar.",
   callback_error: "Error en el callback de OAuth. Revisa los logs del servidor.",
 };
-
-function HeroSearch() {
-  const [, navigate] = useLocation();
-  const [query, setQuery] = useState("");
-  const [open, setOpen] = useState(false);
-  const wrapperRef = useRef<HTMLDivElement>(null);
-
-  const { data: results, isFetching } = trpc.articles.search.useQuery(
-    { q: query },
-    { enabled: query.trim().length >= 2 }
-  );
-
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, []);
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && query.trim()) {
-      setOpen(false);
-    }
-  };
-
-  return (
-    <div ref={wrapperRef} className="relative w-full max-w-xl">
-      <div
-        className="flex items-center gap-2 px-4 py-3 rounded-xl"
-        style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", backdropFilter: "blur(8px)" }}
-      >
-        <Search className="w-5 h-5 flex-shrink-0" style={{ color: "rgba(255,255,255,0.7)" }} />
-        <input
-          type="text"
-          placeholder="Buscar artículos..."
-          value={query}
-          onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
-          onFocus={() => query.trim().length >= 2 && setOpen(true)}
-          onKeyDown={handleKeyDown}
-          className="flex-1 bg-transparent outline-none text-sm placeholder:text-white/50"
-          style={{ color: "#FFFFFF" }}
-        />
-        {query && (
-          <button onClick={() => { setQuery(""); setOpen(false); }} style={{ color: "rgba(255,255,255,0.6)" }}>
-            <X className="w-4 h-4" />
-          </button>
-        )}
-      </div>
-
-      {/* Dropdown results */}
-      {open && query.trim().length >= 2 && (
-        <div
-          className="absolute top-full mt-2 w-full rounded-xl overflow-hidden z-50"
-          style={{ background: "#FFFFFF", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", border: "1px solid #E5E3DE" }}
-        >
-          {isFetching ? (
-            <div className="p-4 text-sm text-center" style={{ color: "#9B9B9B" }}>Buscando...</div>
-          ) : results && results.length > 0 ? (
-            <ul>
-              {results.map((r) => (
-                <li key={r.id} style={{ borderBottom: "1px solid #F0EEE9" }}>
-                  <Link
-                    href={`/articulo/${r.slug}`}
-                    onClick={() => { setOpen(false); setQuery(""); }}
-                    className="flex items-center gap-3 px-4 py-3 no-underline hover:bg-gray-50 transition-colors"
-                  >
-                    {(r.ogImage || r.featuredImage) ? (
-                      <img src={r.ogImage || r.featuredImage || ""} alt={r.title} className="w-12 h-9 object-cover rounded-lg flex-shrink-0" />
-                    ) : (
-                      <div className="w-12 h-9 rounded-lg flex-shrink-0 flex items-center justify-center" style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)" }}>
-                        <span className="text-white text-xs font-bold">CA</span>
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate" style={{ color: "#1A1A1A" }}>{r.title}</p>
-                      {r.categoryName && (
-                        <p className="text-xs mt-0.5" style={{ color: "#9B9B9B" }}>{r.categoryName}</p>
-                      )}
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="p-4 text-sm text-center" style={{ color: "#9B9B9B" }}>
-              No se encontraron artículos para "{query}"
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
 
 export default function Home() {
   const search = useSearch();
@@ -170,8 +74,7 @@ export default function Home() {
                 {bannerSubtitle}
               </p>
             )}
-            {/* Search bar */}
-            <HeroSearch />
+
           </div>
         </div>
       </section>
