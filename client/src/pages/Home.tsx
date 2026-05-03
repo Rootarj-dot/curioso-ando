@@ -1,10 +1,10 @@
-import { Link, useSearch } from "wouter";
+import { Link, useSearch, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArticleCard } from "@/components/ArticleCard";
-import { ArrowRight, TrendingUp, Clock, AlertCircle, X } from "lucide-react";
-import { useState } from "react";
+import { ArrowRight, TrendingUp, Clock, AlertCircle, X, Search } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 
 const AUTH_ERRORS: Record<string, string> = {
   auth_failed: "El inicio de sesión falló. Revisa los logs del servidor (consola donde corre pnpm dev) para ver el error exacto.",
@@ -14,6 +14,102 @@ const AUTH_ERRORS: Record<string, string> = {
   no_user: "Error interno: no se pudo recuperar el usuario después de autenticar.",
   callback_error: "Error en el callback de OAuth. Revisa los logs del servidor.",
 };
+
+function HeroSearch() {
+  const [, navigate] = useLocation();
+  const [query, setQuery] = useState("");
+  const [open, setOpen] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  const { data: results, isFetching } = trpc.articles.search.useQuery(
+    { q: query },
+    { enabled: query.trim().length >= 2 }
+  );
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && query.trim()) {
+      setOpen(false);
+    }
+  };
+
+  return (
+    <div ref={wrapperRef} className="relative w-full max-w-xl">
+      <div
+        className="flex items-center gap-2 px-4 py-3 rounded-xl"
+        style={{ background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", backdropFilter: "blur(8px)" }}
+      >
+        <Search className="w-5 h-5 flex-shrink-0" style={{ color: "rgba(255,255,255,0.7)" }} />
+        <input
+          type="text"
+          placeholder="Buscar artículos..."
+          value={query}
+          onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
+          onFocus={() => query.trim().length >= 2 && setOpen(true)}
+          onKeyDown={handleKeyDown}
+          className="flex-1 bg-transparent outline-none text-sm placeholder:text-white/50"
+          style={{ color: "#FFFFFF" }}
+        />
+        {query && (
+          <button onClick={() => { setQuery(""); setOpen(false); }} style={{ color: "rgba(255,255,255,0.6)" }}>
+            <X className="w-4 h-4" />
+          </button>
+        )}
+      </div>
+
+      {/* Dropdown results */}
+      {open && query.trim().length >= 2 && (
+        <div
+          className="absolute top-full mt-2 w-full rounded-xl overflow-hidden z-50"
+          style={{ background: "#FFFFFF", boxShadow: "0 8px 32px rgba(0,0,0,0.18)", border: "1px solid #E5E3DE" }}
+        >
+          {isFetching ? (
+            <div className="p-4 text-sm text-center" style={{ color: "#9B9B9B" }}>Buscando...</div>
+          ) : results && results.length > 0 ? (
+            <ul>
+              {results.map((r) => (
+                <li key={r.id} style={{ borderBottom: "1px solid #F0EEE9" }}>
+                  <Link
+                    href={`/articulo/${r.slug}`}
+                    onClick={() => { setOpen(false); setQuery(""); }}
+                    className="flex items-center gap-3 px-4 py-3 no-underline hover:bg-gray-50 transition-colors"
+                  >
+                    {(r.ogImage || r.featuredImage) ? (
+                      <img src={r.ogImage || r.featuredImage || ""} alt={r.title} className="w-12 h-9 object-cover rounded-lg flex-shrink-0" />
+                    ) : (
+                      <div className="w-12 h-9 rounded-lg flex-shrink-0 flex items-center justify-center" style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)" }}>
+                        <span className="text-white text-xs font-bold">CA</span>
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate" style={{ color: "#1A1A1A" }}>{r.title}</p>
+                      {r.categoryName && (
+                        <p className="text-xs mt-0.5" style={{ color: "#9B9B9B" }}>{r.categoryName}</p>
+                      )}
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <div className="p-4 text-sm text-center" style={{ color: "#9B9B9B" }}>
+              No se encontraron artículos para "{query}"
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Home() {
   const search = useSearch();
@@ -25,7 +121,15 @@ export default function Home() {
 
   const { data: featuredArticle, isLoading: featuredLoading } = trpc.articles.featured.useQuery();
   const { data: articles, isLoading: articlesLoading } = trpc.articles.list.useQuery({ limit: 12 });
-  const { data: categories } = trpc.categories.list.useQuery();
+  const { data: bannerConfig } = trpc.siteConfig.getBanner.useQuery();
+
+  const bannerTitle = bannerConfig?.title || "Curioso Ando";
+  const bannerSubtitle = bannerConfig?.subtitle || "Datos raros, curiosos y sorprendentes. Noticias, entretenimiento, geek y tecnología en un solo lugar.";
+  const bannerBg = bannerConfig?.bgColor || "";
+
+  const heroStyle: React.CSSProperties = bannerBg
+    ? { background: bannerBg }
+    : {};
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#F8F7F4" }}>
@@ -45,9 +149,6 @@ export default function Home() {
               {errorDetail && (
                 <p className="text-xs mt-1 font-mono" style={{ color: "#FF8888" }}>Detalle: {errorDetail}</p>
               )}
-              <p className="text-xs mt-2" style={{ color: "#CC8888" }}>
-                Abre la consola donde corre <code className="font-mono">pnpm dev</code> y busca las líneas que empiezan con <code className="font-mono">[GoogleAuth]</code> para ver el error exacto.
-              </p>
             </div>
             <button onClick={() => setShowError(false)} style={{ color: "#FF4444" }}>
               <X className="w-4 h-4" />
@@ -57,28 +158,20 @@ export default function Home() {
       )}
 
       {/* Hero Section */}
-      <section className="ca-gradient-hero py-10 md:py-16">
+      <section className={bannerBg ? "" : "ca-gradient-hero"} style={{ ...heroStyle, paddingTop: "2.5rem", paddingBottom: "2.5rem" }}>
         <div className="container">
           <div className="max-w-3xl">
             <span className="ca-badge mb-4">Portal de Noticias</span>
             <h1 className="text-white font-bold text-4xl md:text-5xl leading-tight mb-3" style={{ fontFamily: "Poppins, sans-serif" }}>
-              Curioso Ando
+              {bannerTitle}
             </h1>
-            <p className="text-base md:text-lg mb-5" style={{ color: "#D0C0FF" }}>
-              Datos raros, curiosos y sorprendentes. Noticias, entretenimiento, geek y tecnología en un solo lugar.
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {categories?.map((cat) => (
-                <Link
-                  key={cat.slug}
-                  href={`/categoria/${cat.slug}`}
-                  className="px-4 py-1.5 rounded-full text-sm font-medium no-underline transition-all"
-                  style={{ background: "rgba(255,255,255,0.18)", color: "#FFFFFF", backdropFilter: "blur(4px)", border: "1px solid rgba(255,255,255,0.28)" }}
-                >
-                  {cat.name}
-                </Link>
-              ))}
-            </div>
+            {bannerSubtitle && (
+              <p className="text-base md:text-lg mb-6" style={{ color: "#D0C0FF" }}>
+                {bannerSubtitle}
+              </p>
+            )}
+            {/* Search bar */}
+            <HeroSearch />
           </div>
         </div>
       </section>
@@ -116,9 +209,6 @@ export default function Home() {
                       Notas Recientes
                     </h2>
                   </div>
-                  <Link href="/" className="flex items-center gap-1 text-sm no-underline font-medium" style={{ color: "#7B4FB8" }}>
-                    Ver más <ArrowRight className="w-4 h-4" />
-                  </Link>
                 </div>
 
                 {articlesLoading ? (

@@ -386,7 +386,32 @@ export async function deleteCategory(id: number) {
   await db.delete(categories).where(eq(categories.id, id));
 }
 
-// ─── Featured Article of the Week ──────────────────────────────────────────────────
+// ─── Search Articles ────────────────────────────────────────────────────────
+
+export async function searchArticles(query: string) {
+  const db = await getDb();
+  if (!db) return [];
+  const term = `%${query}%`;
+  return db
+    .select({
+      id: articles.id,
+      title: articles.title,
+      slug: articles.slug,
+      excerpt: articles.excerpt,
+      featuredImage: articles.featuredImage,
+      ogImage: articles.ogImage,
+      publishedAt: articles.publishedAt,
+      categoryName: categories.name,
+      categorySlug: categories.slug,
+    })
+    .from(articles)
+    .leftJoin(categories, eq(articles.categoryId, categories.id))
+    .where(and(eq(articles.status, "published"), like(articles.title, term)))
+    .orderBy(desc(articles.publishedAt))
+    .limit(10);
+}
+
+// ─── Featured Article of the Week ────────────────────────────────────────────────────
 
 export async function setFeaturedArticle(articleId: number) {
   const db = await getDb();

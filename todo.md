@@ -101,3 +101,9 @@
 - [x] Artículo destacado de la semana en grande (seleccionable manualmente desde panel admin)
 - [x] Grilla de notas recientes en un solo panel limpio (sin secciones por categoría)
 - [x] Selector de nota destacada en el panel admin (AdminDashboard)
+
+## Banner Hero Personalizable
+- [x] Quitar categorías del banner hero (ya están en el navbar)
+- [x] Buscador de artículos funcional en el banner hero (lupa)
+- [x] Banner personalizable desde admin: título, subtítulo, color de fondo
+- [x] Panel de edición del banner en AdminDashboard

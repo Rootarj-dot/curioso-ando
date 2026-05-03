@@ -28,6 +28,7 @@ import {
   getArticlesByIds,
   setFeaturedArticle,
   clearFeaturedArticle,
+  searchArticles,
 } from "./db";
 import { uploadToCloudinary, deleteFromCloudinary } from "./cloudinaryStorage";
 import { nanoid } from "nanoid";
@@ -120,6 +121,12 @@ export const appRouter = router({
     featured: publicProcedure.query(async () => {
       return getFeaturedArticle();
     }),
+
+    search: publicProcedure
+      .input(z.object({ q: z.string().min(1).max(100) }))
+      .query(async ({ input }) => {
+        return searchArticles(input.q);
+      }),
 
     bySlug: publicProcedure
       .input(z.object({ slug: z.string() }))
@@ -307,6 +314,24 @@ export const appRouter = router({
       ]);
       return { recentArticles, recommendedArticles };
     }),
+    // Get banner config
+    getBanner: publicProcedure.query(async () => {
+      const raw = await getSiteConfigValue("hero_banner");
+      if (!raw) return { title: "Curioso Ando", subtitle: "Datos raros, curiosos y sorprendentes. Noticias, entretenimiento, geek y tecnolog\u00eda en un solo lugar.", bgColor: "" };
+      try { return JSON.parse(raw) as { title: string; subtitle: string; bgColor: string }; }
+      catch { return { title: "Curioso Ando", subtitle: "", bgColor: "" }; }
+    }),
+    // Save banner config
+    setBanner: adminProcedure
+      .input(z.object({
+        title: z.string().min(1).max(120),
+        subtitle: z.string().max(300).optional(),
+        bgColor: z.string().max(100).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        await setSiteConfigValue("hero_banner", JSON.stringify(input));
+        return { success: true };
+      }),
     // Save the global sidebar articles config
     setSidebarArticles: adminProcedure
       .input(z.object({

@@ -1,8 +1,8 @@
 import { Link } from "wouter";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { AdminLayout } from "./AdminLayout";
-import { FileText, Image, Plus, Eye, Edit, TrendingUp, X, Check, Search } from "lucide-react";
+import { FileText, Image, Plus, Eye, Edit, TrendingUp, X, Check, Search, Palette, Save } from "lucide-react";
 
 export default function AdminDashboard() {
   const utils = trpc.useUtils();
@@ -27,6 +27,28 @@ export default function AdminDashboard() {
 
   const [pickerOpen, setPickerOpen] = useState(false);
   const [search, setSearch] = useState("");
+
+  // Banner config
+  const { data: bannerConfig } = trpc.siteConfig.getBanner.useQuery();
+  const setBannerMutation = trpc.siteConfig.setBanner.useMutation({
+    onSuccess: () => {
+      utils.siteConfig.getBanner.invalidate();
+      setBannerSaved(true);
+      setTimeout(() => setBannerSaved(false), 2000);
+    },
+  });
+  const [bannerTitle, setBannerTitle] = useState("");
+  const [bannerSubtitle, setBannerSubtitle] = useState("");
+  const [bannerBg, setBannerBg] = useState("");
+  const [bannerSaved, setBannerSaved] = useState(false);
+
+  useEffect(() => {
+    if (bannerConfig) {
+      setBannerTitle(bannerConfig.title || "");
+      setBannerSubtitle(bannerConfig.subtitle || "");
+      setBannerBg(bannerConfig.bgColor || "");
+    }
+  }, [bannerConfig]);
 
   const published = articles?.filter((a) => a.status === "published") ?? [];
   const drafts = articles?.filter((a) => a.status === "draft").length ?? 0;
@@ -123,6 +145,63 @@ export default function AdminDashboard() {
                 No hay ninguna nota destacada. Selecciona una para mostrarla en grande en la portada.
               </p>
             )}
+          </div>
+        </div>
+
+        {/* ── Banner Personalizable ───────────────────────────────────────────────────── */}
+        <div className="ca-card overflow-hidden">
+          <div className="flex items-center gap-2 p-4" style={{ borderBottom: "1px solid #E5E3DE" }}>
+            <Palette className="w-5 h-5" style={{ color: "#5B2C8F" }} />
+            <h2 className="font-bold" style={{ color: "#1A1A1A" }}>Banner de la Portada</h2>
+          </div>
+          <div className="p-4 space-y-4">
+            <div>
+              <label className="block text-xs font-semibold mb-1" style={{ color: "#6B6B6B" }}>Título principal</label>
+              <input
+                type="text"
+                value={bannerTitle}
+                onChange={(e) => setBannerTitle(e.target.value)}
+                placeholder="Curioso Ando"
+                className="w-full px-3 py-2 rounded-lg text-sm outline-none"
+                style={{ background: "#F8F7F4", border: "1px solid #E5E3DE", color: "#1A1A1A" }}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1" style={{ color: "#6B6B6B" }}>Subtítulo / descripción</label>
+              <textarea
+                value={bannerSubtitle}
+                onChange={(e) => setBannerSubtitle(e.target.value)}
+                placeholder="Datos raros, curiosos y sorprendentes..."
+                rows={2}
+                className="w-full px-3 py-2 rounded-lg text-sm outline-none resize-none"
+                style={{ background: "#F8F7F4", border: "1px solid #E5E3DE", color: "#1A1A1A" }}
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold mb-1" style={{ color: "#6B6B6B" }}>Color / gradiente de fondo (CSS)</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={bannerBg}
+                  onChange={(e) => setBannerBg(e.target.value)}
+                  placeholder="Dejar vacío para usar el gradiente morado por defecto"
+                  className="flex-1 px-3 py-2 rounded-lg text-sm outline-none font-mono"
+                  style={{ background: "#F8F7F4", border: "1px solid #E5E3DE", color: "#1A1A1A" }}
+                />
+                {bannerBg && (
+                  <div className="w-9 h-9 rounded-lg flex-shrink-0" style={{ background: bannerBg, border: "1px solid #E5E3DE" }} />
+                )}
+              </div>
+              <p className="text-xs mt-1" style={{ color: "#9B9B9B" }}>Ejemplos: <code>#2B037D</code> · <code>linear-gradient(135deg, #1a0050, #4a0080)</code></p>
+            </div>
+            <button
+              onClick={() => setBannerMutation.mutate({ title: bannerTitle, subtitle: bannerSubtitle, bgColor: bannerBg })}
+              disabled={setBannerMutation.isPending || !bannerTitle.trim()}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-opacity hover:opacity-80 disabled:opacity-50"
+              style={{ background: bannerSaved ? "#16a34a" : "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#fff" }}
+            >
+              {bannerSaved ? <><Check className="w-4 h-4" /> Guardado</> : <><Save className="w-4 h-4" /> Guardar banner</>}
+            </button>
           </div>
         </div>
 
