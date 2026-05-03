@@ -3,7 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArticleCard } from "@/components/ArticleCard";
-import { ArrowRight, TrendingUp, Clock, AlertCircle, X } from "lucide-react";
+import { Clock, AlertCircle, X, TrendingUp, ArrowRight, Calendar, User } from "lucide-react";
 import { useState } from "react";
 
 const AUTH_ERRORS: Record<string, string> = {
@@ -14,6 +14,11 @@ const AUTH_ERRORS: Record<string, string> = {
   no_user: "Error interno: no se pudo recuperar el usuario después de autenticar.",
   callback_error: "Error en el callback de OAuth. Revisa los logs del servidor.",
 };
+
+function formatDate(ts: number | string | Date | null | undefined) {
+  if (!ts) return "";
+  return new Date(ts as number).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" });
+}
 
 export default function Home() {
   const search = useSearch();
@@ -27,13 +32,10 @@ export default function Home() {
   const { data: articles, isLoading: articlesLoading } = trpc.articles.list.useQuery({ limit: 12 });
   const { data: bannerConfig } = trpc.siteConfig.getBanner.useQuery();
 
-  const bannerTitle = bannerConfig?.title || "Curioso Ando";
-  const bannerSubtitle = bannerConfig?.subtitle || "Datos raros, curiosos y sorprendentes. Noticias, entretenimiento, geek y tecnología en un solo lugar.";
   const bannerBg = bannerConfig?.bgColor || "";
 
-  const heroStyle: React.CSSProperties = bannerBg
-    ? { background: bannerBg }
-    : {};
+  // Hero background: if featured article has image, use it as bg; else use banner color or default gradient
+  const featuredImg = featuredArticle?.ogImage || featuredArticle?.featuredImage || "";
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#F8F7F4" }}>
@@ -61,57 +63,139 @@ export default function Home() {
         </div>
       )}
 
-      {/* Hero Section */}
-      <section className={bannerBg ? "" : "ca-gradient-hero"} style={{ ...heroStyle, paddingTop: "2.5rem", paddingBottom: "2.5rem" }}>
-        <div className="container">
-          <div className="max-w-3xl">
-            <span className="ca-badge mb-4">Portal de Noticias</span>
-            <h1 className="text-white font-bold text-4xl md:text-5xl leading-tight mb-3" style={{ fontFamily: "Poppins, sans-serif" }}>
-              {bannerTitle}
-            </h1>
-            {bannerSubtitle && (
-              <p className="text-base md:text-lg mb-6" style={{ color: "#D0C0FF" }}>
-                {bannerSubtitle}
-              </p>
-            )}
+      {/* ── Hero / Nota de la Semana ───────────────────────────────────── */}
+      {featuredLoading ? (
+        /* Skeleton mientras carga */
+        <div className="animate-pulse" style={{ height: 480, background: "linear-gradient(135deg, #2B037D, #5B2C8F)" }} />
+      ) : featuredArticle ? (
+        /* Hero con artículo destacado */
+        <section
+          className="relative overflow-hidden"
+          style={{ minHeight: 480 }}
+        >
+          {/* Imagen de fondo */}
+          {featuredImg ? (
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: `url(${featuredImg})` }}
+            />
+          ) : (
+            <div
+              className="absolute inset-0"
+              style={bannerBg ? { background: bannerBg } : { background: "linear-gradient(135deg, #2B037D 0%, #5B2C8F 60%, #8B5CF6 100%)" }}
+            />
+          )}
+          {/* Overlay oscuro para legibilidad */}
+          <div
+            className="absolute inset-0"
+            style={{ background: featuredImg ? "linear-gradient(to top, rgba(10,0,30,0.92) 0%, rgba(10,0,30,0.55) 50%, rgba(10,0,30,0.25) 100%)" : "linear-gradient(to top, rgba(10,0,30,0.7) 0%, rgba(10,0,30,0.2) 100%)" }}
+          />
 
+          {/* Content */}
+          <div className="relative container flex flex-col justify-end" style={{ minHeight: 480, paddingBottom: "3rem", paddingTop: "3rem" }}>
+            <div className="max-w-2xl">
+              {/* Badge */}
+              <div className="flex items-center gap-2 mb-3">
+                <span
+                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider"
+                  style={{ background: "linear-gradient(135deg, #7C3AED, #5B2C8F)", color: "#FFFFFF" }}
+                >
+                  <TrendingUp className="w-3 h-3" />
+                  Nota de la Semana
+                </span>
+                {featuredArticle.categoryName && (
+                  <span
+                    className="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"
+                    style={{ background: "rgba(255,255,255,0.18)", color: "#FFFFFF", backdropFilter: "blur(4px)", border: "1px solid rgba(255,255,255,0.25)" }}
+                  >
+                    {featuredArticle.categoryName}
+                  </span>
+                )}
+              </div>
+
+              {/* Title */}
+              <Link href={`/articulo/${featuredArticle.slug}`} className="no-underline group">
+                <h1
+                  className="font-bold leading-tight mb-3 group-hover:opacity-90 transition-opacity"
+                  style={{ fontFamily: "Poppins, sans-serif", color: "#FFFFFF", fontSize: "clamp(1.75rem, 4vw, 2.75rem)" }}
+                >
+                  {featuredArticle.title}
+                </h1>
+              </Link>
+
+              {/* Excerpt */}
+              {featuredArticle.excerpt && (
+                <p
+                  className="text-base mb-4 line-clamp-2"
+                  style={{ color: "rgba(255,255,255,0.82)" }}
+                >
+                  {featuredArticle.excerpt}
+                </p>
+              )}
+
+              {/* Meta + CTA */}
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex items-center gap-3 text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>
+                  {featuredArticle.authorName && (
+                    <span className="flex items-center gap-1">
+                      <User className="w-3.5 h-3.5" />
+                      {featuredArticle.authorName}
+                    </span>
+                  )}
+                  {featuredArticle.publishedAt && (
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5" />
+                      {formatDate(featuredArticle.publishedAt)}
+                    </span>
+                  )}
+                </div>
+                <Link
+                  href={`/articulo/${featuredArticle.slug}`}
+                  className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold no-underline transition-all hover:opacity-90"
+                  style={{ background: "linear-gradient(135deg, #7C3AED, #5B2C8F)", color: "#FFFFFF" }}
+                >
+                  Leer nota <ArrowRight className="w-4 h-4" />
+                </Link>
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      ) : (
+        /* Sin artículo destacado: banner simple */
+        <section
+          className={bannerBg ? "" : "ca-gradient-hero"}
+          style={{ ...(bannerBg ? { background: bannerBg } : {}), paddingTop: "2.5rem", paddingBottom: "2.5rem" }}
+        >
+          <div className="container">
+            <div className="max-w-3xl">
+              <span className="ca-badge mb-4">Portal de Noticias</span>
+              <h1 className="text-white font-bold text-4xl md:text-5xl leading-tight mb-3" style={{ fontFamily: "Poppins, sans-serif" }}>
+                {bannerConfig?.title || "Curioso Ando"}
+              </h1>
+              {bannerConfig?.subtitle && (
+                <p className="text-base md:text-lg" style={{ color: "#D0C0FF" }}>
+                  {bannerConfig.subtitle}
+                </p>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       <main className="flex-1">
         <div className="container py-10">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
 
-            {/* Main content — single panel */}
+            {/* Main content */}
             <div className="lg:col-span-3 space-y-10">
-
-              {/* ── Nota de la Semana ─────────────────────────────────── */}
-              {(featuredLoading || featuredArticle) && (
-                <section>
-                  <div className="flex items-center gap-2 mb-4">
-                    <TrendingUp className="w-5 h-5" style={{ color: "#5B2C8F" }} />
-                    <h2 className="font-bold text-xl" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
-                      Nota de la Semana
-                    </h2>
-                  </div>
-                  {featuredLoading ? (
-                    <div className="rounded-2xl animate-pulse" style={{ height: 460, backgroundColor: "#E5E3DE" }} />
-                  ) : featuredArticle ? (
-                    <ArticleCard {...featuredArticle} size="large" />
-                  ) : null}
-                </section>
-              )}
 
               {/* ── Notas Recientes ───────────────────────────────────── */}
               <section>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-5 h-5" style={{ color: "#5B2C8F" }} />
-                    <h2 className="font-bold text-xl" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
-                      Notas Recientes
-                    </h2>
-                  </div>
+                <div className="flex items-center gap-2 mb-4">
+                  <Clock className="w-5 h-5" style={{ color: "#5B2C8F" }} />
+                  <h2 className="font-bold text-xl" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
+                    Notas Recientes
+                  </h2>
                 </div>
 
                 {articlesLoading ? (
