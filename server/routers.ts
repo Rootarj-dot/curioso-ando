@@ -26,6 +26,8 @@ import {
   getSiteConfigValue,
   setSiteConfigValue,
   getArticlesByIds,
+  setFeaturedArticle,
+  clearFeaturedArticle,
 } from "./db";
 import { uploadToCloudinary, deleteFromCloudinary } from "./cloudinaryStorage";
 import { nanoid } from "nanoid";
@@ -194,14 +196,26 @@ export const appRouter = router({
         return { success: true };
       }),
 
-    delete: adminProcedure
+     delete: adminProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         await deleteArticle(input.id);
         return { success: true };
       }),
-  }),
 
+    setFeatured: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await setFeaturedArticle(input.id);
+        return { success: true };
+      }),
+
+    clearFeatured: adminProcedure
+      .mutation(async () => {
+        await clearFeaturedArticle();
+        return { success: true };
+      }),
+  }),
   // ─── Media ──────────────────────────────────────────────────────────────────
   media: router({
     list: protectedProcedure.query(async ({ ctx }) => {

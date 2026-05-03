@@ -3,7 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArticleCard } from "@/components/ArticleCard";
-import { ArrowRight, TrendingUp, AlertCircle, X } from "lucide-react";
+import { ArrowRight, TrendingUp, Clock, AlertCircle, X } from "lucide-react";
 import { useState } from "react";
 
 const AUTH_ERRORS: Record<string, string> = {
@@ -57,23 +57,23 @@ export default function Home() {
       )}
 
       {/* Hero Section */}
-      <section className="ca-gradient-hero py-12 md:py-20">
+      <section className="ca-gradient-hero py-10 md:py-16">
         <div className="container">
           <div className="max-w-3xl">
             <span className="ca-badge mb-4">Portal de Noticias</span>
-            <h1 className="text-white font-bold text-4xl md:text-6xl leading-tight mb-4" style={{ fontFamily: "Poppins, sans-serif" }}>
+            <h1 className="text-white font-bold text-4xl md:text-5xl leading-tight mb-3" style={{ fontFamily: "Poppins, sans-serif" }}>
               Curioso Ando
             </h1>
-            <p className="text-lg md:text-xl mb-6" style={{ color: "#D0C0FF" }}>
+            <p className="text-base md:text-lg mb-5" style={{ color: "#D0C0FF" }}>
               Datos raros, curiosos y sorprendentes. Noticias, entretenimiento, geek y tecnología en un solo lugar.
             </p>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2">
               {categories?.map((cat) => (
                 <Link
                   key={cat.slug}
                   href={`/categoria/${cat.slug}`}
-                  className="px-4 py-2 rounded-full text-sm font-medium no-underline transition-all"
-                  style={{ background: "rgba(255,255,255,0.20)", color: "#FFFFFF", backdropFilter: "blur(4px)", border: "1px solid rgba(255,255,255,0.3)" }}
+                  className="px-4 py-1.5 rounded-full text-sm font-medium no-underline transition-all"
+                  style={{ background: "rgba(255,255,255,0.18)", color: "#FFFFFF", backdropFilter: "blur(4px)", border: "1px solid rgba(255,255,255,0.28)" }}
                 >
                   {cat.name}
                 </Link>
@@ -86,41 +86,45 @@ export default function Home() {
       <main className="flex-1">
         <div className="container py-10">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            {/* Main content */}
-            <div className="lg:col-span-3">
 
-              {/* Featured Article */}
+            {/* Main content — single panel */}
+            <div className="lg:col-span-3 space-y-10">
+
+              {/* ── Nota de la Semana ─────────────────────────────────── */}
               {(featuredLoading || featuredArticle) && (
-                <section className="mb-10">
-                  <div className="flex items-center gap-2 mb-5">
+                <section>
+                  <div className="flex items-center gap-2 mb-4">
                     <TrendingUp className="w-5 h-5" style={{ color: "#5B2C8F" }} />
                     <h2 className="font-bold text-xl" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
-                      Nota Destacada
+                      Nota de la Semana
                     </h2>
                   </div>
                   {featuredLoading ? (
-                    <div className="rounded-xl animate-pulse" style={{ height: 420, backgroundColor: "#FFFFFF" }} />
+                    <div className="rounded-2xl animate-pulse" style={{ height: 460, backgroundColor: "#E5E3DE" }} />
                   ) : featuredArticle ? (
                     <ArticleCard {...featuredArticle} size="large" />
                   ) : null}
                 </section>
               )}
 
-              {/* Recent Articles Grid */}
+              {/* ── Notas Recientes ───────────────────────────────────── */}
               <section>
-                <div className="flex items-center justify-between mb-5">
-                  <h2 className="font-bold text-xl" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
-                    Notas Recientes
-                  </h2>
-                  <Link href="/articulos" className="flex items-center gap-1 text-sm no-underline" style={{ color: "#7B4FB8" }}>
-                    Ver todas <ArrowRight className="w-4 h-4" />
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-5 h-5" style={{ color: "#5B2C8F" }} />
+                    <h2 className="font-bold text-xl" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
+                      Notas Recientes
+                    </h2>
+                  </div>
+                  <Link href="/" className="flex items-center gap-1 text-sm no-underline font-medium" style={{ color: "#7B4FB8" }}>
+                    Ver más <ArrowRight className="w-4 h-4" />
                   </Link>
                 </div>
 
                 {articlesLoading ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
                     {Array.from({ length: 6 }).map((_, i) => (
-                      <div key={i} className="rounded-xl animate-pulse" style={{ height: 280, backgroundColor: "#FFFFFF" }} />
+                      <div key={i} className="rounded-xl animate-pulse" style={{ height: 280, backgroundColor: "#E5E3DE" }} />
                     ))}
                   </div>
                 ) : articles && articles.length > 0 ? (
@@ -137,17 +141,11 @@ export default function Home() {
                 )}
               </section>
 
-              {/* Category Sections */}
-              {categories?.map((cat) => {
-                return <CategorySection key={cat.slug} categorySlug={cat.slug} categoryName={cat.name} />;
-              })}
             </div>
 
             {/* Sidebar */}
             <aside className="lg:col-span-1">
               <div className="sticky top-24 flex flex-col gap-6">
-
-                {/* About Widget */}
                 <div className="ca-card p-5">
                   <h3 className="font-bold text-base mb-3" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
                     Sobre Curioso Ando
@@ -158,36 +156,12 @@ export default function Home() {
                 </div>
               </div>
             </aside>
+
           </div>
         </div>
       </main>
 
       <Footer />
     </div>
-  );
-}
-
-function CategorySection({ categorySlug, categoryName }: { categorySlug: string; categoryName: string }) {
-  const { data: articles } = trpc.articles.list.useQuery({ categorySlug, limit: 3 });
-  if (!articles || articles.length === 0) return null;
-  return (
-    <section className="mt-10">
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-3">
-          <div className="w-1 h-6 rounded-full" style={{ background: "linear-gradient(to bottom, #2B037D, #5B2C8F)" }} />
-          <h2 className="font-bold text-xl" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
-            {categoryName}
-          </h2>
-        </div>
-        <Link href={`/categoria/${categorySlug}`} className="flex items-center gap-1 text-sm no-underline" style={{ color: "#7B4FB8" }}>
-          Ver más <ArrowRight className="w-4 h-4" />
-        </Link>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {articles.map((article) => (
-          <ArticleCard key={article.id} {...article} />
-        ))}
-      </div>
-    </section>
   );
 }

@@ -385,3 +385,19 @@ export async function deleteCategory(id: number) {
   if (!db) throw new Error("DB not available");
   await db.delete(categories).where(eq(categories.id, id));
 }
+
+// ─── Featured Article of the Week ──────────────────────────────────────────────────
+
+export async function setFeaturedArticle(articleId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB not available");
+  // Clear all featured flags first, then set the chosen article
+  await db.update(articles).set({ featured: false });
+  await db.update(articles).set({ featured: true }).where(eq(articles.id, articleId));
+}
+
+export async function clearFeaturedArticle() {
+  const db = await getDb();
+  if (!db) throw new Error("DB not available");
+  await db.update(articles).set({ featured: false });
+}

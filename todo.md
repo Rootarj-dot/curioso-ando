@@ -96,3 +96,8 @@
 - [x] Página /admin/categorias con tabla editable (crear, renombrar, eliminar con confirmación)
 - [x] Navbar carga categorías dinámicamente desde la DB (ya no están hardcodeadas)
 - [x] Recomendados movidos debajo del contenido del artículo (sección full-width con grid de tarjetas)
+
+## Rediseño Home
+- [x] Artículo destacado de la semana en grande (seleccionable manualmente desde panel admin)
+- [x] Grilla de notas recientes en un solo panel limpio (sin secciones por categoría)
+- [x] Selector de nota destacada en el panel admin (AdminDashboard)
