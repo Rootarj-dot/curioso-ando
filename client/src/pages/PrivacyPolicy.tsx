@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { Link } from "wouter";
 
 export default function PrivacyPolicy() {
   useEffect(() => {
@@ -15,6 +16,12 @@ export default function PrivacyPolicy() {
       {/* Header */}
       <div style={{ background: "linear-gradient(135deg, #0D0020 0%, #2B037D 60%, #5B2C8F 100%)", padding: "3rem 0 2.5rem" }}>
         <div className="container" style={{ maxWidth: 860, margin: "0 auto", padding: "0 1.5rem" }}>
+          <Link href="/" className="no-underline inline-flex items-center gap-2 mb-4" style={{ color: "#C4B5FD", fontSize: "0.85rem", fontWeight: 600, transition: "color 0.2s" }}
+            onMouseEnter={e => (e.currentTarget.style.color = "#fff")}
+            onMouseLeave={e => (e.currentTarget.style.color = "#C4B5FD")}
+          >
+            <span style={{ fontSize: "1rem" }}>←</span> Volver al inicio
+          </Link>
           <p style={{ color: "#A78BFA", fontSize: "0.8rem", fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: "0.5rem" }}>
             Legal
           </p>

@@ -109,9 +109,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             <p className="text-xs truncate" style={{ color: "#6B6B6B" }}>{user?.role}</p>
           </div>
         </div>
-        <Link href="/" className="flex items-center gap-3 px-3 py-2 rounded-lg no-underline text-sm" style={{ color: "#6B6B6B" }}>
+        <Link href="/" className="flex items-center gap-3 px-3 py-2 rounded-lg no-underline text-sm font-medium mb-1" style={{ color: "#2B037D", background: "#F3F0FF" }}>
           <Home className="w-4 h-4" />
-          Ver sitio
+          ← Ver sitio público
         </Link>
         <button
           onClick={() => logoutMutation.mutate()}
@@ -170,7 +170,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           >
             <Menu className="w-5 h-5" />
           </button>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-1">
             <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)" }}>
               <Search className="w-3.5 h-3.5 text-white" />
             </div>
@@ -178,6 +178,10 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
               Panel Admin
             </span>
           </div>
+          <Link href="/" className="no-underline flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold" style={{ background: "#F3F0FF", color: "#2B037D" }}>
+            <Home className="w-3.5 h-3.5" />
+            Inicio
+          </Link>
         </header>
 
         {/* ── Main content ── */}
