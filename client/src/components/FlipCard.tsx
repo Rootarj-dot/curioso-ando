@@ -35,12 +35,15 @@ export function FlipCard({ slug, title, categoryName, featuredImage, ogImage, pu
               <span style={{ fontFamily: "Poppins, sans-serif", color: "rgba(255,255,255,0.18)", fontSize: "2.5rem", fontWeight: 900, letterSpacing: "0.12em" }}>CA</span>
             </div>
           )}
-          {/* Overlay shimmer */}
+          {/* Overlay inferior para legibilidad del texto */}
           <div className="flip-card-front-overlay" />
-          {/* Category chip */}
-          {categoryName && (
-            <span className="flip-card-category">{categoryName}</span>
-          )}
+          {/* Texto sobre la imagen */}
+          <div className="flip-card-front-text">
+            {categoryName && (
+              <span className="flip-card-category">{categoryName}</span>
+            )}
+            <p className="flip-card-front-title">{title}</p>
+          </div>
         </div>
 
         {/* ── BACK ── */}
@@ -100,11 +103,20 @@ export function FlipCard({ slug, title, categoryName, featuredImage, ogImage, pu
           inset: 0;
           background: linear-gradient(to top, rgba(10,0,30,0.75) 0%, transparent 55%);
         }
-        .flip-card-category {
+        .flip-card-front-text {
           position: absolute;
-          bottom: 8px;
-          left: 10px;
-          font-size: 0.6rem;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          padding: 8px 10px 10px;
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+        }
+        .flip-card-category {
+          display: inline-block;
+          align-self: flex-start;
+          font-size: 0.58rem;
           font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.1em;
@@ -113,6 +125,19 @@ export function FlipCard({ slug, title, categoryName, featuredImage, ogImage, pu
           background: rgba(139,92,246,0.85);
           color: #fff;
           backdrop-filter: blur(4px);
+        }
+        .flip-card-front-title {
+          font-size: 0.72rem;
+          font-weight: 700;
+          line-height: 1.3;
+          color: #fff;
+          font-family: Poppins, sans-serif;
+          text-shadow: 0 1px 6px rgba(0,0,0,0.8);
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          overflow: hidden;
+          margin: 0;
         }
 
         /* BACK */
