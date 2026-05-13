@@ -23,10 +23,43 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Plus, Pencil, Trash2, Eye, EyeOff, Lightbulb } from "lucide-react";
+import {
+  Plus, Pencil, Trash2, Eye, EyeOff, Lightbulb, Star, FlaskConical,
+  Brain, Globe, Zap, Telescope, Waves, Rocket, Palette, Leaf,
+  Atom, Flame, Sparkles, BookOpen, Cpu, Heart
+} from "lucide-react";
 import { toast } from "sonner";
+import type { LucideIcon } from "lucide-react";
 
-const ICONOS_SUGERIDOS = ["💡", "🌟", "🔬", "🧠", "🌍", "🦋", "🎯", "⚡", "🔭", "🧬", "🌊", "🦁", "🚀", "🎨", "🍀"];
+const ICONOS_SUGERIDOS: { name: string; Icon: LucideIcon }[] = [
+  { name: "Lightbulb", Icon: Lightbulb },
+  { name: "Star", Icon: Star },
+  { name: "FlaskConical", Icon: FlaskConical },
+  { name: "Brain", Icon: Brain },
+  { name: "Globe", Icon: Globe },
+  { name: "Zap", Icon: Zap },
+  { name: "Telescope", Icon: Telescope },
+  { name: "Waves", Icon: Waves },
+  { name: "Rocket", Icon: Rocket },
+  { name: "Palette", Icon: Palette },
+  { name: "Leaf", Icon: Leaf },
+  { name: "Atom", Icon: Atom },
+  { name: "Flame", Icon: Flame },
+  { name: "Sparkles", Icon: Sparkles },
+  { name: "BookOpen", Icon: BookOpen },
+  { name: "Cpu", Icon: Cpu },
+  { name: "Heart", Icon: Heart },
+];
+
+// Mapa para renderizar íconos por nombre
+const ICON_MAP: Record<string, LucideIcon> = Object.fromEntries(
+  ICONOS_SUGERIDOS.map(({ name, Icon }) => [name, Icon])
+);
+
+function RenderIcon({ name, className, style }: { name: string; className?: string; style?: React.CSSProperties }) {
+  const Icon = ICON_MAP[name] || Lightbulb;
+  return <Icon className={className} style={style} />;
+}
 
 interface FormState {
   titulo: string;
@@ -35,7 +68,7 @@ interface FormState {
   color: string;
 }
 
-const DEFAULT_FORM: FormState = { titulo: "", contenido: "", icono: "💡", color: "#7C3AED" };
+const DEFAULT_FORM: FormState = { titulo: "", contenido: "", icono: "Lightbulb", color: "#7C3AED" };
 
 export default function AdminDatosCuriosos() {
   const utils = trpc.useUtils();
@@ -173,10 +206,10 @@ export default function AdminDatosCuriosos() {
               >
                 {/* Icono */}
                 <div
-                  className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
+                  className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0"
                   style={{ background: `${d.color}22`, border: `2px solid ${d.color}44` }}
                 >
-                  {d.icono}
+                  <RenderIcon name={d.icono || "Lightbulb"} className="w-6 h-6" style={{ color: d.color || "#7C3AED" }} />
                 </div>
 
                 {/* Content */}
@@ -239,7 +272,7 @@ export default function AdminDatosCuriosos() {
               className="rounded-xl p-4 flex items-start gap-3"
               style={{ background: `${form.color}15`, border: `1px solid ${form.color}40` }}
             >
-              <span className="text-2xl">{form.icono}</span>
+              <RenderIcon name={form.icono} className="w-6 h-6" style={{ color: form.color }} />
               <div>
                 <p className="font-bold text-sm" style={{ color: form.color }}>{form.titulo || "Título del dato"}</p>
                 <p className="text-xs mt-1" style={{ color: "#6B6B6B" }}>{form.contenido || "El contenido aparecerá aquí..."}</p>
@@ -250,27 +283,21 @@ export default function AdminDatosCuriosos() {
             <div>
               <Label className="text-xs font-semibold mb-2 block">Ícono</Label>
               <div className="flex flex-wrap gap-2">
-                {ICONOS_SUGERIDOS.map(ico => (
+                {ICONOS_SUGERIDOS.map(({ name, Icon }) => (
                   <button
-                    key={ico}
+                    key={name}
                     type="button"
-                    onClick={() => setForm(f => ({ ...f, icono: ico }))}
-                    className="w-9 h-9 rounded-lg text-lg flex items-center justify-center transition-all"
+                    onClick={() => setForm(f => ({ ...f, icono: name }))}
+                    className="w-9 h-9 rounded-lg flex items-center justify-center transition-all"
                     style={{
-                      background: form.icono === ico ? `${form.color}30` : "#F3F4F6",
-                      border: form.icono === ico ? `2px solid ${form.color}` : "2px solid transparent",
+                      background: form.icono === name ? `${form.color}30` : "#F3F4F6",
+                      border: form.icono === name ? `2px solid ${form.color}` : "2px solid transparent",
                     }}
+                    title={name}
                   >
-                    {ico}
+                    <Icon className="w-5 h-5" style={{ color: form.icono === name ? form.color : "#6B6B6B" }} />
                   </button>
                 ))}
-                <Input
-                  value={form.icono}
-                  onChange={e => setForm(f => ({ ...f, icono: e.target.value }))}
-                  placeholder="✏️"
-                  className="w-16 h-9 text-center text-lg"
-                  maxLength={4}
-                />
               </div>
             </div>
 

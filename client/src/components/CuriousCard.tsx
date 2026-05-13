@@ -1,4 +1,19 @@
 import { useState } from "react";
+import {
+  Lightbulb, Star, FlaskConical, Brain, Globe, Zap, Telescope,
+  Waves, Rocket, Palette, Leaf, Atom, Flame, Sparkles, BookOpen, Cpu, Heart
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  Lightbulb, Star, FlaskConical, Brain, Globe, Zap, Telescope,
+  Waves, Rocket, Palette, Leaf, Atom, Flame, Sparkles, BookOpen, Cpu, Heart,
+};
+
+function RenderIcon({ name, size = 32, color }: { name: string; size?: number; color?: string }) {
+  const Icon = ICON_MAP[name] || Lightbulb;
+  return <Icon width={size} height={size} color={color || "currentColor"} />;
+}
 
 interface CuriousCardProps {
   titulo: string;
@@ -7,9 +22,10 @@ interface CuriousCardProps {
   color?: string | null;
 }
 
-export function CuriousCard({ titulo, contenido, icono = "💡", color = "#7C3AED" }: CuriousCardProps) {
+export function CuriousCard({ titulo, contenido, icono = "Lightbulb", color = "#7C3AED" }: CuriousCardProps) {
   const [open, setOpen] = useState(false);
   const accentColor = color || "#7C3AED";
+  const iconName = icono || "Lightbulb";
 
   return (
     <>
@@ -28,7 +44,9 @@ export function CuriousCard({ titulo, contenido, icono = "💡", color = "#7C3AE
           <div className="curious-card-front">
             <div className="curious-card-grid" aria-hidden="true" />
             <div className="curious-card-front-content">
-              <span className="curious-card-icon">{icono}</span>
+              <span className="curious-card-icon">
+                <RenderIcon name={iconName} size={32} color={accentColor} />
+              </span>
               <p className="curious-card-front-title">{titulo}</p>
               <span className="curious-card-hint">Toca para saber más →</span>
             </div>
@@ -38,7 +56,9 @@ export function CuriousCard({ titulo, contenido, icono = "💡", color = "#7C3AE
           <div className="curious-card-back">
             <div className="curious-card-back-grid" aria-hidden="true" />
             <div className="curious-card-back-content">
-              <span className="curious-card-back-icon">{icono}</span>
+              <span className="curious-card-back-icon">
+                <RenderIcon name={iconName} size={20} color={accentColor} />
+              </span>
               <p className="curious-card-back-title">{titulo}</p>
               <p className="curious-card-back-text">{contenido.length > 120 ? contenido.slice(0, 120) + "…" : contenido}</p>
             </div>
@@ -66,7 +86,9 @@ export function CuriousCard({ titulo, contenido, icono = "💡", color = "#7C3AE
             <div className="curious-modal-grid" aria-hidden="true" />
 
             <div className="curious-modal-content">
-              <span className="curious-modal-icon">{icono}</span>
+              <span className="curious-modal-icon">
+                <RenderIcon name={iconName} size={44} color={accentColor} />
+              </span>
               <h3 className="curious-modal-title">{titulo}</h3>
               <p className="curious-modal-text">{contenido}</p>
               <button
@@ -152,7 +174,9 @@ export function CuriousCard({ titulo, contenido, icono = "💡", color = "#7C3AE
           text-align: center;
         }
         .curious-card-icon {
-          font-size: 2rem;
+          display: flex;
+          align-items: center;
+          justify-content: center;
           filter: drop-shadow(0 0 8px var(--accent));
         }
         .curious-card-front-title {
@@ -199,7 +223,8 @@ export function CuriousCard({ titulo, contenido, icono = "💡", color = "#7C3AE
           width: 100%;
         }
         .curious-card-back-icon {
-          font-size: 1.2rem;
+          display: flex;
+          align-items: center;
         }
         .curious-card-back-title {
           font-size: 0.7rem;
@@ -283,7 +308,8 @@ export function CuriousCard({ titulo, contenido, icono = "💡", color = "#7C3AE
           gap: 12px;
         }
         .curious-modal-icon {
-          font-size: 2.8rem;
+          display: flex;
+          align-items: center;
           filter: drop-shadow(0 0 12px var(--accent));
           align-self: flex-start;
         }
