@@ -1,0 +1,74 @@
+{
+  "query": "DESCRIBE datos_curiosos;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user VPX1UD4TNxPsUWM.5f6a1643c048 --database VvgGpyGf3Jb2Riey6L2ysE --execute DESCRIBE datos_curiosos;",
+  "rows": [
+    {
+      "Field": "id",
+      "Type": "int",
+      "Null": "NO",
+      "Key": "PRI",
+      "Default": "NULL",
+      "Extra": "auto_increment"
+    },
+    {
+      "Field": "titulo",
+      "Type": "varchar(255)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "contenido",
+      "Type": "text",
+      "Null": "NO",
+      "Key": "",
+      "Default": "NULL",
+      "Extra": ""
+    },
+    {
+      "Field": "icono",
+      "Type": "varchar(10)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "💡",
+      "Extra": ""
+    },
+    {
+      "Field": "color",
+      "Type": "varchar(30)",
+      "Null": "YES",
+      "Key": "",
+      "Default": "#7C3AED",
+      "Extra": ""
+    },
+    {
+      "Field": "activo",
+      "Type": "tinyint(1)",
+      "Null": "NO",
+      "Key": "",
+      "Default": "1",
+      "Extra": ""
+    },
+    {
+      "Field": "createdAt",
+      "Type": "timestamp",
+      "Null": "NO",
+      "Key": "",
+      "Default": "CURRENT_TIMESTAMP",
+      "Extra": ""
+    },
+    {
+      "Field": "updatedAt",
+      "Type": "timestamp",
+      "Null": "NO",
+      "Key": "",
+      "Default": "CURRENT_TIMESTAMP",
+      "Extra": "DEFAULT_GENERATED on update CURRENT_TIMESTAMP"
+    }
+  ],
+  "messages": [],
+  "stdout": "Field\tType\tNull\tKey\tDefault\tExtra\nid\tint\tNO\tPRI\tNULL\tauto_increment\ntitulo\tvarchar(255)\tNO\t\tNULL\t\ncontenido\ttext\tNO\t\tNULL\t\nicono\tvarchar(10)\tYES\t\t💡\t\ncolor\tvarchar(30)\tYES\t\t#7C3AED\t\nactivo\ttinyint(1)\tNO\t\t1\t\ncreatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\t\nupdatedAt\ttimestamp\tNO\t\tCURRENT_TIMESTAMP\tDEFAULT_GENERATED on update CURRENT_TIMESTAMP\n",
+  "stderr": "",
+  "execution_time_ms": 1100
+}

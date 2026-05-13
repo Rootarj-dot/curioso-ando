@@ -90,7 +90,7 @@ export const datosCuriosos = mysqlTable("datos_curiosos", {
   id: int("id").autoincrement().primaryKey(),
   titulo: varchar("titulo", { length: 255 }).notNull(),
   contenido: text("contenido").notNull(),
-  icono: varchar("icono", { length: 10 }).default("💡"),
+  icono: varchar("icono", { length: 50 }).default("💡"),
   color: varchar("color", { length: 30 }).default("#7C3AED"),
   activo: boolean("activo").notNull().default(true),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

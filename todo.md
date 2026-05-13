@@ -109,8 +109,8 @@
 - [x] Panel de edición del banner en AdminDashboard
 
 ## Datos Curiosos
-- [ ] Tabla datos_curiosos en DB (id, titulo, contenido, icono, color, activo, createdAt)
-- [ ] Helpers CRUD en db.ts y procedimientos tRPC (list, create, update, delete, toggle)
-- [ ] Página AdminDatosCuriosos con CRUD completo en panel admin
-- [ ] FlipCards en sidebar de artículos muestran datos curiosos (no artículos recientes)
-- [ ] Al hacer clic en FlipCard: animación de giro + modal con fondo degradado negro/gris
+- [x] Tabla datos_curiosos en DB (id, titulo, contenido, icono, color, activo, createdAt)
+- [x] Helpers CRUD en db.ts y procedimientos tRPC (list, create, update, delete, toggle)
+- [x] Página AdminDatosCuriosos con CRUD completo en panel admin
+- [x] FlipCards en sidebar de artículos muestran datos curiosos (no artículos recientes)
+- [x] Al hacer clic en FlipCard: animación de giro + modal con fondo degradado negro/gris

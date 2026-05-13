@@ -364,7 +364,7 @@ export const appRouter = router({
       .input(z.object({
         titulo: z.string().min(1).max(255),
         contenido: z.string().min(1),
-        icono: z.string().max(10).optional(),
+        icono: z.string().max(50).optional(),
         color: z.string().max(30).optional(),
       }))
       .mutation(async ({ input }) => {
@@ -376,7 +376,7 @@ export const appRouter = router({
         id: z.number(),
         titulo: z.string().min(1).max(255).optional(),
         contenido: z.string().min(1).optional(),
-        icono: z.string().max(10).optional(),
+        icono: z.string().max(50).optional(),
         color: z.string().max(30).optional(),
         activo: z.boolean().optional(),
       }))
