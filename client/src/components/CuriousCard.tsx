@@ -31,10 +31,9 @@ export function CuriousCard({
   icono,
   color,
 }: CuriousCardProps) {
-  const [isFlipped, setIsFlipped] = useState(false);
-  const [answered, setAnswered] = useState(false);
-  const [answerResult, setAnswerResult] = useState<AnswerResult>(null);
   const [showModal, setShowModal] = useState(false);
+  const [isFlipped, setIsFlipped] = useState(false);
+  const [answerResult, setAnswerResult] = useState<AnswerResult>(null);
 
   const accentColor = color || "#7C3AED";
   const iconName = icono || "HelpCircle";
@@ -48,124 +47,141 @@ export function CuriousCard({
     return Math.random() > 0.5 ? opts : [opts[1], opts[0]];
   });
 
-  const handleAnswer = (isCorrect: boolean) => {
-    if (answered) return;
-    setAnswerResult(isCorrect ? "correct" : "incorrect");
-    setAnswered(true);
+  const handleOpenModal = () => {
+    setIsFlipped(false);
+    setAnswerResult(null);
     setShowModal(true);
   };
 
-  const handleReset = () => {
-    setIsFlipped(false);
-    setAnswered(false);
-    setAnswerResult(null);
+  const handleAnswer = (isCorrect: boolean) => {
+    setAnswerResult(isCorrect ? "correct" : "incorrect");
+    // Small delay so the click registers visually before flip
+    setTimeout(() => setIsFlipped(true), 80);
+  };
+
+  const handleClose = () => {
     setShowModal(false);
+    setTimeout(() => {
+      setIsFlipped(false);
+      setAnswerResult(null);
+    }, 300);
+  };
+
+  const handleRetry = () => {
+    setIsFlipped(false);
+    setAnswerResult(null);
   };
 
   return (
     <>
-      {/* ── Card container — altura dinámica con min-height ── */}
+      {/* ── Static card (sidebar) ── */}
       <div
-        className="tcard-root"
+        className="tc-card"
         style={{ "--tc-accent": accentColor } as React.CSSProperties}
+        onClick={handleOpenModal}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === "Enter" && handleOpenModal()}
+        aria-label={`Pregunta trivia: ${pregunta}`}
       >
-        {/* FRONT */}
-        {!isFlipped && (
-          <div
-            className="tcard-face tcard-front"
-            onClick={() => setIsFlipped(true)}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => e.key === "Enter" && setIsFlipped(true)}
-          >
-            <div className="tcard-grid" />
-            <div className="tcard-front-body">
-              <span className="tcard-icon">
-                <RenderIcon name={iconName} size={30} color={accentColor} />
-              </span>
-              <p className="tcard-question">{pregunta}</p>
-              <span className="tcard-hint">Toca para responder →</span>
-            </div>
-          </div>
-        )}
-
-        {/* BACK */}
-        {isFlipped && (
-          <div className="tcard-face tcard-back">
-            <div className="tcard-grid" />
-            <div className="tcard-back-body">
-              <div className="tcard-back-header">
-                <RenderIcon name={iconName} size={16} color={accentColor} />
-                <p className="tcard-back-question">{pregunta}</p>
-              </div>
-              <p className="tcard-back-label">¿Cuál es la respuesta correcta?</p>
-              <div className="tcard-options">
-                {options.map((opt, i) => (
-                  <button
-                    key={i}
-                    className="tcard-opt-btn"
-                    onClick={() => handleAnswer(opt.isCorrect)}
-                    disabled={answered}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
+        <div className="tc-card-grid" />
+        <div className="tc-card-body">
+          <span className="tc-card-icon">
+            <RenderIcon name={iconName} size={30} color={accentColor} />
+          </span>
+          <p className="tc-card-question">{pregunta}</p>
+          <span className="tc-card-hint">Toca para responder →</span>
+        </div>
       </div>
 
-      {/* ── Modal de resultado ── */}
+      {/* ── Modal ── */}
       {showModal && (
         <div
-          className="tcard-modal-overlay"
-          onClick={() => setShowModal(false)}
+          className="tc-overlay"
+          onClick={handleClose}
+          role="dialog"
+          aria-modal="true"
         >
+          {/* Modal box — click inside doesn't close */}
           <div
-            className="tcard-modal"
+            className="tc-modal"
             onClick={(e) => e.stopPropagation()}
             style={{ "--tc-accent": accentColor } as React.CSSProperties}
           >
-            <div className="tcard-modal-orb" />
-            <div className="tcard-modal-grid" />
-            <div className="tcard-modal-body">
-              {/* Resultado */}
-              <div className="tcard-modal-result">
-                {answerResult === "correct"
-                  ? <CheckCircle2 width={44} height={44} color="#4ade80" />
-                  : <XCircle width={44} height={44} color="#f87171" />
-                }
-                <h3
-                  className="tcard-modal-result-title"
-                  style={{ color: answerResult === "correct" ? "#4ade80" : "#f87171" }}
-                >
-                  {answerResult === "correct" ? "¡Acertaste!" : "¡Incorrecto!"}
-                </h3>
-                {answerResult === "incorrect" && (
-                  <p className="tcard-modal-correct-hint">
-                    La respuesta correcta era:{" "}
-                    <strong style={{ color: "#4ade80" }}>{opcionCorrecta}</strong>
-                  </p>
-                )}
-              </div>
+            {/* Decorative orb + grid */}
+            <div className="tc-modal-orb" />
+            <div className="tc-modal-grid" />
 
-              <div className="tcard-modal-divider" />
+            {/* Close button */}
+            <button className="tc-modal-x" onClick={handleClose} aria-label="Cerrar">✕</button>
 
-              {/* Respuesta completa */}
-              <span className="tcard-modal-icon">
-                <RenderIcon name={iconName} size={40} color={accentColor} />
-              </span>
-              <h3 className="tcard-modal-title">{pregunta}</h3>
-              <p className="tcard-modal-text">{respuesta}</p>
+            {/* ── Flip container inside modal ── */}
+            <div
+              className="tc-flip-wrapper"
+              style={{ perspective: "900px" }}
+            >
+              <div
+                className="tc-flip-inner"
+                style={{ transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)" }}
+              >
+                {/* FRONT — Opciones */}
+                <div className="tc-flip-face tc-flip-front">
+                  <div className="tc-flip-front-body">
+                    <div className="tc-flip-icon">
+                      <RenderIcon name={iconName} size={36} color={accentColor} />
+                    </div>
+                    <h3 className="tc-flip-question">{pregunta}</h3>
+                    <p className="tc-flip-sublabel">¿Cuál es la respuesta correcta?</p>
+                    <div className="tc-flip-options">
+                      {options.map((opt, i) => (
+                        <button
+                          key={i}
+                          className="tc-flip-opt"
+                          onClick={() => handleAnswer(opt.isCorrect)}
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
 
-              <div className="tcard-modal-actions">
-                <button className="tcard-modal-retry" onClick={handleReset}>
-                  Intentar de nuevo
-                </button>
-                <button className="tcard-modal-close" onClick={() => setShowModal(false)}>
-                  Cerrar ✕
-                </button>
+                {/* BACK — Resultado */}
+                <div className="tc-flip-face tc-flip-back">
+                  <div className="tc-flip-back-body">
+                    {answerResult === "correct" ? (
+                      <>
+                        <CheckCircle2 width={52} height={52} color="#4ade80" className="tc-result-icon" />
+                        <h3 className="tc-result-title" style={{ color: "#4ade80" }}>¡Acertaste!</h3>
+                      </>
+                    ) : (
+                      <>
+                        <XCircle width={52} height={52} color="#f87171" className="tc-result-icon" />
+                        <h3 className="tc-result-title" style={{ color: "#f87171" }}>¡Incorrecto!</h3>
+                        <p className="tc-result-hint">
+                          La respuesta correcta era:{" "}
+                          <strong style={{ color: "#4ade80" }}>{opcionCorrecta}</strong>
+                        </p>
+                      </>
+                    )}
+
+                    <div className="tc-result-divider" />
+
+                    <span className="tc-result-icon-accent">
+                      <RenderIcon name={iconName} size={28} color={accentColor} />
+                    </span>
+                    <p className="tc-result-answer">{respuesta}</p>
+
+                    <div className="tc-result-actions">
+                      <button className="tc-result-retry" onClick={handleRetry}>
+                        Intentar de nuevo
+                      </button>
+                      <button className="tc-result-close" onClick={handleClose}>
+                        Cerrar
+                      </button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -173,21 +189,32 @@ export function CuriousCard({
       )}
 
       <style>{`
-        /* ── Root ── */
-        .tcard-root {
-          width: 100%;
-          border-radius: 14px;
-          overflow: hidden;
-        }
-
-        /* ── Shared face ── */
-        .tcard-face {
+        /* ══════════════════════════════════════════
+           STATIC CARD (sidebar)
+        ══════════════════════════════════════════ */
+        .tc-card {
           position: relative;
           width: 100%;
           border-radius: 14px;
           overflow: hidden;
+          background: linear-gradient(135deg, #0A0018 0%, #1A0050 55%, #2B037D 100%);
+          box-shadow: 0 0 0 1px rgba(139,92,246,0.3), 0 4px 20px rgba(43,3,125,0.4);
+          cursor: pointer;
+          min-height: 130px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: box-shadow 0.2s, transform 0.2s;
         }
-        .tcard-grid {
+        .tc-card:hover {
+          box-shadow: 0 0 0 1px var(--tc-accent), 0 6px 28px rgba(43,3,125,0.55);
+          transform: translateY(-2px);
+        }
+        .tc-card:focus-visible {
+          outline: 2px solid var(--tc-accent);
+          outline-offset: 2px;
+        }
+        .tc-card-grid {
           position: absolute;
           inset: 0;
           background-image:
@@ -201,36 +228,21 @@ export function CuriousCard({
           0%   { background-position: 0 0; }
           100% { background-position: 22px 22px; }
         }
-
-        /* ── FRONT ── */
-        .tcard-front {
-          background: linear-gradient(135deg, #0A0018 0%, #1A0050 55%, #2B037D 100%);
-          box-shadow: 0 0 0 1px rgba(139,92,246,0.3), 0 4px 20px rgba(43,3,125,0.4);
-          cursor: pointer;
-          min-height: 130px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-        .tcard-front:focus-visible {
-          outline: 2px solid var(--tc-accent);
-          outline-offset: 2px;
-        }
-        .tcard-front-body {
+        .tc-card-body {
           position: relative;
           z-index: 1;
           display: flex;
           flex-direction: column;
           align-items: center;
           gap: 8px;
-          padding: 16px 14px;
+          padding: 18px 14px;
           text-align: center;
           width: 100%;
         }
-        .tcard-icon {
+        .tc-card-icon {
           filter: drop-shadow(0 0 8px var(--tc-accent));
         }
-        .tcard-question {
+        .tc-card-question {
           font-size: 0.75rem;
           font-weight: 700;
           line-height: 1.4;
@@ -239,221 +251,241 @@ export function CuriousCard({
           text-shadow: 0 0 12px rgba(167,139,250,0.5);
           margin: 0;
         }
-        .tcard-hint {
+        .tc-card-hint {
           font-size: 0.6rem;
           color: rgba(167,139,250,0.55);
           letter-spacing: 0.04em;
         }
 
-        /* ── BACK ── */
-        .tcard-back {
-          background: linear-gradient(135deg, #0A0018 0%, #1A0050 50%, #2B037D 100%);
-          box-shadow: 0 0 0 1px rgba(139,92,246,0.5), 0 0 24px rgba(139,92,246,0.2);
-          min-height: 130px;
-          display: flex;
-          align-items: flex-start;
-          justify-content: flex-start;
-        }
-        .tcard-back-body {
-          position: relative;
-          z-index: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
-          padding: 12px;
-          width: 100%;
-        }
-        .tcard-back-header {
-          display: flex;
-          align-items: flex-start;
-          gap: 6px;
-        }
-        .tcard-back-question {
-          font-size: 0.65rem;
-          font-weight: 700;
-          color: var(--tc-accent);
-          font-family: Poppins, sans-serif;
-          text-shadow: 0 0 10px var(--tc-accent);
-          margin: 0;
-          line-height: 1.3;
-          flex: 1;
-        }
-        .tcard-back-label {
-          font-size: 0.6rem;
-          color: rgba(245,240,255,0.5);
-          margin: 0;
-        }
-        .tcard-options {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 6px;
-          margin-top: 2px;
-        }
-        .tcard-opt-btn {
-          font-size: 0.62rem;
-          font-weight: 600;
-          padding: 8px 6px;
-          border-radius: 8px;
-          color: #fff;
-          background: rgba(139,92,246,0.25);
-          border: 1px solid rgba(139,92,246,0.5);
-          cursor: pointer;
-          transition: transform 0.15s, background 0.15s;
-          line-height: 1.3;
-          text-align: center;
-          word-break: break-word;
-        }
-        .tcard-opt-btn:hover:not(:disabled) {
-          background: rgba(139,92,246,0.5);
-          transform: scale(1.03);
-        }
-        .tcard-opt-btn:active:not(:disabled) { transform: scale(0.97); }
-        .tcard-opt-btn:disabled { opacity: 0.5; cursor: default; }
-
-        /* ── Modal overlay ── */
-        .tcard-modal-overlay {
+        /* ══════════════════════════════════════════
+           MODAL OVERLAY
+        ══════════════════════════════════════════ */
+        .tc-overlay {
           position: fixed;
           inset: 0;
           z-index: 9999;
-          background: rgba(0,0,0,0.80);
-          backdrop-filter: blur(6px);
+          background: rgba(0,0,0,0.82);
+          backdrop-filter: blur(7px);
           display: flex;
           align-items: center;
           justify-content: center;
           padding: 16px;
-          animation: tcFadeIn 0.2s ease;
+          animation: tcFadeIn 0.22s ease;
         }
         @keyframes tcFadeIn {
           from { opacity: 0; }
           to   { opacity: 1; }
         }
 
-        /* ── Modal box ── */
-        .tcard-modal {
+        /* ══════════════════════════════════════════
+           MODAL BOX
+        ══════════════════════════════════════════ */
+        .tc-modal {
           position: relative;
           width: 100%;
-          max-width: 420px;
-          border-radius: 20px;
+          max-width: 440px;
+          border-radius: 22px;
           overflow: hidden;
-          background: linear-gradient(160deg, #111111 0%, #1C1C1C 40%, #2A2A2A 100%);
-          border: 1px solid rgba(255,255,255,0.08);
+          background: linear-gradient(160deg, #0e0e0e 0%, #1a1a1a 45%, #242424 100%);
+          border: 1px solid rgba(255,255,255,0.07);
           box-shadow:
             0 0 0 1px var(--tc-accent),
-            0 20px 60px rgba(0,0,0,0.7),
-            0 0 40px rgba(43,3,125,0.3);
-          animation: tcModalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            0 24px 64px rgba(0,0,0,0.75),
+            0 0 48px rgba(43,3,125,0.3);
+          animation: tcModalIn 0.32s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
         @keyframes tcModalIn {
-          from { transform: scale(0.85); opacity: 0; }
-          to   { transform: scale(1); opacity: 1; }
+          from { transform: scale(0.82) translateY(20px); opacity: 0; }
+          to   { transform: scale(1) translateY(0); opacity: 1; }
         }
-        .tcard-modal-orb {
+        .tc-modal-orb {
           position: absolute;
-          top: -60px;
-          right: -60px;
-          width: 180px;
-          height: 180px;
+          top: -70px;
+          right: -70px;
+          width: 200px;
+          height: 200px;
           border-radius: 50%;
           background: radial-gradient(circle, var(--tc-accent) 0%, transparent 70%);
-          opacity: 0.15;
+          opacity: 0.14;
           pointer-events: none;
         }
-        .tcard-modal-grid {
+        .tc-modal-grid {
           position: absolute;
           inset: 0;
           background-image:
-            linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
           background-size: 28px 28px;
           pointer-events: none;
         }
-        .tcard-modal-body {
-          position: relative;
-          z-index: 1;
-          padding: 24px 24px 20px;
+        .tc-modal-x {
+          position: absolute;
+          top: 14px;
+          right: 16px;
+          z-index: 10;
+          background: rgba(255,255,255,0.07);
+          border: 1px solid rgba(255,255,255,0.1);
+          color: rgba(255,255,255,0.45);
+          border-radius: 50%;
+          width: 28px;
+          height: 28px;
+          font-size: 0.7rem;
+          cursor: pointer;
           display: flex;
-          flex-direction: column;
-          gap: 10px;
+          align-items: center;
+          justify-content: center;
+          transition: background 0.2s, color 0.2s;
         }
-        .tcard-modal-result {
+        .tc-modal-x:hover { background: rgba(255,255,255,0.14); color: #fff; }
+
+        /* ══════════════════════════════════════════
+           FLIP CONTAINER (inside modal)
+        ══════════════════════════════════════════ */
+        .tc-flip-wrapper {
+          position: relative;
+          width: 100%;
+        }
+        .tc-flip-inner {
+          position: relative;
+          width: 100%;
+          transform-style: preserve-3d;
+          transition: transform 0.65s cubic-bezier(0.4, 0.2, 0.2, 1);
+        }
+        .tc-flip-face {
+          width: 100%;
+          backface-visibility: hidden;
+          -webkit-backface-visibility: hidden;
+          border-radius: 22px;
+        }
+        .tc-flip-back {
+          position: absolute;
+          inset: 0;
+          transform: rotateY(180deg);
+          /* back face needs same height as front — set by JS via min-height */
+        }
+
+        /* ── FRONT face content ── */
+        .tc-flip-front-body {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 6px;
+          gap: 12px;
+          padding: 32px 24px 28px;
           text-align: center;
         }
-        .tcard-modal-result-title {
-          font-size: 1.3rem;
-          font-weight: 800;
-          font-family: Poppins, sans-serif;
-          margin: 0;
-        }
-        .tcard-modal-correct-hint {
-          font-size: 0.78rem;
-          color: rgba(255,255,255,0.65);
-          margin: 0;
-        }
-        .tcard-modal-divider {
-          height: 1px;
-          background: rgba(255,255,255,0.08);
-        }
-        .tcard-modal-icon {
+        .tc-flip-icon {
           filter: drop-shadow(0 0 12px var(--tc-accent));
-          align-self: flex-start;
         }
-        .tcard-modal-title {
-          font-size: 1rem;
+        .tc-flip-question {
+          font-size: 1.05rem;
           font-weight: 800;
-          line-height: 1.3;
+          line-height: 1.35;
           color: #FFFFFF;
           font-family: Poppins, sans-serif;
           text-shadow: 0 0 20px var(--tc-accent);
           margin: 0;
         }
-        .tcard-modal-text {
+        .tc-flip-sublabel {
+          font-size: 0.72rem;
+          color: rgba(255,255,255,0.4);
+          margin: 0;
+        }
+        .tc-flip-options {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+          width: 100%;
+          margin-top: 4px;
+        }
+        .tc-flip-opt {
+          font-size: 0.78rem;
+          font-weight: 600;
+          padding: 12px 10px;
+          border-radius: 12px;
+          color: #fff;
+          background: rgba(139,92,246,0.2);
+          border: 1px solid rgba(139,92,246,0.45);
+          cursor: pointer;
+          transition: transform 0.15s, background 0.15s, box-shadow 0.15s;
+          line-height: 1.35;
+          text-align: center;
+          word-break: break-word;
+        }
+        .tc-flip-opt:hover {
+          background: rgba(139,92,246,0.45);
+          box-shadow: 0 0 14px rgba(139,92,246,0.4);
+          transform: scale(1.03);
+        }
+        .tc-flip-opt:active { transform: scale(0.97); }
+
+        /* ── BACK face content ── */
+        .tc-flip-back-body {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 10px;
+          padding: 32px 24px 28px;
+          text-align: center;
+          min-height: 100%;
+        }
+        .tc-result-icon { filter: drop-shadow(0 0 12px currentColor); }
+        .tc-result-title {
+          font-size: 1.4rem;
+          font-weight: 800;
+          font-family: Poppins, sans-serif;
+          margin: 0;
+        }
+        .tc-result-hint {
+          font-size: 0.8rem;
+          color: rgba(255,255,255,0.6);
+          margin: 0;
+        }
+        .tc-result-divider {
+          width: 100%;
+          height: 1px;
+          background: rgba(255,255,255,0.07);
+          margin: 4px 0;
+        }
+        .tc-result-icon-accent {
+          filter: drop-shadow(0 0 10px var(--tc-accent));
+        }
+        .tc-result-answer {
           font-size: 0.88rem;
           line-height: 1.65;
           color: rgba(255,255,255,0.78);
           margin: 0;
         }
-        .tcard-modal-actions {
+        .tc-result-actions {
           display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-top: 4px;
           gap: 8px;
+          margin-top: 6px;
+          justify-content: center;
+          flex-wrap: wrap;
         }
-        .tcard-modal-retry {
-          font-size: 0.7rem;
+        .tc-result-retry {
+          font-size: 0.72rem;
           font-weight: 600;
-          color: rgba(255,255,255,0.45);
+          color: rgba(255,255,255,0.5);
           background: rgba(255,255,255,0.05);
           border: 1px solid rgba(255,255,255,0.1);
           border-radius: 999px;
-          padding: 5px 14px;
+          padding: 6px 16px;
           cursor: pointer;
           transition: background 0.2s, color 0.2s;
         }
-        .tcard-modal-retry:hover {
-          background: rgba(255,255,255,0.1);
-          color: rgba(255,255,255,0.75);
-        }
-        .tcard-modal-close {
+        .tc-result-retry:hover { background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.8); }
+        .tc-result-close {
           font-size: 0.72rem;
           font-weight: 700;
-          letter-spacing: 0.06em;
           color: rgba(255,255,255,0.5);
           background: rgba(255,255,255,0.06);
           border: 1px solid rgba(255,255,255,0.12);
           border-radius: 999px;
-          padding: 5px 16px;
+          padding: 6px 18px;
           cursor: pointer;
           transition: background 0.2s, color 0.2s;
         }
-        .tcard-modal-close:hover {
-          background: rgba(255,255,255,0.12);
-          color: #fff;
-        }
+        .tc-result-close:hover { background: rgba(255,255,255,0.13); color: #fff; }
       `}</style>
     </>
   );
