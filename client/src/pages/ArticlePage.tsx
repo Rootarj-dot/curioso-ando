@@ -6,6 +6,7 @@ import { Footer } from "@/components/Footer";
 import { ArticleCard } from "@/components/ArticleCard";
 import { Calendar, User, ArrowLeft, Facebook } from "lucide-react";
 import { CuriousCard } from "@/components/CuriousCard";
+import { useSeoMeta } from "@/hooks/useSeoMeta";
 
 function formatDate(date: Date | null | undefined): string {
   if (!date) return "";
@@ -16,37 +17,7 @@ function formatDate(date: Date | null | undefined): string {
   });
 }
 
-function setMetaTags(opts: {
-  title: string;
-  description: string;
-  image: string;
-  url: string;
-  type?: string;
-}) {
-  document.title = `${opts.title} | Curioso Ando`;
-  const setMeta = (attr: string, value: string, content: string) => {
-    let el = document.querySelector(`meta[${attr}="${value}"]`) as HTMLMetaElement | null;
-    if (!el) {
-      el = document.createElement("meta");
-      el.setAttribute(attr, value);
-      document.head.appendChild(el);
-    }
-    el.setAttribute("content", content);
-  };
-  setMeta("name", "description", opts.description);
-  setMeta("property", "og:title", opts.title);
-  setMeta("property", "og:description", opts.description);
-  setMeta("property", "og:image", opts.image);
-  setMeta("property", "og:image:width", "1200");
-  setMeta("property", "og:image:height", "630");
-  setMeta("property", "og:url", opts.url);
-  setMeta("property", "og:type", opts.type || "article");
-  setMeta("property", "og:site_name", "Curioso Ando");
-  setMeta("name", "twitter:card", "summary_large_image");
-  setMeta("name", "twitter:title", opts.title);
-  setMeta("name", "twitter:description", opts.description);
-  setMeta("name", "twitter:image", opts.image);
-}
+// setMetaTags replaced by useSeoMeta hook
 
 // ─── Inline Articles Block ────────────────────────────────────────────────────
 function InlineArticlesBlock({
@@ -220,16 +191,34 @@ export default function ArticlePage() {
     { enabled: !!article?.id }
   );
 
-  useEffect(() => {
-    if (article) {
-      const ogImage = article.ogImage || article.featuredImage || "";
-      const ogTitle = article.ogTitle || article.title;
-      const ogDesc = article.ogDescription || article.excerpt || "";
-      const ogUrl = `${window.location.origin}/articulo/${article.slug}`;
-      setMetaTags({ title: ogTitle, description: ogDesc, image: ogImage, url: ogUrl, type: "article" });
-    }
-    return () => { document.title = "Curioso Ando - Blog de Noticias"; };
-  }, [article]);
+  // Dynamic SEO meta tags + JSON-LD for this article
+  const ogImage = article?.ogImage || article?.featuredImage || "";
+  const ogTitle = article?.ogTitle || article?.title || "Curioso Ando";
+  const ogDesc = article?.ogDescription || article?.excerpt || "";
+  const ogUrl = article ? `${window.location.origin}/articulo/${article.slug}` : window.location.href;
+
+  useSeoMeta({
+    title: ogTitle,
+    description: ogDesc,
+    image: ogImage || undefined,
+    url: ogUrl,
+    type: "article",
+    jsonLd: article ? {
+      "@type": "NewsArticle",
+      "headline": ogTitle,
+      "description": ogDesc,
+      "image": ogImage ? [ogImage] : undefined,
+      "datePublished": article.publishedAt ? new Date(article.publishedAt).toISOString() : undefined,
+      "dateModified": article.updatedAt ? new Date(article.updatedAt).toISOString() : undefined,
+      "author": { "@type": "Person", "name": article.authorName || "Curioso Ando" },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Curioso Ando",
+        "url": "https://curiosoando.manus.space"
+      },
+      "mainEntityOfPage": { "@type": "WebPage", "@id": ogUrl },
+    } : undefined,
+  });
 
   const shareOnFacebook = useCallback(() => {
     const url = encodeURIComponent(window.location.href);

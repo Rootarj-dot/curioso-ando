@@ -3,26 +3,73 @@
 
   <head>
     <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>Curioso Ando - Blog de Noticias</title>    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- ── Primary Meta Tags ─────────────────────────────────────────────── -->
+    <title>Curioso Ando - Blog de Noticias</title>
+    <meta name="description" content="Datos raros, curiosos y sorprendentes. Noticias, entretenimiento, geek y tecnología en un solo lugar." />
+    <meta name="author" content="Curioso Ando" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="theme-color" content="#2B037D" />
+
+    <!-- ── Open Graph / Facebook ─────────────────────────────────────────── -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Curioso Ando" />
+    <meta property="og:title" content="Curioso Ando - Blog de Noticias" />
+    <meta property="og:description" content="Datos raros, curiosos y sorprendentes. Noticias, entretenimiento, geek y tecnología en un solo lugar." />
+    <meta property="og:url" content="https://curiosoando.manus.space/" />
+    <meta property="og:locale" content="es_ES" />
+
+    <!-- ── Twitter Card ──────────────────────────────────────────────────── -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Curioso Ando - Blog de Noticias" />
+    <meta name="twitter:description" content="Datos raros, curiosos y sorprendentes. Noticias, entretenimiento, geek y tecnología en un solo lugar." />
+
+    <!-- ── Canonical ─────────────────────────────────────────────────────── -->
+    <link rel="canonical" href="https://curiosoando.manus.space/" />
+
+    <!-- ── Preconnect to external origins ───────────────────────────────── -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
-    <meta name="description" content="Curioso Ando - Noticias, entretenimiento, geek y tecnología" />
-    <meta property="og:site_name" content="Curioso Ando" />
-    <meta name="theme-color" content="#2B037D" />
-    <meta name="robots" content="index, follow" />
-    <meta name="author" content="Curioso Ando" />
-    <!-- Google Analytics 4 - Reemplaza G-XXXXXXXXXX con tu ID real de GA4 -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-XXXXXXXXXX');
+    <link rel="preconnect" href="https://www.googletagmanager.com" />
+    <link rel="preconnect" href="https://pagead2.googlesyndication.com" />
+    <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+
+    <!-- ── Google Fonts with display=swap ───────────────────────────────── -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,400&family=Poppins:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- ── Favicon ───────────────────────────────────────────────────────── -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <!-- ── Web App Manifest ──────────────────────────────────────────────── -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- ── JSON-LD: WebSite structured data ─────────────────────────────── -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Curioso Ando",
+      "url": "https://curiosoando.manus.space/",
+      "description": "Datos raros, curiosos y sorprendentes. Noticias, entretenimiento, geek y tecnología en un solo lugar.",
+      "inLanguage": "es",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://curiosoando.manus.space/?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
     </script>
+
+    <!-- GA4 and AdSense are initialized from React via import.meta.env -->
+    <!-- See: client/src/lib/analytics.ts -->
   </head>
 
   <body>

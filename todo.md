@@ -128,3 +128,21 @@
 
 - [x] CuriousCard: altura dinámica para que el texto no se recorte
 - [x] Diseño responsive completo para móvil y tablet (navbar, home, ArticlePage, sidebar, admin)
+
+## Optimización SEO / Performance / AdSense (Mayo 2026)
+
+- [ ] SEO: meta tags dinámicos completos (title, description, canonical, OG, Twitter Card)
+- [ ] SEO: sitemap.xml dinámico generado desde la DB
+- [ ] SEO: robots.txt correcto
+- [ ] SEO: JSON-LD structured data (WebSite, Article, BreadcrumbList)
+- [ ] Performance: lazy loading de imágenes con loading="lazy" y decoding="async"
+- [ ] Performance: font-display:swap en Google Fonts
+- [ ] Performance: preconnect a dominios externos (fonts, analytics)
+- [ ] Performance: compresión gzip/brotli en el servidor Express
+- [ ] Performance: cache headers para assets estáticos
+- [ ] Performance: eliminar console.log en producción
+- [ ] Analytics: slot de Google Analytics (GA4) listo con variable de entorno
+- [ ] AdSense: slots de anuncios preparados con variable de entorno para el Publisher ID
+- [ ] Accesibilidad: aria-labels en botones sin texto, roles correctos
+- [ ] Accesibilidad: CLS fix en imágenes (width/height explícitos)
+- [ ] Accesibilidad: LCP optimization (preload de imagen hero)

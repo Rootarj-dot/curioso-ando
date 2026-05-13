@@ -5,6 +5,7 @@ import { Footer } from "@/components/Footer";
 import { ArticleCard } from "@/components/ArticleCard";
 import { Clock, AlertCircle, X, TrendingUp, ArrowRight, Calendar, User } from "lucide-react";
 import { useState } from "react";
+import { useSeoMeta } from "@/hooks/useSeoMeta";
 
 const AUTH_ERRORS: Record<string, string> = {
   auth_failed: "El inicio de sesión falló. Revisa los logs del servidor (consola donde corre pnpm dev) para ver el error exacto.",
@@ -36,6 +37,14 @@ export default function Home() {
 
   // Hero background: if featured article has image, use it as bg; else use banner color or default gradient
   const featuredImg = featuredArticle?.ogImage || featuredArticle?.featuredImage || "";
+
+  // SEO meta tags for home page
+  useSeoMeta({
+    title: "Curioso Ando - Blog de Noticias",
+    description: "Datos raros, curiosos y sorprendentes. Noticias, entretenimiento, geek y tecnología en un solo lugar.",
+    url: window.location.origin,
+    type: "website",
+  });
 
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#F8F7F4" }}>

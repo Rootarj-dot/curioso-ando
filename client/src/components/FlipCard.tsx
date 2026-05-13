@@ -29,7 +29,7 @@ export function FlipCard({ slug, title, categoryName, featuredImage, ogImage, pu
         {/* ── FRONT ── */}
         <div className="flip-card-front">
           {image ? (
-            <img src={image} alt={title} className="w-full h-full object-cover" />
+            <img src={image} alt={title} loading="lazy" decoding="async" className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #0D0020 0%, #2B037D 60%, #5B2C8F 100%)" }}>
               <span style={{ fontFamily: "Poppins, sans-serif", color: "rgba(255,255,255,0.18)", fontSize: "2.5rem", fontWeight: 900, letterSpacing: "0.12em" }}>CA</span>

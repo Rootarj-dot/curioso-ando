@@ -4,6 +4,7 @@
 import express from "express";
 import { createServer } from "http";
 import net from "net";
+import compression from "compression";
 import { createExpressMiddleware } from "@trpc/server/adapters/express";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
@@ -33,6 +34,22 @@ async function findAvailablePort(startPort: number = 3000): Promise<number> {
 async function startServer() {
   const app = express();
   const server = createServer(app);
+
+  // Gzip/Brotli compression for all responses
+  app.use(compression());
+
+  // Security & cache headers
+  app.use((req, res, next) => {
+    // Cache static assets aggressively (Vite adds content hashes)
+    if (req.path.match(/\.(js|css|woff2?|ttf|eot|ico|png|jpg|jpeg|svg|webp|avif)(\?.*)?$/)) {
+      res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+    }
+    // Security headers
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("X-Frame-Options", "SAMEORIGIN");
+    res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    next();
+  });
 
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
