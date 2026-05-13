@@ -446,10 +446,15 @@ export async function getActiveDatosCuriosos(limit = 5) {
     .limit(limit);
 }
 
+function toMysqlDatetime(d: Date): string {
+  // Format: YYYY-MM-DD HH:MM:SS in UTC — compatible with MariaDB 10.4 and TiDB
+  return d.toISOString().slice(0, 19).replace('T', ' ');
+}
+
 export async function createDatoCurioso(data: { titulo: string; contenido: string; icono?: string; color?: string }) {
   const db = await getDb();
   if (!db) throw new Error("DB not available");
-  const now = new Date();
+  const now = toMysqlDatetime(new Date());
   const icono = data.icono || "Lightbulb";
   const color = data.color || "#7C3AED";
   // Use raw SQL to avoid Drizzle generating DEFAULT keyword for id (incompatible with MariaDB 10.4)
@@ -464,7 +469,7 @@ export async function createDatoCurioso(data: { titulo: string; contenido: strin
 export async function updateDatoCurioso(id: number, data: Partial<{ titulo: string; contenido: string; icono: string; color: string; activo: boolean }>) {
   const db = await getDb();
   if (!db) throw new Error("DB not available");
-  await db.update(datosCuriosos).set({ ...data, updatedAt: new Date() }).where(eq(datosCuriosos.id, id));
+  await db.update(datosCuriosos).set({ ...data, updatedAt: toMysqlDatetime(new Date()) as unknown as Date }).where(eq(datosCuriosos.id, id));
   const rows = await db.select().from(datosCuriosos).where(eq(datosCuriosos.id, id)).limit(1);
   return rows[0];
 }
