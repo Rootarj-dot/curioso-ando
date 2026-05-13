@@ -452,7 +452,7 @@ export async function createDatoCurioso(data: { titulo: string; contenido: strin
   await db.insert(datosCuriosos).values({
     titulo: data.titulo,
     contenido: data.contenido,
-    icono: data.icono || "💡",
+    icono: data.icono || "Lightbulb",
     color: data.color || "#7C3AED",
     activo: true,
   });
