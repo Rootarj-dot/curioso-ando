@@ -66,12 +66,12 @@ export default function Home() {
       {/* ── Hero / Nota de la Semana ───────────────────────────────────── */}
       {featuredLoading ? (
         /* Skeleton mientras carga */
-        <div className="animate-pulse" style={{ height: 480, background: "linear-gradient(135deg, #2B037D, #5B2C8F)" }} />
+        <div className="animate-pulse" style={{ height: "clamp(280px, 50vw, 480px)", background: "linear-gradient(135deg, #2B037D, #5B2C8F)" }} />
       ) : featuredArticle ? (
         /* Hero con artículo destacado */
         <section
           className="relative overflow-hidden"
-          style={{ minHeight: 480 }}
+          style={{ minHeight: "clamp(280px, 50vw, 480px)" }}
         >
           {/* Imagen de fondo */}
           {featuredImg ? (
@@ -92,7 +92,7 @@ export default function Home() {
           />
 
           {/* Content */}
-          <div className="relative container flex flex-col justify-end" style={{ minHeight: 480, paddingBottom: "3rem", paddingTop: "3rem" }}>
+          <div className="relative container flex flex-col justify-end" style={{ minHeight: "clamp(280px, 50vw, 480px)", paddingBottom: "clamp(1.5rem, 4vw, 3rem)", paddingTop: "clamp(1.5rem, 4vw, 3rem)" }}>
             <div className="max-w-2xl">
               {/* Badge */}
               <div className="flex items-center gap-2 mb-3">
@@ -183,11 +183,11 @@ export default function Home() {
       )}
 
       <main className="flex-1">
-        <div className="container py-10">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        <div className="container py-6 md:py-10">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
 
             {/* Main content */}
-            <div className="lg:col-span-3 space-y-10">
+            <div className="lg:col-span-3 space-y-8 order-1">
 
               {/* ── Notas Recientes ───────────────────────────────────── */}
               <section>
@@ -221,8 +221,8 @@ export default function Home() {
             </div>
 
             {/* Sidebar */}
-            <aside className="lg:col-span-1">
-              <div className="sticky top-24 flex flex-col gap-6">
+            <aside className="lg:col-span-1 order-2 lg:order-2">
+              <div className="lg:sticky lg:top-24 flex flex-col gap-6">
                 <div className="ca-card p-5">
                   <h3 className="font-bold text-base mb-3" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
                     Sobre Curioso Ando

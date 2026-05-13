@@ -283,3 +283,42 @@
   background: #2B037D;
   color: #FFFFFF;
 }
+
+/* ─── Responsive: Móvil y Tablet ────────────────────────────────────────────── */
+
+/* Tipografía de artículo más pequeña en móvil */
+@media (max-width: 639px) {
+  .article-content h1 { font-size: 1.5rem; }
+  .article-content h2 { font-size: 1.25rem; }
+  .article-content h3 { font-size: 1.1rem; }
+  .article-content p  { font-size: 0.95rem; line-height: 1.75; }
+  .article-content ul,
+  .article-content ol { padding-left: 1.25rem; }
+  .editor-content { min-height: 280px; padding: 1rem; }
+}
+
+/* Tabla del admin: scroll horizontal en móvil */
+@media (max-width: 767px) {
+  .admin-table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}
+
+/* Trivia modal: ancho completo en móvil */
+@media (max-width: 639px) {
+  .tc-modal-backdrop { padding: 12px !important; }
+  .tc-modal-card { border-radius: 18px !important; }
+  .tc-flip-front-body,
+  .tc-flip-back-body { padding: 24px 16px 20px !important; }
+  .tc-flip-question { font-size: 0.95rem !important; }
+  .tc-flip-options { grid-template-columns: 1fr !important; }
+}
+
+/* Tarjeta trivia del sidebar: más compacta en móvil */
+@media (max-width: 639px) {
+  .tc-card-body { padding: 14px 12px !important; min-height: 100px !important; }
+  .tc-card-question { font-size: 0.72rem !important; }
+}
+
+/* Botones de acción: mínimo 44px de alto para touch */
+@media (max-width: 1023px) {
+  button, a[href], [role="button"] { min-height: 36px; }
+}

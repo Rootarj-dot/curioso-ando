@@ -134,13 +134,13 @@ export function Navbar() {
     <header className="sticky top-0 z-50" style={{ backgroundColor: "#FFFFFF", borderBottom: "1px solid #E5E3DE" }}>
       {/* Top bar */}
       <div className="container">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-14 md:h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 no-underline">
-            <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)" }}>
-              <Search className="w-4 h-4 text-white" />
+            <div className="w-8 h-8 md:w-9 md:h-9 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)" }}>
+              <Search className="w-3.5 h-3.5 md:w-4 md:h-4 text-white" />
             </div>
-            <span className="font-bold text-xl" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
+            <span className="font-bold text-lg md:text-xl" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
               Curioso Ando
             </span>
           </Link>
@@ -209,7 +209,7 @@ export function Navbar() {
       {/* Mobile menu */}
       {menuOpen && (
         <div className="md:hidden" style={{ backgroundColor: "#FFFFFF", borderTop: "1px solid #E5E3DE" }}>
-          <div className="container py-3 flex flex-col gap-1">
+          <div className="container py-4 flex flex-col gap-1">
             {/* Mobile search */}
             <div className="px-1 pb-2" style={{ borderBottom: "1px solid #E5E3DE" }}>
               <MobileSearch onClose={() => setMenuOpen(false)} />
@@ -218,8 +218,8 @@ export function Navbar() {
               <Link
                 key={cat.slug}
                 href={`/categoria/${cat.slug}`}
-                className="px-4 py-2.5 rounded-md text-sm font-medium no-underline"
-                style={{ color: "#1A1A1A" }}
+                className="px-4 py-3 rounded-md text-sm font-medium no-underline flex items-center"
+                style={{ color: "#1A1A1A", minHeight: "44px" }}
                 onClick={() => setMenuOpen(false)}
               >
                 {cat.name}

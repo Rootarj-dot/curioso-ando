@@ -281,8 +281,8 @@ export default function ArticlePage() {
             </div>
           )}
 
-          <div className="container py-8">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          <div className="container py-6 md:py-8">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
               {/* Article */}
               <article className="lg:col-span-3">
                 {/* Breadcrumb */}
@@ -314,7 +314,7 @@ export default function ArticlePage() {
                 )}
 
                 {/* Title */}
-                <h1 className="font-bold text-3xl md:text-4xl leading-tight mt-3 mb-4" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
+                <h1 className="font-bold text-2xl sm:text-3xl md:text-4xl leading-tight mt-3 mb-4" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
                   {article.title}
                 </h1>
 
@@ -376,7 +376,7 @@ export default function ArticlePage() {
 
               {/* Sidebar */}
               <aside className="lg:col-span-1">
-                <div className="sticky top-24 flex flex-col gap-6">
+                <div className="lg:sticky lg:top-24 flex flex-col gap-6">
                   {/* Trivia del artículo */}
                   {triviaList && triviaList.length > 0 && (
                     <div>

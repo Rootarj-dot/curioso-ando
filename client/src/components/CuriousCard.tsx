@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useRef, useState, useLayoutEffect } from "react";
 import * as LucideIcons from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { HelpCircle, CheckCircle2, XCircle } from "lucide-react";
@@ -72,6 +72,19 @@ export function CuriousCard({
     setAnswerResult(null);
   };
 
+  // Refs to measure each face height for dynamic flip container
+  const frontRef = useRef<HTMLDivElement>(null);
+  const backRef = useRef<HTMLDivElement>(null);
+  const [flipHeight, setFlipHeight] = useState<number | undefined>(undefined);
+
+  useLayoutEffect(() => {
+    const front = frontRef.current;
+    const back = backRef.current;
+    if (!front || !back) return;
+    const h = isFlipped ? back.scrollHeight : front.scrollHeight;
+    setFlipHeight(h);
+  }, [isFlipped, showModal, pregunta, respuesta, answerResult]);
+
   return (
     <>
       {/* ── Static card (sidebar) ── */}
@@ -118,14 +131,14 @@ export function CuriousCard({
             {/* ── Flip container inside modal ── */}
             <div
               className="tc-flip-wrapper"
-              style={{ perspective: "900px" }}
+              style={{ perspective: "900px", height: flipHeight ? `${flipHeight}px` : undefined, transition: "height 0.45s ease" }}
             >
               <div
                 className="tc-flip-inner"
                 style={{ transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)" }}
               >
                 {/* FRONT — Opciones */}
-                <div className="tc-flip-face tc-flip-front">
+                <div className="tc-flip-face tc-flip-front" ref={frontRef}>
                   <div className="tc-flip-front-body">
                     <div className="tc-flip-icon">
                       <RenderIcon name={iconName} size={36} color={accentColor} />
@@ -147,7 +160,7 @@ export function CuriousCard({
                 </div>
 
                 {/* BACK — Resultado */}
-                <div className="tc-flip-face tc-flip-back">
+                <div className="tc-flip-face tc-flip-back" ref={backRef}>
                   <div className="tc-flip-back-body">
                     {answerResult === "correct" ? (
                       <>
@@ -196,13 +209,13 @@ export function CuriousCard({
           position: relative;
           width: 100%;
           border-radius: 14px;
-          overflow: hidden;
+          overflow: visible;
           background: linear-gradient(135deg, #0A0018 0%, #1A0050 55%, #2B037D 100%);
           box-shadow: 0 0 0 1px rgba(139,92,246,0.3), 0 4px 20px rgba(43,3,125,0.4);
           cursor: pointer;
-          min-height: 130px;
+          min-height: 0;
           display: flex;
-          align-items: center;
+          align-items: stretch;
           justify-content: center;
           transition: box-shadow 0.2s, transform 0.2s;
         }
@@ -238,6 +251,8 @@ export function CuriousCard({
           padding: 18px 14px;
           text-align: center;
           width: 100%;
+          min-height: 120px;
+          justify-content: center;
         }
         .tc-card-icon {
           filter: drop-shadow(0 0 8px var(--tc-accent));
@@ -250,6 +265,9 @@ export function CuriousCard({
           font-family: Poppins, sans-serif;
           text-shadow: 0 0 12px rgba(167,139,250,0.5);
           margin: 0;
+          word-break: break-word;
+          overflow-wrap: break-word;
+          white-space: normal;
         }
         .tc-card-hint {
           font-size: 0.6rem;
@@ -285,7 +303,7 @@ export function CuriousCard({
           width: 100%;
           max-width: 440px;
           border-radius: 22px;
-          overflow: hidden;
+          overflow: visible;
           background: linear-gradient(160deg, #0e0e0e 0%, #1a1a1a 45%, #242424 100%);
           border: 1px solid rgba(255,255,255,0.07);
           box-shadow:
@@ -350,6 +368,7 @@ export function CuriousCard({
           width: 100%;
           transform-style: preserve-3d;
           transition: transform 0.65s cubic-bezier(0.4, 0.2, 0.2, 1);
+          /* Height is driven by the visible face */
         }
         .tc-flip-face {
           width: 100%;
@@ -359,9 +378,12 @@ export function CuriousCard({
         }
         .tc-flip-back {
           position: absolute;
-          inset: 0;
+          top: 0;
+          left: 0;
+          right: 0;
+          width: 100%;
           transform: rotateY(180deg);
-          /* back face needs same height as front — set by JS via min-height */
+          overflow: visible;
         }
 
         /* ── FRONT face content ── */
@@ -426,7 +448,7 @@ export function CuriousCard({
           gap: 10px;
           padding: 32px 24px 28px;
           text-align: center;
-          min-height: 100%;
+          width: 100%;
         }
         .tc-result-icon { filter: drop-shadow(0 0 12px currentColor); }
         .tc-result-title {
@@ -454,6 +476,9 @@ export function CuriousCard({
           line-height: 1.65;
           color: rgba(255,255,255,0.78);
           margin: 0;
+          word-break: break-word;
+          overflow-wrap: break-word;
+          white-space: normal;
         }
         .tc-result-actions {
           display: flex;

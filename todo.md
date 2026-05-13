@@ -123,3 +123,8 @@
 - [x] Rediseño de CuriousCard: frente muestra pregunta, reverso muestra respuesta pixelada + 2 opciones
 - [x] Feedback de acierto/error al responder la trivia
 - [x] ArticlePage carga trivia del artículo actual (no datos curiosos genéricos)
+
+## Mejoras pendientes (Mayo 2026)
+
+- [x] CuriousCard: altura dinámica para que el texto no se recorte
+- [x] Diseño responsive completo para móvil y tablet (navbar, home, ArticlePage, sidebar, admin)
