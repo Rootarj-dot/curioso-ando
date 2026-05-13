@@ -450,15 +450,13 @@ export async function createDatoCurioso(data: { titulo: string; contenido: strin
   const db = await getDb();
   if (!db) throw new Error("DB not available");
   const now = new Date();
-  await db.insert(datosCuriosos).values({
-    titulo: data.titulo,
-    contenido: data.contenido,
-    icono: data.icono || "Lightbulb",
-    color: data.color || "#7C3AED",
-    activo: true,
-    createdAt: now,
-    updatedAt: now,
-  });
+  const icono = data.icono || "Lightbulb";
+  const color = data.color || "#7C3AED";
+  // Use raw SQL to avoid Drizzle generating DEFAULT keyword for id (incompatible with MariaDB 10.4)
+  await db.execute(
+    sql`INSERT INTO datos_curiosos (titulo, contenido, icono, color, activo, createdAt, updatedAt)
+        VALUES (${data.titulo}, ${data.contenido}, ${icono}, ${color}, true, ${now}, ${now})`
+  );
   const rows = await db.select().from(datosCuriosos).orderBy(desc(datosCuriosos.createdAt)).limit(1);
   return rows[0];
 }
