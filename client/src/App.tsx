@@ -14,6 +14,7 @@ import AdminMedia from "./pages/Admin/AdminMedia";
 import AdminUsers from "./pages/Admin/AdminUsers";
 import AdminCategorias from "./pages/Admin/AdminCategorias";
 import AdminDatosCuriosos from "./pages/Admin/AdminDatosCuriosos";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 function Router() {
   return (
@@ -32,6 +33,9 @@ function Router() {
       <Route path="/admin/usuarios" component={AdminUsers} />
       <Route path="/admin/categorias" component={AdminCategorias} />
       <Route path="/admin/datos-curiosos" component={AdminDatosCuriosos} />
+
+      {/* Legal */}
+      <Route path="/aviso-de-privacidad" component={PrivacyPolicy} />
 
       {/* 404 */}
       <Route path="/404" component={NotFound} />

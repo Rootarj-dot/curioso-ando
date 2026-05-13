@@ -38,8 +38,7 @@ export function Footer() {
           <div>
             <h4 className="font-semibold mb-3 text-sm uppercase tracking-wider" style={{ color: "rgba(255,255,255,0.5)" }}>Legal</h4>
             <ul className="flex flex-col gap-2">
-              <li><Link href="/privacidad" className="text-sm no-underline transition-opacity hover:opacity-100" style={{ color: "rgba(255,255,255,0.75)" }}>Política de Privacidad</Link></li>
-              <li><Link href="/cookies" className="text-sm no-underline transition-opacity hover:opacity-100" style={{ color: "rgba(255,255,255,0.75)" }}>Política de Cookies</Link></li>
+              <li><Link href="/aviso-de-privacidad" className="text-sm no-underline transition-opacity hover:opacity-100" style={{ color: "rgba(255,255,255,0.75)" }}>Aviso de Privacidad</Link></li>
               <li><Link href="/contacto" className="text-sm no-underline transition-opacity hover:opacity-100" style={{ color: "rgba(255,255,255,0.75)" }}>Contacto</Link></li>
             </ul>
           </div>
