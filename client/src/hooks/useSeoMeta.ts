@@ -27,7 +27,7 @@ interface SeoMetaOptions {
   noIndex?: boolean;
 }
 
-const SITE_NAME = "Curioso Ando";
+const SITE_NAME = "Curioseando Ando";
 const SITE_URL = "https://curiosoando.manus.space";
 
 function setMeta(attr: string, value: string, content: string): void {

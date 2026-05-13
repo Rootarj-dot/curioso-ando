@@ -141,7 +141,7 @@ export function Navbar() {
               <Search className="w-3.5 h-3.5 md:w-4 md:h-4 text-white" />
             </div>
             <span className="font-bold text-lg md:text-xl" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
-              Curioso Ando
+              Curioseando Ando
             </span>
           </Link>
 

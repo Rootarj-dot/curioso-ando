@@ -65,7 +65,7 @@ export default function AdminDashboard() {
           <h1 className="font-bold text-2xl" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
             Dashboard
           </h1>
-          <p style={{ color: "#6B6B6B" }}>Bienvenido al panel de administración de Curioso Ando.</p>
+          <p style={{ color: "#6B6B6B" }}>Bienvenido al panel de administración de Curioseando Ando.</p>
         </div>
 
         {/* Stats */}
@@ -161,7 +161,7 @@ export default function AdminDashboard() {
                 type="text"
                 value={bannerTitle}
                 onChange={(e) => setBannerTitle(e.target.value)}
-                placeholder="Curioso Ando"
+                placeholder="Curioseando Ando"
                 className="w-full px-3 py-2 rounded-lg text-sm outline-none"
                 style={{ background: "#F8F7F4", border: "1px solid #E5E3DE", color: "#1A1A1A" }}
               />

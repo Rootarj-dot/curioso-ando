@@ -40,7 +40,7 @@ export default function Home() {
 
   // SEO meta tags for home page
   useSeoMeta({
-    title: "Curioso Ando - Blog de Noticias",
+    title: "Curioseando Ando - Blog de Noticias",
     description: "Datos raros, curiosos y sorprendentes. Noticias, entretenimiento, geek y tecnología en un solo lugar.",
     url: window.location.origin,
     type: "website",
@@ -179,7 +179,7 @@ export default function Home() {
             <div className="max-w-3xl">
               <span className="ca-badge mb-4">Portal de Noticias</span>
               <h1 className="text-white font-bold text-4xl md:text-5xl leading-tight mb-3" style={{ fontFamily: "Poppins, sans-serif" }}>
-                {bannerConfig?.title || "Curioso Ando"}
+                {bannerConfig?.title || "Curioseando Ando"}
               </h1>
               {bannerConfig?.subtitle && (
                 <p className="text-base md:text-lg" style={{ color: "#D0C0FF" }}>
@@ -234,7 +234,7 @@ export default function Home() {
               <div className="lg:sticky lg:top-24 flex flex-col gap-6">
                 <div className="ca-card p-5">
                   <h3 className="font-bold text-base mb-3" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
-                    Sobre Curioso Ando
+                    Sobre Curioseando Ando
                   </h3>
                   <p className="text-sm" style={{ color: "#6B6B6B" }}>
                     Datos raros, curiosos y sorprendentes en un scroll. Aprende, ríe y di "¡no lo sabía!".

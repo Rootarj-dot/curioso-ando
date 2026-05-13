@@ -193,7 +193,7 @@ export default function ArticlePage() {
 
   // Dynamic SEO meta tags + JSON-LD for this article
   const ogImage = article?.ogImage || article?.featuredImage || "";
-  const ogTitle = article?.ogTitle || article?.title || "Curioso Ando";
+  const ogTitle = article?.ogTitle || article?.title || "Curioseando Ando";
   const ogDesc = article?.ogDescription || article?.excerpt || "";
   const ogUrl = article ? `${window.location.origin}/articulo/${article.slug}` : window.location.href;
 
@@ -210,10 +210,10 @@ export default function ArticlePage() {
       "image": ogImage ? [ogImage] : undefined,
       "datePublished": article.publishedAt ? new Date(article.publishedAt).toISOString() : undefined,
       "dateModified": article.updatedAt ? new Date(article.updatedAt).toISOString() : undefined,
-      "author": { "@type": "Person", "name": article.authorName || "Curioso Ando" },
+      "author": { "@type": "Person", "name": article.authorName || "Curioseando Ando" },
       "publisher": {
         "@type": "Organization",
-        "name": "Curioso Ando",
+        "name": "Curioseando Ando",
         "url": "https://curiosoando.manus.space"
       },
       "mainEntityOfPage": { "@type": "WebPage", "@id": ogUrl },

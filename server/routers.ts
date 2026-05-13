@@ -326,9 +326,9 @@ export const appRouter = router({
     // Get banner config
     getBanner: publicProcedure.query(async () => {
       const raw = await getSiteConfigValue("hero_banner");
-      if (!raw) return { title: "Curioso Ando", subtitle: "Datos raros, curiosos y sorprendentes. Noticias, entretenimiento, geek y tecnolog\u00eda en un solo lugar.", bgColor: "" };
+      if (!raw) return { title: "Curioseando Ando", subtitle: "Datos raros, curiosos y sorprendentes. Noticias, entretenimiento, geek y tecnolog\u00eda en un solo lugar.", bgColor: "" };
       try { return JSON.parse(raw) as { title: string; subtitle: string; bgColor: string }; }
-      catch { return { title: "Curioso Ando", subtitle: "", bgColor: "" }; }
+      catch { return { title: "Curioseando Ando", subtitle: "", bgColor: "" }; }
     }),
     // Save banner config
     setBanner: adminProcedure

@@ -38,7 +38,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)" }}>
             <Search className="w-8 h-8 text-white" />
           </div>
-          <h1 className="font-bold text-2xl mb-2" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>Curioso Ando</h1>
+          <h1 className="font-bold text-2xl mb-2" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>Curioseando Ando</h1>
           <p className="mb-6" style={{ color: "#6B6B6B" }}>Debes iniciar sesión para acceder al panel.</p>
           <a
             href={getLoginUrl()}
@@ -61,7 +61,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             <Search className="w-4 h-4 text-white" />
           </div>
           <div>
-            <p className="font-bold text-sm" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>Curioso Ando</p>
+            <p className="font-bold text-sm" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>Curioseando Ando</p>
             <p className="text-xs" style={{ color: "#6B6B6B" }}>Panel Admin</p>
           </div>
         </div>
