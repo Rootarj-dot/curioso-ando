@@ -1,0 +1,9 @@
+{
+  "query": "CREATE TABLE `article_trivia` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`articleId` int NOT NULL,\n\t`pregunta` varchar(500) NOT NULL,\n\t`respuesta` text NOT NULL,\n\t`opcionCorrecta` varchar(255) NOT NULL,\n\t`opcionIncorrecta` varchar(255) NOT NULL,\n\t`icono` varchar(50) DEFAULT 'HelpCircle',\n\t`color` varchar(30) DEFAULT '#7C3AED',\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `article_trivia_id` PRIMARY KEY(`id`)\n);",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user VPX1UD4TNxPsUWM.5f6a1643c048 --database VvgGpyGf3Jb2Riey6L2ysE --execute CREATE TABLE `article_trivia` (\n\t`id` int AUTO_INCREMENT NOT NULL,\n\t`articleId` int NOT NULL,\n\t`pregunta` varchar(500) NOT NULL,\n\t`respuesta` text NOT NULL,\n\t`opcionCorrecta` varchar(255) NOT NULL,\n\t`opcionIncorrecta` varchar(255) NOT NULL,\n\t`icono` varchar(50) DEFAULT 'HelpCircle',\n\t`color` varchar(30) DEFAULT '#7C3AED',\n\t`createdAt` timestamp NOT NULL DEFAULT (now()),\n\t`updatedAt` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,\n\tCONSTRAINT `article_trivia_id` PRIMARY KEY(`id`)\n);",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 358
+}

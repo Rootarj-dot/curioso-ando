@@ -215,7 +215,10 @@ export default function ArticlePage() {
     { enabled: !!article?.categorySlug }
   );
   const { data: sidebarData } = trpc.siteConfig.getSidebarArticleData.useQuery();
-  const { data: datosCuriosos } = trpc.datosCuriosos.listActivos.useQuery({ limit: 5 });
+  const { data: triviaList } = trpc.trivia.listByArticle.useQuery(
+    { articleId: article?.id ?? 0 },
+    { enabled: !!article?.id }
+  );
 
   useEffect(() => {
     if (article) {
@@ -374,15 +377,24 @@ export default function ArticlePage() {
               {/* Sidebar */}
               <aside className="lg:col-span-1">
                 <div className="sticky top-24 flex flex-col gap-6">
-                  {/* Datos Curiosos — CuriousCards futuristas */}
-                  {datosCuriosos && datosCuriosos.length > 0 && (
+                  {/* Trivia del artículo */}
+                  {triviaList && triviaList.length > 0 && (
                     <div>
                       <h3 className="font-bold text-sm mb-3 uppercase tracking-wide" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
-                        Datos Curiosos
+                        ¿Cuánto sabes?
                       </h3>
                       <div className="flex flex-col gap-3">
-                        {datosCuriosos.map((d) => (
-                          <CuriousCard key={d.id} titulo={d.titulo} contenido={d.contenido} icono={d.icono} color={d.color} />
+                        {triviaList.map((t) => (
+                          <CuriousCard
+                            key={t.id}
+                            id={t.id}
+                            pregunta={t.pregunta}
+                            respuesta={t.respuesta}
+                            opcionCorrecta={t.opcionCorrecta}
+                            opcionIncorrecta={t.opcionIncorrecta}
+                            icono={t.icono}
+                            color={t.color}
+                          />
                         ))}
                       </div>
                     </div>

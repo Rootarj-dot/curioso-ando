@@ -34,6 +34,10 @@ import {
   createDatoCurioso,
   updateDatoCurioso,
   deleteDatoCurioso,
+  getTriviaByArticle,
+  createTrivia,
+  updateTrivia,
+  deleteTrivia,
 } from "./db";
 import { uploadToCloudinary, deleteFromCloudinary } from "./cloudinaryStorage";
 import { nanoid } from "nanoid";
@@ -389,6 +393,52 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         await deleteDatoCurioso(input.id);
+        return { success: true };
+      }),
+  }),
+
+  // ─── Article Trivia ───────────────────────────────────────────────────────
+  trivia: router({
+    // Pública: obtener trivia de un artículo
+    listByArticle: publicProcedure
+      .input(z.object({ articleId: z.number() }))
+      .query(async ({ input }) => {
+        return getTriviaByArticle(input.articleId);
+      }),
+    // Admin: crear trivia para un artículo
+    create: adminProcedure
+      .input(z.object({
+        articleId: z.number(),
+        pregunta: z.string().min(1).max(500),
+        respuesta: z.string().min(1),
+        opcionCorrecta: z.string().min(1).max(255),
+        opcionIncorrecta: z.string().min(1).max(255),
+        icono: z.string().max(50).optional(),
+        color: z.string().max(30).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return createTrivia(input);
+      }),
+    // Admin: actualizar trivia
+    update: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        pregunta: z.string().min(1).max(500).optional(),
+        respuesta: z.string().min(1).optional(),
+        opcionCorrecta: z.string().min(1).max(255).optional(),
+        opcionIncorrecta: z.string().min(1).max(255).optional(),
+        icono: z.string().max(50).optional(),
+        color: z.string().max(30).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        return updateTrivia(id, data);
+      }),
+    // Admin: eliminar trivia
+    delete: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await deleteTrivia(input.id);
         return { success: true };
       }),
   }),

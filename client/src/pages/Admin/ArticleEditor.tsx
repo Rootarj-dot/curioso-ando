@@ -7,6 +7,7 @@ import { MediaGallery } from "@/components/MediaGallery";
 import { toast } from "sonner";
 import { Save, Eye, ArrowLeft, Image as ImageIcon } from "lucide-react";
 import { SidebarArticlesPanel } from "@/components/Admin/SidebarArticlesPanel";
+import { TriviaEditor } from "@/components/Admin/TriviaEditor";
 import type { LexicalEditor } from "lexical";
 
 export default function ArticleEditor() {
@@ -385,6 +386,11 @@ export default function ArticleEditor() {
                 </div>
               </div>
             </div>
+
+            {/* Trivia Editor — solo visible cuando se edita un artículo existente */}
+            {isEditing && articleId && (
+              <TriviaEditor articleId={articleId} />
+            )}
 
             {/* Sidebar Articles Panel */}
             <SidebarArticlesPanel />

@@ -85,6 +85,23 @@ export const siteConfig = mysqlTable("site_config", {
 });
 export type SiteConfig = typeof siteConfig.$inferSelect;
 
+// ─── Article Trivia ─────────────────────────────────────────────────────────────────────────────
+export const articleTrivia = mysqlTable("article_trivia", {
+  id: int("id").autoincrement().primaryKey(),
+  articleId: int("articleId").notNull(),
+  pregunta: varchar("pregunta", { length: 500 }).notNull(),
+  respuesta: text("respuesta").notNull(),
+  opcionCorrecta: varchar("opcionCorrecta", { length: 255 }).notNull(),
+  opcionIncorrecta: varchar("opcionIncorrecta", { length: 255 }).notNull(),
+  icono: varchar("icono", { length: 50 }).default("HelpCircle"),
+  color: varchar("color", { length: 30 }).default("#7C3AED"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ArticleTrivia = typeof articleTrivia.$inferSelect;
+export type InsertArticleTrivia = typeof articleTrivia.$inferInsert;
+
 // ─── Datos Curiosos ─────────────────────────────────────────────────────────────────────────────
 export const datosCuriosos = mysqlTable("datos_curiosos", {
   id: int("id").autoincrement().primaryKey(),

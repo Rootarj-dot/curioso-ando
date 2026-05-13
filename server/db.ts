@@ -1,6 +1,6 @@
 import { eq, desc, and, like, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, articles, categories, media, InsertArticle, InsertMedia, datosCuriosos } from "../drizzle/schema";
+import { InsertUser, users, articles, categories, media, InsertArticle, InsertMedia, datosCuriosos, articleTrivia } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -478,4 +478,50 @@ export async function deleteDatoCurioso(id: number) {
   const db = await getDb();
   if (!db) throw new Error("DB not available");
   await db.delete(datosCuriosos).where(eq(datosCuriosos.id, id));
+}
+
+// ─── Article Trivia ───────────────────────────────────────────────────────────
+
+export async function getTriviaByArticle(articleId: number) {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(articleTrivia).where(eq(articleTrivia.articleId, articleId)).orderBy(articleTrivia.createdAt);
+}
+
+export async function createTrivia(data: { articleId: number; pregunta: string; respuesta: string; opcionCorrecta: string; opcionIncorrecta: string; icono?: string; color?: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("DB not available");
+  const now = toMysqlDatetime(new Date());
+  const icono = data.icono || "HelpCircle";
+  const color = data.color || "#7C3AED";
+  // Use raw SQL to avoid Drizzle generating DEFAULT keyword for id (incompatible with MariaDB 10.4)
+  await db.execute(
+    sql`INSERT INTO article_trivia (articleId, pregunta, respuesta, opcionCorrecta, opcionIncorrecta, icono, color, createdAt, updatedAt)
+        VALUES (${data.articleId}, ${data.pregunta}, ${data.respuesta}, ${data.opcionCorrecta}, ${data.opcionIncorrecta}, ${icono}, ${color}, ${now}, ${now})`
+  );
+  const rows = await db.select().from(articleTrivia)
+    .where(eq(articleTrivia.articleId, data.articleId))
+    .orderBy(desc(articleTrivia.createdAt))
+    .limit(1);
+  return rows[0];
+}
+
+export async function updateTrivia(id: number, data: Partial<{ pregunta: string; respuesta: string; opcionCorrecta: string; opcionIncorrecta: string; icono: string; color: string }>) {
+  const db = await getDb();
+  if (!db) throw new Error("DB not available");
+  await db.update(articleTrivia).set({ ...data, updatedAt: toMysqlDatetime(new Date()) as unknown as Date }).where(eq(articleTrivia.id, id));
+  const rows = await db.select().from(articleTrivia).where(eq(articleTrivia.id, id)).limit(1);
+  return rows[0];
+}
+
+export async function deleteTrivia(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB not available");
+  await db.delete(articleTrivia).where(eq(articleTrivia.id, id));
+}
+
+export async function deleteTriviaByArticle(articleId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB not available");
+  await db.delete(articleTrivia).where(eq(articleTrivia.articleId, articleId));
 }

@@ -114,3 +114,12 @@
 - [x] Página AdminDatosCuriosos con CRUD completo en panel admin
 - [x] FlipCards en sidebar de artículos muestran datos curiosos (no artículos recientes)
 - [x] Al hacer clic en FlipCard: animación de giro + modal con fondo degradado negro/gris
+
+## Sistema de Trivia por Artículo
+- [x] Tabla article_trivia en DB (id, articleId, pregunta, respuesta, opcionCorrecta, opcionIncorrecta, icono, color)
+- [x] Helpers CRUD en db.ts: getTriviaByArticle, createTrivia, updateTrivia, deleteTrivia
+- [x] Procedimientos tRPC: trivia.listByArticle (público), trivia.create/update/delete (admin)
+- [x] Componente TriviaEditor integrado en el sidebar del editor de artículos (solo al editar)
+- [x] Rediseño de CuriousCard: frente muestra pregunta, reverso muestra respuesta pixelada + 2 opciones
+- [x] Feedback de acierto/error al responder la trivia
+- [x] ArticlePage carga trivia del artículo actual (no datos curiosos genéricos)
