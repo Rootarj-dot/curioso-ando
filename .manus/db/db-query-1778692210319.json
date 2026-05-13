@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE datos_curiosos MODIFY COLUMN icono VARCHAR(50) DEFAULT 'Lightbulb';",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway06.us-east-1.prod.aws.tidbcloud.com --port 4000 --user VPX1UD4TNxPsUWM.5f6a1643c048 --database VvgGpyGf3Jb2Riey6L2ysE --execute ALTER TABLE datos_curiosos MODIFY COLUMN icono VARCHAR(50) DEFAULT 'Lightbulb';",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 342
+}
