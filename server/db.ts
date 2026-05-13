@@ -449,12 +449,15 @@ export async function getActiveDatosCuriosos(limit = 5) {
 export async function createDatoCurioso(data: { titulo: string; contenido: string; icono?: string; color?: string }) {
   const db = await getDb();
   if (!db) throw new Error("DB not available");
+  const now = new Date();
   await db.insert(datosCuriosos).values({
     titulo: data.titulo,
     contenido: data.contenido,
     icono: data.icono || "Lightbulb",
     color: data.color || "#7C3AED",
     activo: true,
+    createdAt: now,
+    updatedAt: now,
   });
   const rows = await db.select().from(datosCuriosos).orderBy(desc(datosCuriosos.createdAt)).limit(1);
   return rows[0];
@@ -463,7 +466,7 @@ export async function createDatoCurioso(data: { titulo: string; contenido: strin
 export async function updateDatoCurioso(id: number, data: Partial<{ titulo: string; contenido: string; icono: string; color: string; activo: boolean }>) {
   const db = await getDb();
   if (!db) throw new Error("DB not available");
-  await db.update(datosCuriosos).set(data).where(eq(datosCuriosos.id, id));
+  await db.update(datosCuriosos).set({ ...data, updatedAt: new Date() }).where(eq(datosCuriosos.id, id));
   const rows = await db.select().from(datosCuriosos).where(eq(datosCuriosos.id, id)).limit(1);
   return rows[0];
 }
