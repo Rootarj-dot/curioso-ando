@@ -1,6 +1,6 @@
 import { eq, desc, and, like, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, articles, categories, media, InsertArticle, InsertMedia } from "../drizzle/schema";
+import { InsertUser, users, articles, categories, media, InsertArticle, InsertMedia, datosCuriosos } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -425,4 +425,51 @@ export async function clearFeaturedArticle() {
   const db = await getDb();
   if (!db) throw new Error("DB not available");
   await db.update(articles).set({ featured: false });
+}
+
+// ─── Datos Curiosos ─────────────────────────────────────────────────────────────────────────────
+
+export async function getAllDatosCuriosos() {
+  const db = await getDb();
+  if (!db) return [];
+  return db.select().from(datosCuriosos).orderBy(desc(datosCuriosos.createdAt));
+}
+
+export async function getActiveDatosCuriosos(limit = 5) {
+  const db = await getDb();
+  if (!db) return [];
+  return db
+    .select()
+    .from(datosCuriosos)
+    .where(eq(datosCuriosos.activo, true))
+    .orderBy(sql`RAND()`)
+    .limit(limit);
+}
+
+export async function createDatoCurioso(data: { titulo: string; contenido: string; icono?: string; color?: string }) {
+  const db = await getDb();
+  if (!db) throw new Error("DB not available");
+  await db.insert(datosCuriosos).values({
+    titulo: data.titulo,
+    contenido: data.contenido,
+    icono: data.icono || "💡",
+    color: data.color || "#7C3AED",
+    activo: true,
+  });
+  const rows = await db.select().from(datosCuriosos).orderBy(desc(datosCuriosos.createdAt)).limit(1);
+  return rows[0];
+}
+
+export async function updateDatoCurioso(id: number, data: Partial<{ titulo: string; contenido: string; icono: string; color: string; activo: boolean }>) {
+  const db = await getDb();
+  if (!db) throw new Error("DB not available");
+  await db.update(datosCuriosos).set(data).where(eq(datosCuriosos.id, id));
+  const rows = await db.select().from(datosCuriosos).where(eq(datosCuriosos.id, id)).limit(1);
+  return rows[0];
+}
+
+export async function deleteDatoCurioso(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("DB not available");
+  await db.delete(datosCuriosos).where(eq(datosCuriosos.id, id));
 }

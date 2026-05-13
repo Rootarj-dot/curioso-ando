@@ -29,6 +29,11 @@ import {
   setFeaturedArticle,
   clearFeaturedArticle,
   searchArticles,
+  getAllDatosCuriosos,
+  getActiveDatosCuriosos,
+  createDatoCurioso,
+  updateDatoCurioso,
+  deleteDatoCurioso,
 } from "./db";
 import { uploadToCloudinary, deleteFromCloudinary } from "./cloudinaryStorage";
 import { nanoid } from "nanoid";
@@ -340,6 +345,50 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         await setSiteConfigValue("sidebar_articles", JSON.stringify(input));
+        return { success: true };
+      }),
+  }),
+  datosCuriosos: router({
+    // Pública: obtener datos curiosos activos (aleatorios) para el sidebar
+    listActivos: publicProcedure
+      .input(z.object({ limit: z.number().min(1).max(20).optional() }))
+      .query(async ({ input }) => {
+        return getActiveDatosCuriosos(input.limit ?? 5);
+      }),
+    // Admin: listar todos
+    listAll: adminProcedure.query(async () => {
+      return getAllDatosCuriosos();
+    }),
+    // Admin: crear
+    create: adminProcedure
+      .input(z.object({
+        titulo: z.string().min(1).max(255),
+        contenido: z.string().min(1),
+        icono: z.string().max(10).optional(),
+        color: z.string().max(30).optional(),
+      }))
+      .mutation(async ({ input }) => {
+        return createDatoCurioso(input);
+      }),
+    // Admin: actualizar
+    update: adminProcedure
+      .input(z.object({
+        id: z.number(),
+        titulo: z.string().min(1).max(255).optional(),
+        contenido: z.string().min(1).optional(),
+        icono: z.string().max(10).optional(),
+        color: z.string().max(30).optional(),
+        activo: z.boolean().optional(),
+      }))
+      .mutation(async ({ input }) => {
+        const { id, ...data } = input;
+        return updateDatoCurioso(id, data);
+      }),
+    // Admin: eliminar
+    delete: adminProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await deleteDatoCurioso(input.id);
         return { success: true };
       }),
   }),

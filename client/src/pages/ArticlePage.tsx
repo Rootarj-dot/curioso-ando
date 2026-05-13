@@ -5,7 +5,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArticleCard } from "@/components/ArticleCard";
 import { Calendar, User, ArrowLeft, Facebook } from "lucide-react";
-import { FlipCard } from "@/components/FlipCard";
+import { CuriousCard } from "@/components/CuriousCard";
 
 function formatDate(date: Date | null | undefined): string {
   if (!date) return "";
@@ -215,6 +215,7 @@ export default function ArticlePage() {
     { enabled: !!article?.categorySlug }
   );
   const { data: sidebarData } = trpc.siteConfig.getSidebarArticleData.useQuery();
+  const { data: datosCuriosos } = trpc.datosCuriosos.listActivos.useQuery({ limit: 5 });
 
   useEffect(() => {
     if (article) {
@@ -373,15 +374,15 @@ export default function ArticlePage() {
               {/* Sidebar */}
               <aside className="lg:col-span-1">
                 <div className="sticky top-24 flex flex-col gap-6">
-                  {/* Recientes — FlipCards futuristas */}
-                  {sidebarData && sidebarData.recentArticles.length > 0 && (
+                  {/* Datos Curiosos — CuriousCards futuristas */}
+                  {datosCuriosos && datosCuriosos.length > 0 && (
                     <div>
                       <h3 className="font-bold text-sm mb-3 uppercase tracking-wide" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
-                        Recientes
+                        Datos Curiosos
                       </h3>
                       <div className="flex flex-col gap-3">
-                        {sidebarData.recentArticles.map((a) => (
-                          <FlipCard key={a.id} {...a} />
+                        {datosCuriosos.map((d) => (
+                          <CuriousCard key={d.id} titulo={d.titulo} contenido={d.contenido} icono={d.icono} color={d.color} />
                         ))}
                       </div>
                     </div>
