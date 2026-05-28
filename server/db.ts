@@ -5,16 +5,37 @@ import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
+function getErrorDiagnostic(error: unknown) {
+  const parts: string[] = [];
+  let current = error as any;
+  let depth = 0;
+
+  while (current && depth < 5) {
+    const prefix = depth === 0 ? "error" : `cause${depth}`;
+    const ownProps = Object.getOwnPropertyNames(current).filter((prop) => prop !== "stack");
+    parts.push(
+      `${prefix}:`,
+      "name=", current?.name ?? "",
+      "code=", current?.code ?? "",
+      "errno=", current?.errno ?? "",
+      "sqlState=", current?.sqlState ?? "",
+      "fatal=", current?.fatal ?? "",
+      "message=", current?.message ?? "",
+      "sqlMessage=", current?.sqlMessage ?? "",
+      "sql=", current?.sql ?? "",
+      "ownProps=", ownProps.join(",")
+    );
+    current = current?.cause;
+    depth += 1;
+  }
+
+  return parts.join(" ");
+}
+
 function logDatabaseError(context: string, error: unknown) {
   const err = error as any;
-  console.error(
-    `[Database] ❌ ${context}:`,
-    "code=", err?.code ?? "",
-    "errno=", err?.errno ?? "",
-    "message=", err?.message ?? "",
-    "sqlMessage=", err?.sqlMessage ?? "",
-    "stack=", err?.stack ?? ""
-  );
+  console.error(`[Database] ❌ ${context}: ${getErrorDiagnostic(error)}`);
+  if (err?.stack) console.error(`[Database] ❌ ${context} stack:`, err.stack);
 }
 
 export async function getDb() {
