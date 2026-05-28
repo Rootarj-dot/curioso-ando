@@ -1,9 +1,12 @@
 import { eq, desc, and, like, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
+import { createHash } from "node:crypto";
+import mysql from "mysql2/promise";
 import { InsertUser, users, articles, categories, media, InsertArticle, InsertMedia, datosCuriosos, articleTrivia } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
+let _didRunDbDiagnostics = false;
 
 function getErrorDiagnostic(error: unknown) {
   const parts: string[] = [];
@@ -38,12 +41,50 @@ function logDatabaseError(context: string, error: unknown) {
   if (err?.stack) console.error(`[Database] ❌ ${context} stack:`, err.stack);
 }
 
+function logDatabaseUrlFingerprint(databaseUrl: string) {
+  try {
+    const parsed = new URL(databaseUrl);
+    const passwordHashPrefix = parsed.password
+      ? createHash("sha256").update(parsed.password).digest("hex").slice(0, 10)
+      : "none";
+    console.log(
+      "[Database] URL parts:",
+      "protocol=", parsed.protocol.replace(":", ""),
+      "host=", parsed.hostname,
+      "port=", parsed.port || "default",
+      "database=", parsed.pathname.replace(/^\//, ""),
+      "user=", parsed.username,
+      "passwordLength=", String(parsed.password.length),
+      "passwordHashPrefix=", passwordHashPrefix
+    );
+  } catch (error) {
+    logDatabaseError("DATABASE_URL parse diagnostic error", error);
+  }
+}
+
+async function runDirectMysqlDiagnostic(databaseUrl: string) {
+  try {
+    logDatabaseUrlFingerprint(databaseUrl);
+    const connection = await mysql.createConnection(databaseUrl);
+    await connection.query("select 1 as ok");
+    await connection.end();
+    console.log("[Database] ✅ mysql2 direct connection OK");
+  } catch (error) {
+    logDatabaseError("mysql2 direct connection diagnostic error", error);
+  }
+}
+
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      const urlForLog = (process.env.DATABASE_URL ?? "").replace(/:([^@]+)@/, ":***@");
+      const databaseUrl = process.env.DATABASE_URL;
+      const urlForLog = (databaseUrl ?? "").replace(/:([^@]+)@/, ":***@");
       console.log("[Database] Intentando conectar a:", urlForLog);
-      _db = drizzle(process.env.DATABASE_URL);
+      if (!_didRunDbDiagnostics) {
+        _didRunDbDiagnostics = true;
+        await runDirectMysqlDiagnostic(databaseUrl);
+      }
+      _db = drizzle(databaseUrl);
       console.log("[Database] ✅ Instancia Drizzle creada");
     } catch (error) {
       logDatabaseError("Error al crear instancia Drizzle", error);
