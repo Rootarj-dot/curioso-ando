@@ -5,12 +5,27 @@ import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 
+function logDatabaseError(context: string, error: unknown) {
+  const err = error as any;
+  console.error(
+    `[Database] ❌ ${context}:`,
+    "code=", err?.code ?? "",
+    "errno=", err?.errno ?? "",
+    "message=", err?.message ?? "",
+    "sqlMessage=", err?.sqlMessage ?? "",
+    "stack=", err?.stack ?? ""
+  );
+}
+
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
+      const urlForLog = (process.env.DATABASE_URL ?? "").replace(/:([^@]+)@/, ":***@");
+      console.log("[Database] Intentando conectar a:", urlForLog);
       _db = drizzle(process.env.DATABASE_URL);
+      console.log("[Database] ✅ Instancia Drizzle creada");
     } catch (error) {
-      console.warn("[Database] Failed to connect:", error);
+      logDatabaseError("Error al crear instancia Drizzle", error);
       _db = null;
     }
   }
@@ -48,14 +63,24 @@ export async function upsertUser(user: InsertUser): Promise<void> {
   }
   if (!values.lastSignedIn) values.lastSignedIn = new Date();
   if (Object.keys(updateSet).length === 0) updateSet.lastSignedIn = new Date();
-  await db.insert(users).values(values).onDuplicateKeyUpdate({ set: updateSet });
+  try {
+    await db.insert(users).values(values).onDuplicateKeyUpdate({ set: updateSet });
+  } catch (error) {
+    logDatabaseError("upsertUser query error", error);
+    throw error;
+  }
 }
 
 export async function getUserByOpenId(openId: string) {
   const db = await getDb();
   if (!db) return undefined;
-  const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
-  return result.length > 0 ? result[0] : undefined;
+  try {
+    const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
+    return result.length > 0 ? result[0] : undefined;
+  } catch (error) {
+    logDatabaseError("getUserByOpenId query error", error);
+    throw error;
+  }
 }
 
 // ─── Categories ──────────────────────────────────────────────────────────────
@@ -63,7 +88,12 @@ export async function getUserByOpenId(openId: string) {
 export async function getAllCategories() {
   const db = await getDb();
   if (!db) return [];
-  return db.select().from(categories).orderBy(categories.name);
+  try {
+    return await db.select().from(categories).orderBy(categories.name);
+  } catch (error) {
+    logDatabaseError("getAllCategories query error", error);
+    throw error;
+  }
 }
 
 // ─── Articles ────────────────────────────────────────────────────────────────
@@ -74,8 +104,36 @@ export async function getPublishedArticles(opts?: { categorySlug?: string; limit
   const limit = opts?.limit ?? 20;
   const offset = opts?.offset ?? 0;
 
-  if (opts?.categorySlug) {
-    return db
+  try {
+    if (opts?.categorySlug) {
+      return await db
+        .select({
+          id: articles.id,
+          title: articles.title,
+          slug: articles.slug,
+          excerpt: articles.excerpt,
+          featuredImage: articles.featuredImage,
+          ogImage: articles.ogImage,
+          status: articles.status,
+          featured: articles.featured,
+          publishedAt: articles.publishedAt,
+          createdAt: articles.createdAt,
+          categoryId: articles.categoryId,
+          categoryName: categories.name,
+          categorySlug: categories.slug,
+          authorId: articles.authorId,
+          authorName: users.name,
+        })
+        .from(articles)
+        .leftJoin(categories, eq(articles.categoryId, categories.id))
+        .leftJoin(users, eq(articles.authorId, users.id))
+        .where(and(eq(articles.status, "published"), eq(categories.slug, opts.categorySlug)))
+        .orderBy(desc(articles.publishedAt))
+        .limit(limit)
+        .offset(offset);
+    }
+
+    return await db
       .select({
         id: articles.id,
         title: articles.title,
@@ -96,37 +154,14 @@ export async function getPublishedArticles(opts?: { categorySlug?: string; limit
       .from(articles)
       .leftJoin(categories, eq(articles.categoryId, categories.id))
       .leftJoin(users, eq(articles.authorId, users.id))
-      .where(and(eq(articles.status, "published"), eq(categories.slug, opts.categorySlug)))
+      .where(eq(articles.status, "published"))
       .orderBy(desc(articles.publishedAt))
       .limit(limit)
       .offset(offset);
+  } catch (error) {
+    logDatabaseError("getPublishedArticles query error", error);
+    throw error;
   }
-
-  return db
-    .select({
-      id: articles.id,
-      title: articles.title,
-      slug: articles.slug,
-      excerpt: articles.excerpt,
-      featuredImage: articles.featuredImage,
-      ogImage: articles.ogImage,
-      status: articles.status,
-      featured: articles.featured,
-      publishedAt: articles.publishedAt,
-      createdAt: articles.createdAt,
-      categoryId: articles.categoryId,
-      categoryName: categories.name,
-      categorySlug: categories.slug,
-      authorId: articles.authorId,
-      authorName: users.name,
-    })
-    .from(articles)
-    .leftJoin(categories, eq(articles.categoryId, categories.id))
-    .leftJoin(users, eq(articles.authorId, users.id))
-    .where(eq(articles.status, "published"))
-    .orderBy(desc(articles.publishedAt))
-    .limit(limit)
-    .offset(offset);
 }
 
 export async function getFeaturedArticle() {
