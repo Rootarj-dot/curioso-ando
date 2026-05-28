@@ -169,7 +169,7 @@ export function Navbar() {
               <NavSearch />
             </div>
 
-            {isAuthenticated ? (
+            {user?.role === 'admin' ? (
               <Link
                 href="/admin"
                 className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium no-underline"
@@ -226,7 +226,7 @@ export function Navbar() {
               </Link>
             ))}
             <div className="border-t mt-2 pt-2" style={{ borderColor: "#E5E3DE" }}>
-              {isAuthenticated ? (
+              {user?.role === 'admin' ? (
                 <Link
                   href="/admin"
                   className="px-4 py-2.5 rounded-md text-sm font-medium no-underline flex items-center gap-2"
