@@ -525,3 +525,25 @@ export async function deleteTriviaByArticle(articleId: number) {
   if (!db) throw new Error("DB not available");
   await db.delete(articleTrivia).where(eq(articleTrivia.articleId, articleId));
 }
+
+// ─── Admin: Recent Users ─────────────────────────────────────────────────────
+
+export async function getRecentUsers(limit: number = 20) {
+  const db = await getDb();
+  if (!db) return [];
+  const rows = await db
+    .select({
+      id: users.id,
+      openId: users.openId,
+      name: users.name,
+      email: users.email,
+      role: users.role,
+      loginMethod: users.loginMethod,
+      createdAt: users.createdAt,
+      lastSignedIn: users.lastSignedIn,
+    })
+    .from(users)
+    .orderBy(desc(users.createdAt))
+    .limit(limit);
+  return rows;
+}
