@@ -51,12 +51,19 @@ export function setupGoogleAuth(app: Express) {
 
   app.use(passport.initialize());
 
+  // Construir la URL de callback usando APP_PUBLIC_URL si está disponible
+  const appPublicUrl = (process.env.APP_PUBLIC_URL ?? "").replace(/\/$/, "");
+  const callbackURL = appPublicUrl
+    ? `${appPublicUrl}/api/auth/google/callback`
+    : "/api/auth/google/callback";
+  console.log("[GoogleAuth] callbackURL:", callbackURL);
+
   passport.use(
     new GoogleStrategy(
       {
         clientID: GOOGLE_CLIENT_ID,
         clientSecret: GOOGLE_CLIENT_SECRET,
-        callbackURL: "/api/auth/google/callback",
+        callbackURL,
         passReqToCallback: false,
       },
       async (_accessToken, _refreshToken, profile, done) => {

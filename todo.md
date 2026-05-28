@@ -131,18 +131,23 @@
 
 ## Optimización SEO / Performance / AdSense (Mayo 2026)
 
-- [ ] SEO: meta tags dinámicos completos (title, description, canonical, OG, Twitter Card)
-- [ ] SEO: sitemap.xml dinámico generado desde la DB
-- [ ] SEO: robots.txt correcto
-- [ ] SEO: JSON-LD structured data (WebSite, Article, BreadcrumbList)
-- [ ] Performance: lazy loading de imágenes con loading="lazy" y decoding="async"
-- [ ] Performance: font-display:swap en Google Fonts
-- [ ] Performance: preconnect a dominios externos (fonts, analytics)
-- [ ] Performance: compresión gzip/brotli en el servidor Express
-- [ ] Performance: cache headers para assets estáticos
-- [ ] Performance: eliminar console.log en producción
-- [ ] Analytics: slot de Google Analytics (GA4) listo con variable de entorno
-- [ ] AdSense: slots de anuncios preparados con variable de entorno para el Publisher ID
+- [x] SEO: meta tags dinámicos completos (title, description, canonical, OG, Twitter Card)
+- [x] SEO: sitemap.xml dinámico generado desde la DB
+- [x] SEO: robots.txt correcto
+- [x] SEO: JSON-LD structured data (WebSite, Article, BreadcrumbList)
+- [x] Performance: lazy loading de imágenes con loading="lazy" y decoding="async"
+- [x] Performance: font-display:swap en Google Fonts
+- [x] Performance: preconnect a dominios externos (fonts, analytics)
+- [x] Performance: compresión gzip/brotli en el servidor Express
+- [x] Performance: cache headers para assets estáticos
+- [x] Analytics: slot de Google Analytics (GA4) listo con variable de entorno
+- [x] AdSense: slots de anuncios preparados con variable de entorno para el Publisher ID
+
+## Build y Deployment (Mayo 2026)
+
+- [x] Fix error de build: @lexical/react v0.44.0 sin especificador "." en exports → eliminado de manualChunks
+- [x] Tabla de últimos usuarios registrados en panel admin con búsqueda y filtros
+- [x] Gestión de roles integrada en la misma página de usuarios
 - [ ] Accesibilidad: aria-labels en botones sin texto, roles correctos
 - [ ] Accesibilidad: CLS fix en imágenes (width/height explícitos)
 - [ ] Accesibilidad: LCP optimization (preload de imagen hero)

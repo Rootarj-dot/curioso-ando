@@ -38,6 +38,7 @@ import {
   createTrivia,
   updateTrivia,
   deleteTrivia,
+  getRecentUsers,
 } from "./db";
 import { uploadToCloudinary, deleteFromCloudinary } from "./cloudinaryStorage";
 import { nanoid } from "nanoid";
@@ -296,6 +297,11 @@ export const appRouter = router({
         }
         await updateUserRole(input.id, input.role);
         return { success: true };
+      }),
+    recentList: adminProcedure
+      .input(z.object({ limit: z.number().min(1).max(100).optional() }))
+      .query(async ({ input }) => {
+        return await getRecentUsers(input.limit ?? 20);
       }),
   }),
 

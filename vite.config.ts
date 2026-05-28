@@ -172,6 +172,9 @@ export default defineConfig({
     rollupOptions: {
       output: {
         // Manual chunk splitting for better caching
+        // NOTE: @lexical/react v0.44.0 does NOT have a "." export specifier,
+        // so it CANNOT be listed here. Only list subpackages that have their
+        // own entry points (e.g. @lexical/rich-text, @lexical/list, etc.)
         manualChunks: {
           "vendor-react": ["react", "react-dom"],
           "vendor-trpc": ["@trpc/client", "@trpc/react-query", "@tanstack/react-query"],
@@ -182,7 +185,15 @@ export default defineConfig({
             "@radix-ui/react-tabs",
             "@radix-ui/react-tooltip",
           ],
-          "vendor-editor": ["@lexical/react", "@lexical/rich-text", "@lexical/list"],
+          "vendor-editor": [
+            "@lexical/rich-text",
+            "@lexical/list",
+            "@lexical/code",
+            "@lexical/history",
+            "@lexical/link",
+            "@lexical/selection",
+            "@lexical/utils",
+          ],
           "vendor-icons": ["lucide-react"],
         },
       },
