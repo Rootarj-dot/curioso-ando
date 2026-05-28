@@ -55,6 +55,9 @@ async function startServer() {
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
+  // Trust proxy headers (needed for correct redirect_uri in Google OAuth behind Cloud Run / reverse proxies)
+  app.set("trust proxy", true);
+
   // Google OAuth 2.0
   setupGoogleAuth(app);
 

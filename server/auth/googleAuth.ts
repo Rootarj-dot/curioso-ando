@@ -57,6 +57,8 @@ export function setupGoogleAuth(app: Express) {
         clientID: GOOGLE_CLIENT_ID,
         clientSecret: GOOGLE_CLIENT_SECRET,
         callbackURL: "/api/auth/google/callback",
+        // proxy: true permite que passport use el header X-Forwarded-Proto para construir la URL
+        proxy: true,
         passReqToCallback: false,
       },
       async (_accessToken, _refreshToken, profile, done) => {
