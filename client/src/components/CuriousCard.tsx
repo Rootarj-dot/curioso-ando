@@ -134,7 +134,7 @@ export function CuriousCard({
               style={{ perspective: "900px", height: flipHeight ? `${flipHeight}px` : undefined, transition: "height 0.45s ease" }}
             >
               <div
-                className="tc-flip-inner"
+                className={`tc-flip-inner${isFlipped ? " tc-is-flipped" : ""}`}
                 style={{ transform: isFlipped ? "rotateY(180deg)" : "rotateY(0deg)" }}
               >
                 {/* FRONT — Opciones */}
@@ -384,6 +384,52 @@ export function CuriousCard({
           width: 100%;
           transform: rotateY(180deg);
           overflow: visible;
+        }
+
+        /* Firefox renders some preserve-3d/backface combinations mirrored.
+           Keep the same modal layout and final appearance, but use a 2D
+           visibility transition only in Firefox to avoid reversed text. */
+        @-moz-document url-prefix() {
+          .tc-flip-wrapper {
+            perspective: none !important;
+          }
+          .tc-flip-inner {
+            transform: none !important;
+            transform-style: flat;
+            transition: none;
+          }
+          .tc-flip-face {
+            backface-visibility: visible;
+            -webkit-backface-visibility: visible;
+            transition: opacity 0.28s ease, visibility 0.28s ease;
+          }
+          .tc-flip-front {
+            position: relative;
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+          }
+          .tc-flip-back {
+            transform: none;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+          }
+          .tc-flip-inner.tc-is-flipped .tc-flip-front {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+          }
+          .tc-flip-inner.tc-is-flipped .tc-flip-back {
+            position: relative;
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+          }
         }
 
         /* ── FRONT face content ── */

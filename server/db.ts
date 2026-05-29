@@ -1,93 +1,16 @@
 import { eq, desc, and, like, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { createHash } from "node:crypto";
-import mysql from "mysql2/promise";
 import { InsertUser, users, articles, categories, media, InsertArticle, InsertMedia, datosCuriosos, articleTrivia } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
-let _didRunDbDiagnostics = false;
-
-function getErrorDiagnostic(error: unknown) {
-  const parts: string[] = [];
-  let current = error as any;
-  let depth = 0;
-
-  while (current && depth < 5) {
-    const prefix = depth === 0 ? "error" : `cause${depth}`;
-    const ownProps = Object.getOwnPropertyNames(current).filter((prop) => prop !== "stack");
-    parts.push(
-      `${prefix}:`,
-      "name=", current?.name ?? "",
-      "code=", current?.code ?? "",
-      "errno=", current?.errno ?? "",
-      "sqlState=", current?.sqlState ?? "",
-      "fatal=", current?.fatal ?? "",
-      "message=", current?.message ?? "",
-      "sqlMessage=", current?.sqlMessage ?? "",
-      "sql=", current?.sql ?? "",
-      "ownProps=", ownProps.join(",")
-    );
-    current = current?.cause;
-    depth += 1;
-  }
-
-  return parts.join(" ");
-}
-
-function logDatabaseError(context: string, error: unknown) {
-  const err = error as any;
-  console.error(`[Database] ❌ ${context}: ${getErrorDiagnostic(error)}`);
-  if (err?.stack) console.error(`[Database] ❌ ${context} stack:`, err.stack);
-}
-
-function logDatabaseUrlFingerprint(databaseUrl: string) {
-  try {
-    const parsed = new URL(databaseUrl);
-    const passwordHashPrefix = parsed.password
-      ? createHash("sha256").update(parsed.password).digest("hex").slice(0, 10)
-      : "none";
-    console.log(
-      "[Database] URL parts:",
-      "protocol=", parsed.protocol.replace(":", ""),
-      "host=", parsed.hostname,
-      "port=", parsed.port || "default",
-      "database=", parsed.pathname.replace(/^\//, ""),
-      "user=", parsed.username,
-      "passwordLength=", String(parsed.password.length),
-      "passwordHashPrefix=", passwordHashPrefix
-    );
-  } catch (error) {
-    logDatabaseError("DATABASE_URL parse diagnostic error", error);
-  }
-}
-
-async function runDirectMysqlDiagnostic(databaseUrl: string) {
-  try {
-    logDatabaseUrlFingerprint(databaseUrl);
-    const connection = await mysql.createConnection(databaseUrl);
-    await connection.query("select 1 as ok");
-    await connection.end();
-    console.log("[Database] ✅ mysql2 direct connection OK");
-  } catch (error) {
-    logDatabaseError("mysql2 direct connection diagnostic error", error);
-  }
-}
 
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      const databaseUrl = process.env.DATABASE_URL;
-      const urlForLog = (databaseUrl ?? "").replace(/:([^@]+)@/, ":***@");
-      console.log("[Database] Intentando conectar a:", urlForLog);
-      if (!_didRunDbDiagnostics) {
-        _didRunDbDiagnostics = true;
-        await runDirectMysqlDiagnostic(databaseUrl);
-      }
-      _db = drizzle(databaseUrl);
-      console.log("[Database] ✅ Instancia Drizzle creada");
+      _db = drizzle(process.env.DATABASE_URL);
     } catch (error) {
-      logDatabaseError("Error al crear instancia Drizzle", error);
+      console.warn("[Database] Failed to connect:", error);
       _db = null;
     }
   }
@@ -125,24 +48,14 @@ export async function upsertUser(user: InsertUser): Promise<void> {
   }
   if (!values.lastSignedIn) values.lastSignedIn = new Date();
   if (Object.keys(updateSet).length === 0) updateSet.lastSignedIn = new Date();
-  try {
-    await db.insert(users).values(values).onDuplicateKeyUpdate({ set: updateSet });
-  } catch (error) {
-    logDatabaseError("upsertUser query error", error);
-    throw error;
-  }
+  await db.insert(users).values(values).onDuplicateKeyUpdate({ set: updateSet });
 }
 
 export async function getUserByOpenId(openId: string) {
   const db = await getDb();
   if (!db) return undefined;
-  try {
-    const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
-    return result.length > 0 ? result[0] : undefined;
-  } catch (error) {
-    logDatabaseError("getUserByOpenId query error", error);
-    throw error;
-  }
+  const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
 }
 
 // ─── Categories ──────────────────────────────────────────────────────────────
@@ -150,12 +63,7 @@ export async function getUserByOpenId(openId: string) {
 export async function getAllCategories() {
   const db = await getDb();
   if (!db) return [];
-  try {
-    return await db.select().from(categories).orderBy(categories.name);
-  } catch (error) {
-    logDatabaseError("getAllCategories query error", error);
-    throw error;
-  }
+  return db.select().from(categories).orderBy(categories.name);
 }
 
 // ─── Articles ────────────────────────────────────────────────────────────────
@@ -166,36 +74,8 @@ export async function getPublishedArticles(opts?: { categorySlug?: string; limit
   const limit = opts?.limit ?? 20;
   const offset = opts?.offset ?? 0;
 
-  try {
-    if (opts?.categorySlug) {
-      return await db
-        .select({
-          id: articles.id,
-          title: articles.title,
-          slug: articles.slug,
-          excerpt: articles.excerpt,
-          featuredImage: articles.featuredImage,
-          ogImage: articles.ogImage,
-          status: articles.status,
-          featured: articles.featured,
-          publishedAt: articles.publishedAt,
-          createdAt: articles.createdAt,
-          categoryId: articles.categoryId,
-          categoryName: categories.name,
-          categorySlug: categories.slug,
-          authorId: articles.authorId,
-          authorName: users.name,
-        })
-        .from(articles)
-        .leftJoin(categories, eq(articles.categoryId, categories.id))
-        .leftJoin(users, eq(articles.authorId, users.id))
-        .where(and(eq(articles.status, "published"), eq(categories.slug, opts.categorySlug)))
-        .orderBy(desc(articles.publishedAt))
-        .limit(limit)
-        .offset(offset);
-    }
-
-    return await db
+  if (opts?.categorySlug) {
+    return db
       .select({
         id: articles.id,
         title: articles.title,
@@ -216,14 +96,37 @@ export async function getPublishedArticles(opts?: { categorySlug?: string; limit
       .from(articles)
       .leftJoin(categories, eq(articles.categoryId, categories.id))
       .leftJoin(users, eq(articles.authorId, users.id))
-      .where(eq(articles.status, "published"))
+      .where(and(eq(articles.status, "published"), eq(categories.slug, opts.categorySlug)))
       .orderBy(desc(articles.publishedAt))
       .limit(limit)
       .offset(offset);
-  } catch (error) {
-    logDatabaseError("getPublishedArticles query error", error);
-    throw error;
   }
+
+  return db
+    .select({
+      id: articles.id,
+      title: articles.title,
+      slug: articles.slug,
+      excerpt: articles.excerpt,
+      featuredImage: articles.featuredImage,
+      ogImage: articles.ogImage,
+      status: articles.status,
+      featured: articles.featured,
+      publishedAt: articles.publishedAt,
+      createdAt: articles.createdAt,
+      categoryId: articles.categoryId,
+      categoryName: categories.name,
+      categorySlug: categories.slug,
+      authorId: articles.authorId,
+      authorName: users.name,
+    })
+    .from(articles)
+    .leftJoin(categories, eq(articles.categoryId, categories.id))
+    .leftJoin(users, eq(articles.authorId, users.id))
+    .where(eq(articles.status, "published"))
+    .orderBy(desc(articles.publishedAt))
+    .limit(limit)
+    .offset(offset);
 }
 
 export async function getFeaturedArticle() {
