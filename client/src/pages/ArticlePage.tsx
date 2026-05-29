@@ -4,7 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArticleCard } from "@/components/ArticleCard";
-import { Calendar, User, ArrowLeft, Facebook } from "lucide-react";
+import { Calendar, ArrowLeft, Facebook } from "lucide-react";
 import { CuriousCard } from "@/components/CuriousCard";
 import { useSeoMeta } from "@/hooks/useSeoMeta";
 
@@ -314,14 +314,6 @@ export default function ArticlePage() {
 
                 {/* Meta */}
                 <div className="flex flex-wrap items-center gap-4 pb-6 mb-6" style={{ borderBottom: "1px solid #E5E3DE" }}>
-                  {article.authorName && (
-                    <span className="flex items-center gap-2 text-sm" style={{ color: "#6B6B6B" }}>
-                      <div className="w-7 h-7 rounded-full flex items-center justify-center" style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)" }}>
-                        <User className="w-3.5 h-3.5 text-white" />
-                      </div>
-                      {article.authorName}
-                    </span>
-                  )}
                   {article.publishedAt && (
                     <span className="flex items-center gap-1.5 text-sm" style={{ color: "#6B6B6B" }}>
                       <Calendar className="w-4 h-4" />

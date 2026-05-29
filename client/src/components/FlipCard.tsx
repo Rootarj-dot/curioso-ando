@@ -20,7 +20,7 @@ function formatDate(ts: Date | number | string | null | undefined) {
   });
 }
 
-export function FlipCard({ slug, title, categoryName, featuredImage, ogImage, publishedAt, authorName }: FlipCardProps) {
+export function FlipCard({ slug, title, categoryName, featuredImage, ogImage, publishedAt }: FlipCardProps) {
   const image = featuredImage || ogImage || "";
 
   return (
@@ -57,7 +57,6 @@ export function FlipCard({ slug, title, categoryName, featuredImage, ogImage, pu
             )}
             <p className="flip-card-back-title">{title}</p>
             <div className="flip-card-back-meta">
-              {authorName && <span>{authorName}</span>}
               {publishedAt && <span>{formatDate(publishedAt)}</span>}
             </div>
             <Link href={`/articulo/${slug}`} className="flip-card-cta no-underline">

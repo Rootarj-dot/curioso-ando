@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Calendar, User } from "lucide-react";
+import { Calendar } from "lucide-react";
 
 interface ArticleCardProps {
   id: number;
@@ -10,7 +10,6 @@ interface ArticleCardProps {
   ogImage?: string | null;
   categoryName?: string | null;
   categorySlug?: string | null;
-  authorName?: string | null;
   publishedAt?: Date | null;
   featured?: boolean;
   size?: "normal" | "large";
@@ -33,7 +32,6 @@ export function ArticleCard({
   ogImage,
   categoryName,
   categorySlug,
-  authorName,
   publishedAt,
   size = "normal",
 }: ArticleCardProps) {
@@ -66,12 +64,6 @@ export function ArticleCard({
               <p className="text-sm mb-3 line-clamp-2" style={{ color: "#E0D8FF" }}>{excerpt}</p>
             )}
             <div className="flex items-center gap-4 text-xs" style={{ color: "#C0B8E8" }}>
-              {authorName && (
-                <span className="flex items-center gap-1">
-                  <User className="w-3 h-3" />
-                  {authorName}
-                </span>
-              )}
               {publishedAt && (
                 <span className="flex items-center gap-1">
                   <Calendar className="w-3 h-3" />
@@ -115,12 +107,6 @@ export function ArticleCard({
             <p className="text-sm mb-3 line-clamp-2 flex-1" style={{ color: "#6B6B6B" }}>{excerpt}</p>
           )}
           <div className="flex items-center gap-3 text-xs mt-auto" style={{ color: "#9B9890" }}>
-            {authorName && (
-              <span className="flex items-center gap-1">
-                <User className="w-3 h-3" />
-                {authorName}
-              </span>
-            )}
             {publishedAt && (
               <span className="flex items-center gap-1 ml-auto">
                 <Calendar className="w-3 h-3" />

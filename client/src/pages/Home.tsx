@@ -3,7 +3,7 @@ import { trpc } from "@/lib/trpc";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArticleCard } from "@/components/ArticleCard";
-import { Clock, AlertCircle, X, TrendingUp, ArrowRight, Calendar, User } from "lucide-react";
+import { Clock, AlertCircle, X, TrendingUp, ArrowRight, Calendar } from "lucide-react";
 import { useState } from "react";
 import { useSeoMeta } from "@/hooks/useSeoMeta";
 
@@ -145,12 +145,6 @@ export default function Home() {
               {/* Meta + CTA */}
               <div className="flex flex-wrap items-center gap-4">
                 <div className="flex items-center gap-3 text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>
-                  {featuredArticle.authorName && (
-                    <span className="flex items-center gap-1">
-                      <User className="w-3.5 h-3.5" />
-                      {featuredArticle.authorName}
-                    </span>
-                  )}
                   {featuredArticle.publishedAt && (
                     <span className="flex items-center gap-1">
                       <Calendar className="w-3.5 h-3.5" />
@@ -193,10 +187,10 @@ export default function Home() {
 
       <main className="flex-1">
         <div className="container py-6 md:py-10">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
+          <div className="max-w-7xl mx-auto">
 
             {/* Main content */}
-            <div className="lg:col-span-3 space-y-8 order-1">
+            <div className="space-y-8">
 
               {/* ── Notas Recientes ───────────────────────────────────── */}
               <section>
@@ -208,15 +202,17 @@ export default function Home() {
                 </div>
 
                 {articlesLoading ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 justify-items-center">
                     {Array.from({ length: 6 }).map((_, i) => (
-                      <div key={i} className="rounded-xl animate-pulse" style={{ height: 280, backgroundColor: "#E5E3DE" }} />
+                      <div key={i} className="w-full max-w-sm rounded-xl animate-pulse" style={{ height: 280, backgroundColor: "#E5E3DE" }} />
                     ))}
                   </div>
                 ) : articles && articles.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 justify-items-center">
                     {articles.map((article) => (
-                      <ArticleCard key={article.id} {...article} />
+                      <div key={article.id} className="w-full max-w-sm">
+                        <ArticleCard {...article} />
+                      </div>
                     ))}
                   </div>
                 ) : (
@@ -228,20 +224,6 @@ export default function Home() {
               </section>
 
             </div>
-
-            {/* Sidebar */}
-            <aside className="lg:col-span-1 order-2 lg:order-2">
-              <div className="lg:sticky lg:top-24 flex flex-col gap-6">
-                <div className="ca-card p-5">
-                  <h3 className="font-bold text-base mb-3" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
-                    Sobre Curioseando Ando
-                  </h3>
-                  <p className="text-sm" style={{ color: "#6B6B6B" }}>
-                    Datos raros, curiosos y sorprendentes en un scroll. Aprende, ríe y di "¡no lo sabía!".
-                  </p>
-                </div>
-              </div>
-            </aside>
 
           </div>
         </div>
