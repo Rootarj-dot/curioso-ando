@@ -58,9 +58,15 @@ export function serveStatic(app: Express) {
     );
   }
 
-  // Normalizar la ruta directa del panel para evitar 404 del hosting/CDN en /admin sin barra.
-  app.get("/admin", (_req, res) => {
-    res.redirect(302, "/admin/");
+  // Normalizar solo la ruta exacta del panel sin barra; /admin/ debe caer al SPA sin redirección.
+  app.use((req, res, next) => {
+    if (req.path === "/admin") {
+      const query = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
+      res.redirect(302, `/admin/${query}`);
+      return;
+    }
+
+    next();
   });
 
   app.use(express.static(distPath));
