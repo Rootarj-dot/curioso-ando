@@ -1,9 +1,62 @@
 import { eq, desc, and, like, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
+import mysql from "mysql2/promise";
 import { InsertUser, users, articles, categories, media, InsertArticle, InsertMedia, datosCuriosos, articleTrivia } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
+let secureAdminRolesMigration: Promise<void> | null = null;
+
+const SECURE_ADMIN_EMAILS = ["shuraand@gmail.com", "mechanicmurry23@gmail.com"];
+
+async function ensureSecureAdminRolesSchema() {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) return;
+
+  secureAdminRolesMigration ??= (async () => {
+    const conn = await mysql.createConnection(databaseUrl);
+    try {
+      const [columns] = await conn.query(
+        `SELECT COLUMN_NAME
+         FROM INFORMATION_SCHEMA.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE()
+           AND TABLE_NAME = 'users'
+           AND COLUMN_NAME = 'accessStatus'
+         LIMIT 1`
+      );
+
+      if (Array.isArray(columns) && columns.length === 0) {
+        await conn.execute(
+          "ALTER TABLE `users` ADD `accessStatus` enum('active','blocked') NOT NULL DEFAULT 'active'"
+        );
+        console.log("[Database] ✅ Columna users.accessStatus creada automáticamente");
+      }
+
+      await conn.execute(
+        `UPDATE \`users\`
+         SET \`role\` = 'user'
+         WHERE \`role\` = 'admin'
+           AND LOWER(COALESCE(\`email\`, '')) NOT IN (?, ?)`,
+        SECURE_ADMIN_EMAILS
+      );
+
+      await conn.execute(
+        `UPDATE \`users\`
+         SET \`role\` = 'admin', \`accessStatus\` = 'active'
+         WHERE LOWER(COALESCE(\`email\`, '')) IN (?, ?)`,
+        SECURE_ADMIN_EMAILS
+      );
+    } catch (error) {
+      secureAdminRolesMigration = null;
+      console.error("[Database] ❌ Error aplicando migración de roles seguros:", error);
+      throw error;
+    } finally {
+      await conn.end();
+    }
+  })();
+
+  await secureAdminRolesMigration;
+}
 
 export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
@@ -23,6 +76,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
   if (!user.openId) throw new Error("User openId is required for upsert");
   const db = await getDb();
   if (!db) return;
+  await ensureSecureAdminRolesSchema();
   const values: InsertUser = { openId: user.openId };
   const updateSet: Record<string, unknown> = {};
   const textFields = ["name", "email", "loginMethod"] as const;
@@ -55,6 +109,7 @@ export async function upsertUser(user: InsertUser): Promise<void> {
 export async function getUserByOpenId(openId: string) {
   const db = await getDb();
   if (!db) return undefined;
+  await ensureSecureAdminRolesSchema();
   const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
   return result.length > 0 ? result[0] : undefined;
 }
@@ -284,6 +339,7 @@ export async function getMediaById(id: number) {
 export async function getAllUsers() {
   const db = await getDb();
   if (!db) return [];
+  await ensureSecureAdminRolesSchema();
   const result = await db.select({
     id: users.id,
     name: users.name,
@@ -306,6 +362,7 @@ export async function updateUserRole(id: number, role: "user" | "admin") {
 export async function updateUserAccessStatus(id: number, accessStatus: "active" | "blocked") {
   const db = await getDb();
   if (!db) return;
+  await ensureSecureAdminRolesSchema();
   await db.update(users).set({ accessStatus }).where(eq(users.id, id));
 }
 
@@ -532,6 +589,7 @@ export async function deleteTriviaByArticle(articleId: number) {
 export async function getRecentUsers(limit: number = 20) {
   const db = await getDb();
   if (!db) return [];
+  await ensureSecureAdminRolesSchema();
   const rows = await db
     .select({
       id: users.id,
