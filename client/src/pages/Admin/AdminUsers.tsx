@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { trpc } from "@/lib/trpc";
 import { AdminLayout } from "./AdminLayout";
-import { Users, Shield, User, Calendar, Mail, RefreshCw, Search, Crown, Clock } from "lucide-react";
+import { Users, Shield, User, Calendar, Mail, RefreshCw, Search, Crown, Clock, Ban, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 
 function formatDate(date: Date | string | null | undefined): string {
@@ -51,9 +51,33 @@ function RoleBadge({ role }: { role: string | null | undefined }) {
   );
 }
 
+function StatusBadge({ accessStatus }: { accessStatus: string | null | undefined }) {
+  if (accessStatus === "blocked") {
+    return (
+      <span
+        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold"
+        style={{ background: "#FEF2F2", color: "#B91C1C", border: "1px solid #FECACA" }}
+      >
+        <Ban className="w-3 h-3" />
+        Bloqueado
+      </span>
+    );
+  }
+  return (
+    <span
+      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium"
+      style={{ background: "#ECFDF5", color: "#047857", border: "1px solid #A7F3D0" }}
+    >
+      <CheckCircle className="w-3 h-3" />
+      Activo
+    </span>
+  );
+}
+
 export default function AdminUsers() {
   const utils = trpc.useUtils();
   const [changingId, setChangingId] = useState<number | null>(null);
+  const [changingStatusId, setChangingStatusId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
   const [recentLimit, setRecentLimit] = useState(10);
 
@@ -81,9 +105,27 @@ export default function AdminUsers() {
     },
   });
 
+  const updateAccessStatusMutation = trpc.users.updateAccessStatus.useMutation({
+    onSuccess: () => {
+      toast.success("Estado de acceso actualizado correctamente");
+      utils.users.list.invalidate();
+      utils.users.recentList.invalidate();
+      setChangingStatusId(null);
+    },
+    onError: (e) => {
+      toast.error("Error: " + e.message);
+      setChangingStatusId(null);
+    },
+  });
+
   const handleRoleChange = (id: number, newRole: "user" | "admin") => {
     setChangingId(id);
     updateRoleMutation.mutate({ id, role: newRole });
+  };
+
+  const handleAccessStatusChange = (id: number, accessStatus: "active" | "blocked") => {
+    setChangingStatusId(id);
+    updateAccessStatusMutation.mutate({ id, accessStatus });
   };
 
   const filteredAll = allUsers?.filter((u) => {
@@ -177,6 +219,7 @@ export default function AdminUsers() {
                       <th className="text-left px-4 py-3 font-semibold text-xs" style={{ color: "#6B6B6B" }}>Usuario</th>
                       <th className="text-left px-4 py-3 font-semibold text-xs hidden md:table-cell" style={{ color: "#6B6B6B" }}>Email</th>
                       <th className="text-left px-4 py-3 font-semibold text-xs" style={{ color: "#6B6B6B" }}>Rol</th>
+                      <th className="text-left px-4 py-3 font-semibold text-xs" style={{ color: "#6B6B6B" }}>Estado</th>
                       <th className="text-left px-4 py-3 font-semibold text-xs hidden sm:table-cell" style={{ color: "#6B6B6B" }}>Fecha de registro</th>
                       <th className="text-left px-4 py-3 font-semibold text-xs hidden lg:table-cell" style={{ color: "#6B6B6B" }}>Último acceso</th>
                     </tr>
@@ -209,6 +252,9 @@ export default function AdminUsers() {
                         </td>
                         <td className="px-4 py-3">
                           <RoleBadge role={user.role} />
+                        </td>
+                        <td className="px-4 py-3">
+                          <StatusBadge accessStatus={user.accessStatus} />
                         </td>
                         <td className="px-4 py-3 hidden sm:table-cell text-xs" style={{ color: "#6B6B6B" }}>
                           {formatDateTime(user.createdAt)}
@@ -248,7 +294,7 @@ export default function AdminUsers() {
           </div>
 
           {/* Role Legend */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
             <div className="p-3 rounded-xl" style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E3DE" }}>
               <div className="flex items-center gap-2 mb-1">
                 <Shield className="w-4 h-4" style={{ color: "#2B037D" }} />
@@ -265,6 +311,15 @@ export default function AdminUsers() {
               </div>
               <p className="text-xs" style={{ color: "#6B6B6B" }}>
                 Solo puede ver el sitio público. Sin acceso al panel de administración.
+              </p>
+            </div>
+            <div className="p-3 rounded-xl" style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E3DE" }}>
+              <div className="flex items-center gap-2 mb-1">
+                <Ban className="w-4 h-4" style={{ color: "#B91C1C" }} />
+                <span className="font-semibold text-sm" style={{ color: "#1A1A1A" }}>Bloqueado</span>
+              </div>
+              <p className="text-xs" style={{ color: "#6B6B6B" }}>
+                Usuario restringido: no puede usar endpoints protegidos ni administrativos.
               </p>
             </div>
           </div>
@@ -295,6 +350,7 @@ export default function AdminUsers() {
                       <th className="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider hidden sm:table-cell" style={{ color: "#6B6B6B" }}>Registrado</th>
                       <th className="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider hidden lg:table-cell" style={{ color: "#6B6B6B" }}>Último acceso</th>
                       <th className="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: "#6B6B6B" }}>Rol</th>
+                      <th className="text-left px-5 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: "#6B6B6B" }}>Estado</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -354,6 +410,29 @@ export default function AdminUsers() {
                             >
                               <option value="user">Usuario</option>
                               <option value="admin">Admin</option>
+                            </select>
+                          )}
+                        </td>
+                        <td className="px-5 py-4">
+                          {changingStatusId === user.id ? (
+                            <div className="flex items-center gap-2">
+                              <RefreshCw className="w-4 h-4 animate-spin" style={{ color: "#B91C1C" }} />
+                              <span className="text-xs" style={{ color: "#6B6B6B" }}>Actualizando...</span>
+                            </div>
+                          ) : (
+                            <select
+                              value={user.accessStatus ?? "active"}
+                              onChange={(e) => handleAccessStatusChange(user.id, e.target.value as "active" | "blocked")}
+                              className="text-sm px-3 py-1.5 rounded-lg border font-medium"
+                              style={{
+                                borderColor: user.accessStatus === "blocked" ? "#B91C1C" : "#D1FAE5",
+                                backgroundColor: user.accessStatus === "blocked" ? "#FEF2F2" : "#ECFDF5",
+                                color: user.accessStatus === "blocked" ? "#B91C1C" : "#047857",
+                                outline: "none",
+                              }}
+                            >
+                              <option value="active">Activo</option>
+                              <option value="blocked">Bloqueado</option>
                             </select>
                           )}
                         </td>

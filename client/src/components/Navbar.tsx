@@ -168,7 +168,7 @@ export function Navbar() {
               <NavSearch />
             </div>
 
-            {user?.role === 'admin' && (
+            {user?.role === 'admin' && user.accessStatus !== 'blocked' && (
               <Link
                 href="/admin"
                 className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium no-underline"
@@ -211,7 +211,7 @@ export function Navbar() {
               </Link>
             ))}
             <div className="border-t mt-2 pt-2" style={{ borderColor: "#E5E3DE" }}>
-              {user?.role === 'admin' && (
+              {user?.role === 'admin' && user.accessStatus !== 'blocked' && (
                 <Link
                   href="/admin"
                   className="px-4 py-2.5 rounded-md text-sm font-medium no-underline flex items-center gap-2"

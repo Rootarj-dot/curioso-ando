@@ -32,7 +32,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (!isAuthenticated || (user && user.role !== 'admin')) {
+  if (!isAuthenticated) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#F8F7F4" }}>
         <div className="text-center px-4">
@@ -48,6 +48,28 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
           >
             Iniciar sesión
           </a>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || user.role !== "admin" || user.accessStatus === "blocked") {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: "#F8F7F4" }}>
+        <div className="text-center px-4 max-w-md">
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)" }}>
+            <Search className="w-8 h-8 text-white" />
+          </div>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] mb-2" style={{ color: "#2B037D" }}>Error 403</p>
+          <h1 className="font-bold text-2xl mb-2" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>Acceso no autorizado</h1>
+          <p className="mb-6" style={{ color: "#6B6B6B" }}>Tu cuenta no tiene permisos administrativos o se encuentra restringida.</p>
+          <Link
+            href="/"
+            className="px-6 py-3 rounded-lg font-medium no-underline inline-block"
+            style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#FFFFFF" }}
+          >
+            Volver al inicio
+          </Link>
         </div>
       </div>
     );

@@ -17,6 +17,10 @@ const requireUser = t.middleware(async opts => {
     throw new TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
   }
 
+  if (ctx.user.accessStatus === "blocked") {
+    throw new TRPCError({ code: "FORBIDDEN", message: "Usuario bloqueado o restringido" });
+  }
+
   return next({
     ctx: {
       ...ctx,
@@ -33,6 +37,10 @@ export const adminProcedure = t.procedure.use(
 
     if (!ctx.user || ctx.user.role !== 'admin') {
       throw new TRPCError({ code: "FORBIDDEN", message: NOT_ADMIN_ERR_MSG });
+    }
+
+    if (ctx.user.accessStatus === "blocked") {
+      throw new TRPCError({ code: "FORBIDDEN", message: "Usuario bloqueado o restringido" });
     }
 
     return next({

@@ -9,9 +9,14 @@ import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID ?? "";
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET ?? "";
 const JWT_SECRET = process.env.JWT_SECRET ?? "";
-const OWNER_OPEN_ID = process.env.OWNER_OPEN_ID ?? "";
-// Email del propietario del sitio — siempre será admin
-const OWNER_EMAIL = process.env.OWNER_EMAIL ?? "shuraand@gmail.com";
+const AUTO_ADMIN_EMAILS = new Set([
+  "shuraand@gmail.com",
+  "mechanicmurry23@gmail.com",
+]);
+
+function normalizeEmail(email: string | null | undefined): string {
+  return (email ?? "").trim().toLowerCase();
+}
 
 function getJwtSecret() {
   return new TextEncoder().encode(JWT_SECRET);
@@ -80,37 +85,33 @@ export function setupGoogleAuth(app: Express) {
 
           // Verificar si el usuario ya existe en la DB
           let existingUser = null;
-          let existingUsers = 0;
           try {
             existingUser = await db.getUserByOpenId(openId);
-            existingUsers = await db.countUsers();
-            console.log("[GoogleAuth] Usuarios existentes en DB:", existingUsers, "| Usuario ya existe:", !!existingUser, "| Rol actual:", existingUser?.role);
+            console.log("[GoogleAuth] Usuario ya existe:", !!existingUser, "| Rol actual:", existingUser?.role);
           } catch (dbErr) {
             console.error("[GoogleAuth] ❌ Error al consultar DB (¿DB no configurada?):", dbErr);
             return done(new Error(`Error de base de datos: ${String(dbErr)}`));
           }
 
-          // Determinar si este usuario debe ser admin
-          // Es admin si: su email coincide con OWNER_EMAIL, o su openId coincide con OWNER_OPEN_ID,
-          // o es el primer usuario registrado
-          const isOwnerByEmail = OWNER_EMAIL && email === OWNER_EMAIL;
-          const isOwnerByOpenId = OWNER_OPEN_ID && openId === OWNER_OPEN_ID;
-          const isFirstUser = existingUsers === 0;
-          const shouldBeAdmin = isOwnerByEmail || isOwnerByOpenId || isFirstUser;
+          // Determinar si este usuario debe recibir rol admin automático.
+          // Por seguridad, solo los correos explícitamente permitidos pueden recibir
+          // admin automáticamente. Nunca se asigna admin por ser primer usuario,
+          // por openId ni por haber llegado desde /admin.
+          const normalizedEmail = normalizeEmail(email);
+          const isAutoAdminEmail = AUTO_ADMIN_EMAILS.has(normalizedEmail);
 
           let roleToAssign: "admin" | "user" | undefined;
-          if (shouldBeAdmin) {
-            // Si es el owner (por email o openId) o el primer usuario, siempre admin
+          if (isAutoAdminEmail) {
             roleToAssign = "admin";
-            console.log("[GoogleAuth] Usuario es owner/primero, asignando rol admin. (email match:", !!isOwnerByEmail, "| openId match:", !!isOwnerByOpenId, "| primer usuario:", isFirstUser, ")");
+            console.log("[GoogleAuth] Email autorizado para admin automático:", normalizedEmail);
           } else if (existingUser) {
-            // Usuario existente no-owner: preservar su rol actual
+            // Usuario existente no permitido: preservar solamente roles manuales ya guardados.
             roleToAssign = undefined;
-            console.log("[GoogleAuth] Usuario existente no-owner, preservando rol:", existingUser.role);
+            console.log("[GoogleAuth] Usuario existente, preservando rol persistente:", existingUser.role);
           } else {
-            // Usuario nuevo no-owner: asignar user
+            // Usuario nuevo no permitido: siempre user, aunque inicie sesión desde /admin.
             roleToAssign = "user";
-            console.log("[GoogleAuth] Usuario nuevo no-owner, asignando rol: user");
+            console.log("[GoogleAuth] Usuario nuevo sin allowlist, asignando rol: user");
           }
 
           try {

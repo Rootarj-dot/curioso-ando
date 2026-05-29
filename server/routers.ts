@@ -3,7 +3,7 @@ import { TRPCError } from "@trpc/server";
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
-import { publicProcedure, protectedProcedure, router } from "./_core/trpc";
+import { adminProcedure, publicProcedure, router } from "./_core/trpc";
 import {
   getAllCategories,
   createCategory,
@@ -23,6 +23,7 @@ import {
   getMediaById,
   getAllUsers,
   updateUserRole,
+  updateUserAccessStatus,
   getSiteConfigValue,
   setSiteConfigValue,
   getArticlesByIds,
@@ -42,22 +43,6 @@ import {
 } from "./db";
 import { uploadToCloudinary, deleteFromCloudinary } from "./cloudinaryStorage";
 import { nanoid } from "nanoid";
-
-// Helper: admin-only guard
-const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.role !== "admin") {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Solo administradores pueden realizar esta acción" });
-  }
-  return next({ ctx });
-});
-
-// Helper: editor or admin
-const editorProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.user.role !== "admin" && ctx.user.role !== "user") {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Acceso denegado" });
-  }
-  return next({ ctx });
-});
 
 function slugify(text: string): string {
   return text
@@ -171,7 +156,7 @@ export const appRouter = router({
       }),
 
     // ─── Admin procedures ──────────────────────────────────────────────────
-    adminList: protectedProcedure.query(async () => {
+    adminList: adminProcedure.query(async () => {
       return getAllArticlesAdmin();
     }),
 
@@ -259,11 +244,11 @@ export const appRouter = router({
   }),
   // ─── Media ──────────────────────────────────────────────────────────────────
   media: router({
-    list: protectedProcedure.query(async ({ ctx }) => {
+    list: adminProcedure.query(async () => {
       return getAllMedia();
     }),
 
-    upload: protectedProcedure
+    upload: adminProcedure
       .input(z.object({
         filename: z.string(),
         originalName: z.string(),
@@ -293,7 +278,7 @@ export const appRouter = router({
         return { url, key: publicId };
       }),
 
-     delete: protectedProcedure
+     delete: adminProcedure
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         const mediaItem = await getMediaById(input.id);
@@ -316,10 +301,19 @@ export const appRouter = router({
     updateRole: adminProcedure
       .input(z.object({ id: z.number(), role: z.enum(["user", "admin"]) }))
       .mutation(async ({ input, ctx }) => {
-        if (input.id === ctx.user.id) {
-          throw new TRPCError({ code: "BAD_REQUEST", message: "No puedes cambiar tu propio rol" });
+        if (input.id === ctx.user.id && input.role !== "admin") {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "No puedes remover tu propio rol de administrador" });
         }
         await updateUserRole(input.id, input.role);
+        return { success: true };
+      }),
+    updateAccessStatus: adminProcedure
+      .input(z.object({ id: z.number(), accessStatus: z.enum(["active", "blocked"]) }))
+      .mutation(async ({ input, ctx }) => {
+        if (input.id === ctx.user.id && input.accessStatus === "blocked") {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "No puedes bloquear tu propio usuario" });
+        }
+        await updateUserAccessStatus(input.id, input.accessStatus);
         return { success: true };
       }),
     recentList: adminProcedure

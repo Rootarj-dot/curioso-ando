@@ -42,9 +42,10 @@ export async function upsertUser(user: InsertUser): Promise<void> {
   if (user.role !== undefined) {
     values.role = user.role;
     updateSet.role = user.role;
-  } else if (user.openId === ENV.ownerOpenId) {
-    values.role = 'admin';
-    updateSet.role = 'admin';
+  }
+  if (user.accessStatus !== undefined) {
+    values.accessStatus = user.accessStatus;
+    updateSet.accessStatus = user.accessStatus;
   }
   if (!values.lastSignedIn) values.lastSignedIn = new Date();
   if (Object.keys(updateSet).length === 0) updateSet.lastSignedIn = new Date();
@@ -280,13 +281,6 @@ export async function getMediaById(id: number) {
   return result[0] ?? null;
 }
 
-export async function countUsers(): Promise<number> {
-  const db = await getDb();
-  if (!db) return 0;
-  const result = await db.select({ count: sql<number>`count(*)` }).from(users);
-  return Number(result[0]?.count ?? 0);
-}
-
 export async function getAllUsers() {
   const db = await getDb();
   if (!db) return [];
@@ -295,6 +289,7 @@ export async function getAllUsers() {
     name: users.name,
     email: users.email,
     role: users.role,
+    accessStatus: users.accessStatus,
     loginMethod: users.loginMethod,
     createdAt: users.createdAt,
     lastSignedIn: users.lastSignedIn,
@@ -306,6 +301,12 @@ export async function updateUserRole(id: number, role: "user" | "admin") {
   const db = await getDb();
   if (!db) return;
   await db.update(users).set({ role }).where(eq(users.id, id));
+}
+
+export async function updateUserAccessStatus(id: number, accessStatus: "active" | "blocked") {
+  const db = await getDb();
+  if (!db) return;
+  await db.update(users).set({ accessStatus }).where(eq(users.id, id));
 }
 
 // ─── Site Config ─────────────────────────────────────────────────────────────
@@ -538,6 +539,7 @@ export async function getRecentUsers(limit: number = 20) {
       name: users.name,
       email: users.email,
       role: users.role,
+      accessStatus: users.accessStatus,
       loginMethod: users.loginMethod,
       createdAt: users.createdAt,
       lastSignedIn: users.lastSignedIn,
