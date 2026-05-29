@@ -58,6 +58,11 @@ export function serveStatic(app: Express) {
     );
   }
 
+  // Normalizar la ruta directa del panel para evitar 404 del hosting/CDN en /admin sin barra.
+  app.get("/admin", (_req, res) => {
+    res.redirect(302, "/admin/");
+  });
+
   app.use(express.static(distPath));
 
   // fall through to index.html if the file doesn't exist
