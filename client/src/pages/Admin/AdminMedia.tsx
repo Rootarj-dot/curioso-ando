@@ -76,7 +76,7 @@ export default function AdminMedia() {
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
-            style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#1A1A1A" }}
+            style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#FFFFFF" }}
           >
             <Upload className="w-4 h-4" />
             {uploading ? "Subiendo..." : "Subir imágenes"}
@@ -90,7 +90,7 @@ export default function AdminMedia() {
             style={{ backgroundColor: "#FFFFFF", border: "2px dashed #E5E3DE" }}
             onClick={() => fileInputRef.current?.click()}
           >
-            <ImageIcon className="w-16 h-16 mb-4 opacity-20 text-white" />
+            <ImageIcon className="w-16 h-16 mb-4 opacity-20" style={{ color: "#2B037D" }} />
             <p className="font-semibold mb-1">Sin imágenes</p>
             <p style={{ color: "#6B6B6B" }}>Haz clic para subir tu primera imagen</p>
           </div>
@@ -100,14 +100,14 @@ export default function AdminMedia() {
               <div key={item.id} className="group relative rounded-xl overflow-hidden ca-card" style={{ aspectRatio: "1" }}>
                 <img src={item.url} alt={item.originalName} className="w-full h-full object-cover" />
                 <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: "rgba(0,0,0,0.7)" }}>
-                  <button onClick={() => copyUrl(item.url)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: "#2B037D", color: "#1A1A1A" }}>
+                  <button onClick={() => copyUrl(item.url)} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: "#2B037D", color: "#FFFFFF" }}>
                     <Copy className="w-3.5 h-3.5" /> Copiar URL
                   </button>
                   <button onClick={() => { if (confirm("¿Eliminar?")) deleteMutation.mutate({ id: item.id }); }} className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium" style={{ background: "rgba(239,68,68,0.2)", color: "#ef4444" }}>
                     <Trash2 className="w-3.5 h-3.5" /> Eliminar
                   </button>
                 </div>
-                <div className="absolute bottom-0 left-0 right-0 px-2 py-1 text-xs truncate opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: "rgba(0,0,0,0.8)", color: "#3A3A3A" }}>
+                <div className="absolute bottom-0 left-0 right-0 px-2 py-1 text-xs truncate opacity-0 group-hover:opacity-100 transition-opacity" style={{ background: "rgba(0,0,0,0.8)", color: "#FFFFFF" }}>
                   {item.originalName}
                 </div>
               </div>

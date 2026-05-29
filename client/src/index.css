@@ -150,6 +150,10 @@
 }
 .ca-gradient-hero {
   background: linear-gradient(135deg, #2B037D 0%, #3D0FA0 50%, #5B2C8F 100%);
+  color: #FFFFFF;
+}
+.ca-gradient-hero :is(h1, h2, h3, p, span) {
+  color: inherit;
 }
 .ca-gradient-overlay {
   background: linear-gradient(to bottom, rgba(43, 3, 125, 0.6), rgba(248, 247, 244, 0.95));

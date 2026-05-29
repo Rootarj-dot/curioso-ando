@@ -101,7 +101,7 @@ export function MediaGallery({ onSelect, onClose }: MediaGalleryProps) {
         <div className="flex items-center justify-between p-4" style={{ borderBottom: "1px solid #E5E3DE" }}>
           <div className="flex items-center gap-2">
             <ImageIcon className="w-5 h-5" style={{ color: "#7B4FB8" }} />
-            <h2 className="text-white font-bold text-lg">Galería de Medios</h2>
+            <h2 className="font-bold text-lg" style={{ color: "#1A1A1A" }}>Galería de Medios</h2>
           </div>
           <button onClick={onClose} className="p-2 rounded-lg transition-colors" style={{ color: "#6B6B6B" }}>
             <X className="w-5 h-5" />
@@ -114,7 +114,7 @@ export function MediaGallery({ onSelect, onClose }: MediaGalleryProps) {
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-opacity"
-            style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#1A1A1A" }}
+            style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#FFFFFF" }}
           >
             <Upload className="w-4 h-4" />
             {uploading ? "Subiendo..." : "Subir imágenes"}
@@ -131,7 +131,7 @@ export function MediaGallery({ onSelect, onClose }: MediaGalleryProps) {
             <button
               onClick={handleSelect}
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium ml-auto"
-              style={{ background: "#16a34a", color: "#1A1A1A" }}
+              style={{ background: "#16a34a", color: "#FFFFFF" }}
             >
               <Check className="w-4 h-4" />
               Insertar seleccionada
@@ -184,7 +184,7 @@ export function MediaGallery({ onSelect, onClose }: MediaGalleryProps) {
                   </button>
                   <div
                     className="absolute bottom-0 left-0 right-0 px-2 py-1 text-xs truncate opacity-0 group-hover:opacity-100 transition-opacity"
-                    style={{ background: "rgba(0,0,0,0.8)", color: "#3A3A3A" }}
+                    style={{ background: "rgba(0,0,0,0.8)", color: "#FFFFFF" }}
                   >
                     {item.originalName}
                   </div>

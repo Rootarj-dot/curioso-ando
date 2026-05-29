@@ -38,7 +38,7 @@ export default function AdminArticles() {
           <Link
             href="/admin/nuevo"
             className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium no-underline"
-            style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#1A1A1A" }}
+            style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#FFFFFF" }}
           >
             <Plus className="w-4 h-4" />
             Nuevo
@@ -48,9 +48,9 @@ export default function AdminArticles() {
         <div className="ca-card overflow-hidden">
           {!articles || articles.length === 0 ? (
             <div className="p-12 text-center" style={{ color: "#6B6B6B" }}>
-              <p className="text-lg font-semibold text-white mb-2">Sin artículos</p>
+              <p className="text-lg font-semibold mb-2" style={{ color: "#1A1A1A" }}>Sin artículos</p>
               <p className="mb-4">Crea tu primer artículo para comenzar.</p>
-              <Link href="/admin/nuevo" className="px-4 py-2 rounded-lg text-sm font-medium no-underline" style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#1A1A1A" }}>
+              <Link href="/admin/nuevo" className="px-4 py-2 rounded-lg text-sm font-medium no-underline" style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#FFFFFF" }}>
                 Crear artículo
               </Link>
             </div>
@@ -68,7 +68,7 @@ export default function AdminArticles() {
                   {articles.map((article) => (
                     <tr key={article.id} style={{ borderBottom: "1px solid #E5E3DE" }}>
                       <td className="px-4 py-3">
-                        <p className="text-white font-medium line-clamp-1 max-w-xs">{article.title}</p>
+                        <p className="font-medium line-clamp-1 max-w-xs" style={{ color: "#1A1A1A" }}>{article.title}</p>
                         <p className="text-xs mt-0.5" style={{ color: "#5A5C5E" }}>/{article.slug}</p>
                       </td>
                       <td className="px-4 py-3">
