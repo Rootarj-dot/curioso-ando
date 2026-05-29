@@ -58,10 +58,11 @@ export function serveStatic(app: Express) {
     );
   }
 
-  // Normalizar solo la ruta exacta del panel sin barra; /admin/ debe caer al SPA sin redirección.
+  // Normalizar solo la URL exacta del panel sin barra; /admin/ debe caer al SPA sin redirección.
   app.use((req, res, next) => {
-    if (req.path === "/admin") {
-      const query = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
+    const originalUrl = req.originalUrl || req.url;
+    if (originalUrl === "/admin" || originalUrl.startsWith("/admin?")) {
+      const query = originalUrl.includes("?") ? originalUrl.slice(originalUrl.indexOf("?")) : "";
       res.redirect(302, `/admin/${query}`);
       return;
     }
