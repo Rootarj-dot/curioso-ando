@@ -14,6 +14,7 @@ import AdminMedia from "./pages/Admin/AdminMedia";
 import AdminUsers from "./pages/Admin/AdminUsers";
 import AdminCategorias from "./pages/Admin/AdminCategorias";
 import AdminDatosCuriosos from "./pages/Admin/AdminDatosCuriosos";
+import AdminSocialLinks from "./pages/Admin/AdminSocialLinks";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 
 function Router() {
@@ -33,6 +34,7 @@ function Router() {
       <Route path="/admin/usuarios" component={AdminUsers} />
       <Route path="/admin/categorias" component={AdminCategorias} />
       <Route path="/admin/datos-curiosos" component={AdminDatosCuriosos} />
+      <Route path="/admin/redes-sociales" component={AdminSocialLinks} />
 
       {/* Legal */}
       <Route path="/aviso-de-privacidad" component={PrivacyPolicy} />

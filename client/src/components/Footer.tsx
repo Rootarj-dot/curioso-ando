@@ -1,8 +1,17 @@
 import { Link } from "wouter";
-import { Search } from "lucide-react";
+import { Facebook, Instagram, Search } from "lucide-react";
+import { trpc } from "@/lib/trpc";
+import { TikTokIcon } from "@/components/TikTokIcon";
 
 export function Footer() {
   const year = new Date().getFullYear();
+  const { data: socialLinks } = trpc.siteConfig.getSocialLinks.useQuery();
+  const activeSocialLinks = [
+    { label: "Facebook", href: socialLinks?.facebook, icon: Facebook },
+    { label: "Instagram", href: socialLinks?.instagram, icon: Instagram },
+    { label: "TikTok", href: socialLinks?.tiktok, icon: TikTokIcon },
+  ].filter((item) => item.href && item.href.trim().length > 0);
+
   return (
     <footer style={{ background: "linear-gradient(135deg, #2B037D 0%, #5B2C8F 60%, #8B5CF6 100%)" }}>
       <div className="container py-10">
@@ -18,6 +27,23 @@ export function Footer() {
             <p className="text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>
               Datos raros, curiosos y sorprendentes. Aprende, ríe y di "¡no lo sabía!".
             </p>
+            {activeSocialLinks.length > 0 && (
+              <div className="flex items-center gap-3 mt-5" aria-label="Redes sociales">
+                {activeSocialLinks.map(({ label, href, icon: Icon }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    className="w-9 h-9 rounded-full flex items-center justify-center transition-all hover:-translate-y-0.5 hover:bg-white/20"
+                    style={{ backgroundColor: "rgba(255,255,255,0.12)", color: "#FFFFFF" }}
+                  >
+                    <Icon className="w-4 h-4" />
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Categories */}

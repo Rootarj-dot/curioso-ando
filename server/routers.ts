@@ -70,6 +70,30 @@ function slugify(text: string): string {
     .trim();
 }
 
+const socialLinksSchema = z.object({
+  facebook: z.string().url("URL de Facebook inválida").or(z.literal("")),
+  instagram: z.string().url("URL de Instagram inválida").or(z.literal("")),
+  tiktok: z.string().url("URL de TikTok inválida").or(z.literal("")),
+});
+
+type SocialLinks = z.infer<typeof socialLinksSchema>;
+
+const emptySocialLinks: SocialLinks = {
+  facebook: "",
+  instagram: "",
+  tiktok: "",
+};
+
+function parseSocialLinks(raw: string | null): SocialLinks {
+  if (!raw) return emptySocialLinks;
+  try {
+    const parsed = socialLinksSchema.partial().parse(JSON.parse(raw));
+    return { ...emptySocialLinks, ...parsed };
+  } catch {
+    return emptySocialLinks;
+  }
+}
+
 export const appRouter = router({
   system: systemRouter,
 
@@ -336,6 +360,11 @@ export const appRouter = router({
       try { return JSON.parse(raw) as { title: string; subtitle: string; bgColor: string }; }
       catch { return { title: "Curioseando Ando", subtitle: "", bgColor: "" }; }
     }),
+    // Get social links config
+    getSocialLinks: publicProcedure.query(async () => {
+      const raw = await getSiteConfigValue("social_links");
+      return parseSocialLinks(raw);
+    }),
     // Save banner config
     setBanner: adminProcedure
       .input(z.object({
@@ -345,6 +374,13 @@ export const appRouter = router({
       }))
       .mutation(async ({ input }) => {
         await setSiteConfigValue("hero_banner", JSON.stringify(input));
+        return { success: true };
+      }),
+    // Save social links config
+    setSocialLinks: adminProcedure
+      .input(socialLinksSchema)
+      .mutation(async ({ input }) => {
+        await setSiteConfigValue("social_links", JSON.stringify(input));
         return { success: true };
       }),
     // Save the global sidebar articles config

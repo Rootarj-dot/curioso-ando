@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { getLoginUrl } from "@/const";
-import { LayoutDashboard, FileText, Image, Search, LogOut, Home, Plus, Users, Tag, Lightbulb, Menu, X } from "lucide-react";
+import { LayoutDashboard, FileText, Image, Search, LogOut, Home, Plus, Users, Tag, Lightbulb, Menu, X, Share2 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
 const NAV_ITEMS = [
@@ -12,6 +12,7 @@ const NAV_ITEMS = [
   { href: "/admin/medios", label: "Medios", icon: Image },
   { href: "/admin/categorias", label: "Categorías", icon: Tag },
   { href: "/admin/datos-curiosos", label: "Datos Curiosos", icon: Lightbulb },
+  { href: "/admin/redes-sociales", label: "Redes Sociales", icon: Share2 },
   { href: "/admin/usuarios", label: "Usuarios", icon: Users },
 ];
 
