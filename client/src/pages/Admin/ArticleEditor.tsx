@@ -5,7 +5,7 @@ import { AdminLayout } from "./AdminLayout";
 import { BlockEditor, insertImageIntoEditor } from "@/components/Editor/BlockEditor";
 import { MediaGallery } from "@/components/MediaGallery";
 import { toast } from "sonner";
-import { Save, Eye, ArrowLeft, Image as ImageIcon } from "lucide-react";
+import { Save, Eye, ArrowLeft, Image as ImageIcon, HelpCircle } from "lucide-react";
 import { SidebarArticlesPanel } from "@/components/Admin/SidebarArticlesPanel";
 import { TriviaEditor } from "@/components/Admin/TriviaEditor";
 import type { LexicalEditor } from "lexical";
@@ -388,9 +388,19 @@ export default function ArticleEditor() {
               </div>
             </div>
 
-            {/* Trivia Editor — solo visible cuando se edita un artículo existente */}
-            {isEditing && articleId && (
+            {/* Trivia Editor */}
+            {isEditing && articleId ? (
               <TriviaEditor articleId={articleId} />
+            ) : (
+              <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
+                <div className="flex items-center gap-2">
+                  <HelpCircle className="w-4 h-4 text-purple-600" />
+                  <h3 className="font-semibold text-sm">Preguntas Trivia</h3>
+                </div>
+                <div className="mt-3 rounded-lg border border-dashed border-purple-200 bg-purple-50/50 px-3 py-3 text-xs text-muted-foreground">
+                  Guarda el artículo por primera vez para activar la edición de preguntas trivia. Después del guardado, esta pantalla se abrirá automáticamente en modo edición y podrás agregar las preguntas.
+                </div>
+              </div>
             )}
 
             {/* Sidebar Articles Panel */}
