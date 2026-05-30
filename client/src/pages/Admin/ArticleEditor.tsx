@@ -5,9 +5,10 @@ import { AdminLayout } from "./AdminLayout";
 import { BlockEditor, insertImageIntoEditor } from "@/components/Editor/BlockEditor";
 import { MediaGallery } from "@/components/MediaGallery";
 import { toast } from "sonner";
-import { Save, Eye, ArrowLeft, Image as ImageIcon, HelpCircle } from "lucide-react";
+import { Save, Eye, ArrowLeft, Image as ImageIcon } from "lucide-react";
 import { SidebarArticlesPanel } from "@/components/Admin/SidebarArticlesPanel";
 import { TriviaEditor } from "@/components/Admin/TriviaEditor";
+import type { DraftTriviaItem } from "@/components/Admin/TriviaEditor";
 import type { LexicalEditor } from "lexical";
 
 export default function ArticleEditor() {
@@ -31,6 +32,7 @@ export default function ArticleEditor() {
   const [publishedAt, setPublishedAt] = useState("");
   const [showGallery, setShowGallery] = useState(false);
   const [galleryTarget, setGalleryTarget] = useState<"featured" | "og" | "editor">("editor");
+  const [pendingTriviaItems, setPendingTriviaItems] = useState<DraftTriviaItem[]>([]);
   const editorRef = useRef<LexicalEditor | null>(null);
   const handleEditorReady = useCallback((editor: LexicalEditor) => {
     editorRef.current = editor;
@@ -42,10 +44,38 @@ export default function ArticleEditor() {
     select: (articles) => articles.find((a) => a.id === articleId),
   });
 
+  const createTriviaMutation = trpc.trivia.create.useMutation();
+
   const createMutation = trpc.articles.create.useMutation({
-    onSuccess: ({ id: newArticleId }) => {
-      toast.success("Artículo guardado");
-      navigate(`/admin/editar/${newArticleId}`);
+    onSuccess: async ({ id: newArticleId }) => {
+      try {
+        if (pendingTriviaItems.length > 0) {
+          await Promise.all(
+            pendingTriviaItems.map((item) =>
+              createTriviaMutation.mutateAsync({
+                articleId: newArticleId,
+                pregunta: item.pregunta,
+                respuesta: item.respuesta,
+                opcionCorrecta: item.opcionCorrecta,
+                opcionIncorrecta: item.opcionIncorrecta,
+                icono: item.icono || undefined,
+                color: item.color || undefined,
+              })
+            )
+          );
+          setPendingTriviaItems([]);
+          toast.success(
+            `Artículo guardado con ${pendingTriviaItems.length} pregunta${pendingTriviaItems.length === 1 ? "" : "s"} trivia`
+          );
+        } else {
+          toast.success("Artículo guardado");
+        }
+      } catch (e) {
+        const message = e instanceof Error ? e.message : "Error desconocido";
+        toast.error("El artículo se guardó, pero no se pudieron guardar las preguntas trivia: " + message);
+      } finally {
+        navigate(`/admin/editar/${newArticleId}`);
+      }
     },
     onError: (e) => toast.error("Error: " + e.message),
   });
@@ -143,7 +173,7 @@ export default function ArticleEditor() {
     }
   };
 
-  const isSaving = createMutation.isPending || updateMutation.isPending;
+  const isSaving = createMutation.isPending || updateMutation.isPending || createTriviaMutation.isPending;
 
   return (
     <AdminLayout>
@@ -389,19 +419,11 @@ export default function ArticleEditor() {
             </div>
 
             {/* Trivia Editor */}
-            {isEditing && articleId ? (
-              <TriviaEditor articleId={articleId} />
-            ) : (
-              <div className="bg-card border border-border rounded-xl p-4 shadow-sm">
-                <div className="flex items-center gap-2">
-                  <HelpCircle className="w-4 h-4 text-purple-600" />
-                  <h3 className="font-semibold text-sm">Preguntas Trivia</h3>
-                </div>
-                <div className="mt-3 rounded-lg border border-dashed border-purple-200 bg-purple-50/50 px-3 py-3 text-xs text-muted-foreground">
-                  Guarda el artículo por primera vez para activar la edición de preguntas trivia. Después del guardado, esta pantalla se abrirá automáticamente en modo edición y podrás agregar las preguntas.
-                </div>
-              </div>
-            )}
+            <TriviaEditor
+              articleId={articleId}
+              draftItems={pendingTriviaItems}
+              onDraftItemsChange={setPendingTriviaItems}
+            />
 
             {/* Sidebar Articles Panel */}
             <SidebarArticlesPanel />

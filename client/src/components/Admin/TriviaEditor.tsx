@@ -22,9 +22,8 @@ function LucideIconComponent({ name, className }: { name: string; className?: st
   return <Icon className={className} />;
 }
 
-interface TriviaItem {
+export interface DraftTriviaItem {
   id: number;
-  articleId: number;
   pregunta: string;
   respuesta: string;
   opcionCorrecta: string;
@@ -33,12 +32,16 @@ interface TriviaItem {
   color: string | null;
 }
 
+
 interface TriviaEditorProps {
-  articleId: number;
+  articleId?: number;
+  draftItems?: DraftTriviaItem[];
+  onDraftItemsChange?: (items: DraftTriviaItem[]) => void;
 }
 
-export function TriviaEditor({ articleId }: TriviaEditorProps) {
+export function TriviaEditor({ articleId, draftItems = [], onDraftItemsChange }: TriviaEditorProps) {
   const utils = trpc.useUtils();
+  const isDraftMode = !articleId;
   const [isOpen, setIsOpen] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -51,12 +54,16 @@ export function TriviaEditor({ articleId }: TriviaEditorProps) {
   const [icono, setIcono] = useState("HelpCircle");
   const [color, setColor] = useState("#7C3AED");
 
-  const { data: triviaList = [] } = trpc.trivia.listByArticle.useQuery({ articleId });
+  const { data: persistedTriviaList = [] } = trpc.trivia.listByArticle.useQuery(
+    { articleId: articleId ?? 0 },
+    { enabled: !isDraftMode }
+  );
+  const triviaList: DraftTriviaItem[] = isDraftMode ? draftItems : persistedTriviaList;
 
   const createMutation = trpc.trivia.create.useMutation({
     onSuccess: () => {
       toast.success("Pregunta creada");
-      utils.trivia.listByArticle.invalidate({ articleId });
+      if (articleId) utils.trivia.listByArticle.invalidate({ articleId });
       resetForm();
     },
     onError: (e) => toast.error("Error: " + e.message),
@@ -65,7 +72,7 @@ export function TriviaEditor({ articleId }: TriviaEditorProps) {
   const updateMutation = trpc.trivia.update.useMutation({
     onSuccess: () => {
       toast.success("Pregunta actualizada");
-      utils.trivia.listByArticle.invalidate({ articleId });
+      if (articleId) utils.trivia.listByArticle.invalidate({ articleId });
       resetForm();
     },
     onError: (e) => toast.error("Error: " + e.message),
@@ -74,7 +81,7 @@ export function TriviaEditor({ articleId }: TriviaEditorProps) {
   const deleteMutation = trpc.trivia.delete.useMutation({
     onSuccess: () => {
       toast.success("Pregunta eliminada");
-      utils.trivia.listByArticle.invalidate({ articleId });
+      if (articleId) utils.trivia.listByArticle.invalidate({ articleId });
     },
     onError: (e) => toast.error("Error: " + e.message),
   });
@@ -90,7 +97,7 @@ export function TriviaEditor({ articleId }: TriviaEditorProps) {
     setShowForm(false);
   };
 
-  const startEdit = (item: TriviaItem) => {
+  const startEdit = (item: DraftTriviaItem) => {
     setEditingId(item.id);
     setPregunta(item.pregunta);
     setRespuesta(item.respuesta);
@@ -106,6 +113,33 @@ export function TriviaEditor({ articleId }: TriviaEditorProps) {
       toast.error("Completa todos los campos");
       return;
     }
+    if (isDraftMode) {
+      const draftItem: DraftTriviaItem = {
+        id: editingId ?? -Date.now(),
+        pregunta,
+        respuesta,
+        opcionCorrecta,
+        opcionIncorrecta,
+        icono,
+        color,
+      };
+
+      if (editingId) {
+        onDraftItemsChange?.(draftItems.map((item) => (item.id === editingId ? draftItem : item)));
+        toast.success("Pregunta actualizada");
+      } else {
+        onDraftItemsChange?.([...draftItems, draftItem]);
+        toast.success("Pregunta agregada al borrador");
+      }
+      resetForm();
+      return;
+    }
+
+    if (!articleId) {
+      toast.error("Guarda el artículo antes de guardar preguntas trivia");
+      return;
+    }
+
     if (editingId) {
       updateMutation.mutate({ id: editingId, pregunta, respuesta, opcionCorrecta, opcionIncorrecta, icono, color });
     } else {
@@ -160,7 +194,14 @@ export function TriviaEditor({ articleId }: TriviaEditorProps) {
                     <Edit2 className="w-3.5 h-3.5" />
                   </button>
                   <button
-                    onClick={() => deleteMutation.mutate({ id: item.id })}
+                    onClick={() => {
+                      if (isDraftMode) {
+                        onDraftItemsChange?.(draftItems.filter((draftItem) => draftItem.id !== item.id));
+                        toast.success("Pregunta eliminada");
+                      } else {
+                        deleteMutation.mutate({ id: item.id });
+                      }
+                    }}
                     className="p-1 rounded hover:bg-red-50 text-muted-foreground hover:text-red-500 transition-colors"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
