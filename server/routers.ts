@@ -193,7 +193,11 @@ export const appRouter = router({
           authorId: ctx.user.id,
           publishedAt,
         });
-        return { slug };
+        const createdArticle = await getArticleBySlug(slug);
+        if (!createdArticle) {
+          throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "No se pudo recuperar el artículo creado" });
+        }
+        return { id: createdArticle.id, slug: createdArticle.slug };
       }),
 
     update: adminProcedure

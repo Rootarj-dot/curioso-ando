@@ -12,7 +12,8 @@ import type { LexicalEditor } from "lexical";
 
 export default function ArticleEditor() {
   const params = useParams<{ id: string }>();
-  const articleId = params.id ? parseInt(params.id) : undefined;
+  const parsedArticleId = params.id ? parseInt(params.id, 10) : undefined;
+  const articleId = Number.isFinite(parsedArticleId) ? parsedArticleId : undefined;
   const isEditing = !!articleId;
   const [, navigate] = useLocation();
 
@@ -42,9 +43,9 @@ export default function ArticleEditor() {
   });
 
   const createMutation = trpc.articles.create.useMutation({
-    onSuccess: ({ slug: newSlug }) => {
+    onSuccess: ({ id: newArticleId }) => {
       toast.success("Artículo guardado");
-      navigate(`/admin/editar/${newSlug}`);
+      navigate(`/admin/editar/${newArticleId}`);
     },
     onError: (e) => toast.error("Error: " + e.message),
   });

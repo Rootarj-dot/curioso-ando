@@ -64,8 +64,26 @@ function InlineArticlesBlock({
 }
 
 // ─── Lexical Content Renderer ─────────────────────────────────────────────────
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function escapeAttribute(value: string): string {
+  return escapeHtml(value).replace(/"/g, "&quot;");
+}
+
+function renderImageNode(node: any): string {
+  if (!node.src) return "";
+  const src = escapeAttribute(String(node.src));
+  const alt = escapeAttribute(String(node.altText || ""));
+  return `<img src="${src}" alt="${alt}" />`;
+}
+
 function renderTextNode(node: any): string {
-  let text = node.text || "";
+  let text = escapeHtml(node.text || "");
   if (node.format & 1) text = `<strong>${text}</strong>`;
   if (node.format & 2) text = `<em>${text}</em>`;
   if (node.format & 8) text = `<u>${text}</u>`;
@@ -76,6 +94,7 @@ function renderInlineNodes(nodes: any[]): string {
   return (nodes || [])
     .map((n) => {
       if (n.type === "text") return renderTextNode(n);
+      if (n.type === "image") return renderImageNode(n);
       if (n.type === "linebreak") return "<br/>";
       if (n.children) return renderInlineNodes(n.children);
       return "";
@@ -122,7 +141,7 @@ function splitContentSegments(
     } else if (node.type === "quote") {
       htmlBuffer += `<blockquote>${renderInlineNodes(node.children || [])}</blockquote>`;
     } else if (node.type === "image") {
-      htmlBuffer += `<img src="${node.src}" alt="${node.altText || ""}" />`;
+      htmlBuffer += renderImageNode(node);
     } else if (node.type === "linebreak") {
       htmlBuffer += "<br/>";
     } else if (node.children) {
