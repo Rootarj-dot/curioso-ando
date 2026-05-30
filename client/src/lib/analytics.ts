@@ -8,6 +8,13 @@
  * Both are optional — if not set, the scripts are simply not loaded.
  */
 
+const DEFAULT_GA_MEASUREMENT_ID = "G-LH9VJZWW1F";
+
+function getGaMeasurementId(): string | undefined {
+  const envGaId = import.meta.env.VITE_GA_MEASUREMENT_ID as string | undefined;
+  return envGaId || DEFAULT_GA_MEASUREMENT_ID;
+}
+
 declare global {
   interface Window {
     dataLayer: unknown[];
@@ -26,7 +33,7 @@ function loadScript(src: string, attrs: Record<string, string> = {}): void {
 
 /** Initialize Google Analytics 4 */
 export function initGA(): void {
-  const gaId = import.meta.env.VITE_GA_MEASUREMENT_ID as string | undefined;
+  const gaId = getGaMeasurementId();
   if (!gaId || !gaId.startsWith("G-")) return;
 
   loadScript(`https://www.googletagmanager.com/gtag/js?id=${gaId}`);
@@ -41,7 +48,7 @@ export function initGA(): void {
 /** Track a page view (call on route changes) */
 export function trackPageView(path: string): void {
   if (typeof window.gtag !== "function") return;
-  const gaId = import.meta.env.VITE_GA_MEASUREMENT_ID as string | undefined;
+  const gaId = getGaMeasurementId();
   if (!gaId) return;
   window.gtag("config", gaId, { page_path: path });
 }
