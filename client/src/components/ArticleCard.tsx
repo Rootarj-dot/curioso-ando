@@ -80,26 +80,16 @@ export function ArticleCard({
   return (
     <Link href={`/articulo/${slug}`} className="no-underline group block">
       <article className="ca-card overflow-hidden transition-transform duration-200 group-hover:-translate-y-1 h-full flex flex-col">
-        <div className="relative overflow-hidden bg-[#1A1A1A]" style={{ aspectRatio: "1792 / 1024" }}>
+        <div className="relative overflow-hidden bg-white">
           {image ? (
-            <>
-              <img
-                src={image}
-                alt=""
-                loading="lazy"
-                aria-hidden="true"
-                className="absolute inset-0 w-full h-full object-cover scale-110 blur-md opacity-60 transition-transform duration-500 group-hover:scale-125"
-              />
-              <div className="absolute inset-0 bg-black/10" />
-              <img
-                src={image}
-                alt={title}
-                loading="lazy"
-                className="relative z-10 w-full h-full object-contain transition-transform duration-500 group-hover:scale-[1.02]"
-              />
-            </>
+            <img
+              src={image}
+              alt={title}
+              loading="lazy"
+              className="block w-full h-auto transition-transform duration-500 group-hover:scale-[1.02]"
+            />
           ) : (
-            <div className="absolute inset-0 ca-gradient-hero flex items-center justify-center">
+            <div className="ca-gradient-hero flex aspect-[1792/1024] items-center justify-center">
               <span className="text-white/30 text-4xl font-bold">CA</span>
             </div>
           )}
