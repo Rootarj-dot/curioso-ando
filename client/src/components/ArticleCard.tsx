@@ -80,13 +80,13 @@ export function ArticleCard({
   return (
     <Link href={`/articulo/${slug}`} className="no-underline group block">
       <article className="ca-card overflow-hidden transition-transform duration-200 group-hover:-translate-y-1 h-full flex flex-col">
-        <div className="relative overflow-hidden" style={{ aspectRatio: "1792 / 1024" }}>
+        <div className="relative overflow-hidden bg-white" style={{ aspectRatio: "1792 / 1024" }}>
           {image ? (
             <img
               src={image}
               alt={title}
               loading="lazy"
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              className="absolute inset-0 w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
             />
           ) : (
             <div className="absolute inset-0 ca-gradient-hero flex items-center justify-center">
