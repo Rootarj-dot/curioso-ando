@@ -1,7 +1,9 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { trackPageView } from "@/lib/analytics";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { useEffect, useRef } from "react";
+import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
@@ -16,6 +18,23 @@ import AdminCategorias from "./pages/Admin/AdminCategorias";
 import AdminDatosCuriosos from "./pages/Admin/AdminDatosCuriosos";
 import AdminSocialLinks from "./pages/Admin/AdminSocialLinks";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+
+function AnalyticsRouteTracker() {
+  const [location] = useLocation();
+  const isInitialRender = useRef(true);
+
+  useEffect(() => {
+    if (isInitialRender.current) {
+      isInitialRender.current = false;
+      return;
+    }
+
+    const path = `${window.location.pathname}${window.location.search}${window.location.hash}`;
+    trackPageView(path || location);
+  }, [location]);
+
+  return null;
+}
 
 function Router() {
   return (
@@ -51,6 +70,7 @@ function App() {
     <ErrorBoundary>
       <ThemeProvider defaultTheme="light">
         <TooltipProvider>
+          <AnalyticsRouteTracker />
           <Toaster richColors position="top-right" />
           <Router />
         </TooltipProvider>
