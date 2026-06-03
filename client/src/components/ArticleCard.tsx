@@ -80,7 +80,7 @@ export function ArticleCard({
   return (
     <Link href={`/articulo/${slug}`} className="no-underline group block">
       <article className="ca-card overflow-hidden transition-transform duration-200 group-hover:-translate-y-1 h-full flex flex-col">
-        <div className="relative overflow-hidden" style={{ paddingBottom: "56.25%" }}>
+        <div className="relative overflow-hidden" style={{ aspectRatio: "1792 / 1024" }}>
           {image ? (
             <img
               src={image}
