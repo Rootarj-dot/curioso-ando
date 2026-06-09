@@ -16,6 +16,9 @@ const AUTH_ERRORS: Record<string, string> = {
   callback_error: "Error en el callback de OAuth. Revisa los logs del servidor.",
 };
 
+const HERO_HEIGHT = "clamp(280px, 50vw, 480px)";
+const DEFAULT_BANNER_SUBTITLE = "Datos raros, curiosos y sorprendentes. Noticias, entretenimiento, geek y tecnología en un solo lugar.";
+
 function formatDate(ts: number | string | Date | null | undefined) {
   if (!ts) return "";
   return new Date(ts as number).toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" });
@@ -29,7 +32,7 @@ export default function Home() {
   const errorMessage = errorCode ? (AUTH_ERRORS[errorCode] ?? `Error desconocido: ${errorCode}`) : null;
   const [showError, setShowError] = useState(true);
 
-  const { data: featuredArticle, isLoading: featuredLoading } = trpc.articles.featured.useQuery();
+  const { data: featuredArticle } = trpc.articles.featured.useQuery();
   const { data: articles, isLoading: articlesLoading } = trpc.articles.list.useQuery({ limit: 12 });
   const { data: bannerConfig } = trpc.siteConfig.getBanner.useQuery();
 
@@ -37,11 +40,15 @@ export default function Home() {
 
   // Hero background: if featured article has image, use it as bg; else use banner color or default gradient
   const featuredImg = featuredArticle?.ogImage || featuredArticle?.featuredImage || "";
+  const hasFeaturedArticle = Boolean(featuredArticle);
+  const fallbackTitle = bannerConfig?.title || "Curioseando Ando";
+  const fallbackSubtitle = bannerConfig?.subtitle || DEFAULT_BANNER_SUBTITLE;
+  const fallbackBackground = bannerBg || "linear-gradient(135deg, #2B037D 0%, #5B2C8F 60%, #8B5CF6 100%)";
 
   // SEO meta tags for home page
   useSeoMeta({
     title: "Curioseando Ando - Blog de Noticias",
-    description: "Datos raros, curiosos y sorprendentes. Noticias, entretenimiento, geek y tecnología en un solo lugar.",
+    description: DEFAULT_BANNER_SUBTITLE,
     url: window.location.origin,
     type: "website",
   });
@@ -73,123 +80,111 @@ export default function Home() {
       )}
 
       {/* ── Hero / Nota de la Semana ───────────────────────────────────── */}
-      {featuredLoading ? (
-        /* Skeleton mientras carga */
-        <div className="animate-pulse" style={{ height: "clamp(280px, 50vw, 480px)", background: "linear-gradient(135deg, #2B037D, #5B2C8F)" }} />
-      ) : featuredArticle ? (
-        /* Hero con artículo destacado */
-        <section
-          className="relative overflow-hidden"
-          style={{ minHeight: "clamp(280px, 50vw, 480px)" }}
-        >
-          {/* Imagen de fondo priorizada para mejorar LCP */}
-          {featuredImg ? (
-            <img
-              src={featuredImg}
-              alt=""
-              width={1792}
-              height={1024}
-              loading="eager"
-              decoding="async"
-              fetchPriority="high"
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-          ) : (
-            <div
-              className="absolute inset-0"
-              style={bannerBg ? { background: bannerBg } : { background: "linear-gradient(135deg, #2B037D 0%, #5B2C8F 60%, #8B5CF6 100%)" }}
-            />
-          )}
-          {/* Overlay oscuro para legibilidad */}
+      <section
+        className="relative overflow-hidden"
+        style={{ minHeight: HERO_HEIGHT }}
+      >
+        {hasFeaturedArticle && featuredImg ? (
+          <img
+            src={featuredImg}
+            alt=""
+            width={1792}
+            height={1024}
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
           <div
             className="absolute inset-0"
-            style={{ background: featuredImg ? "linear-gradient(to top, rgba(10,0,30,0.92) 0%, rgba(10,0,30,0.55) 50%, rgba(10,0,30,0.25) 100%)" : "linear-gradient(to top, rgba(10,0,30,0.7) 0%, rgba(10,0,30,0.2) 100%)" }}
+            style={{ background: fallbackBackground }}
           />
+        )}
 
-          {/* Content */}
-          <div className="relative container flex flex-col justify-end" style={{ minHeight: "clamp(280px, 50vw, 480px)", paddingBottom: "clamp(1.5rem, 4vw, 3rem)", paddingTop: "clamp(1.5rem, 4vw, 3rem)" }}>
-            <div className="max-w-2xl">
-              {/* Badge */}
-              <div className="flex items-center gap-2 mb-3">
-                <span
-                  className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider"
-                  style={{ background: "linear-gradient(135deg, #7C3AED, #5B2C8F)", color: "#FFFFFF" }}
-                >
-                  <TrendingUp className="w-3 h-3" />
-                  Nota de la Semana
-                </span>
-                {featuredArticle.categoryName && (
+        {/* Overlay oscuro para legibilidad */}
+        <div
+          className="absolute inset-0"
+          style={{ background: hasFeaturedArticle && featuredImg ? "linear-gradient(to top, rgba(10,0,30,0.92) 0%, rgba(10,0,30,0.55) 50%, rgba(10,0,30,0.25) 100%)" : "linear-gradient(to top, rgba(10,0,30,0.7) 0%, rgba(10,0,30,0.2) 100%)" }}
+        />
+
+        {/* Content */}
+        <div className="relative container flex flex-col justify-end" style={{ minHeight: HERO_HEIGHT, paddingBottom: "clamp(1.5rem, 4vw, 3rem)", paddingTop: "clamp(1.5rem, 4vw, 3rem)" }}>
+          <div className="max-w-2xl">
+            {hasFeaturedArticle && featuredArticle ? (
+              <>
+                {/* Badge */}
+                <div className="flex items-center gap-2 mb-3">
                   <span
-                    className="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"
-                    style={{ background: "rgba(255,255,255,0.18)", color: "#FFFFFF", backdropFilter: "blur(4px)", border: "1px solid rgba(255,255,255,0.25)" }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider"
+                    style={{ background: "linear-gradient(135deg, #7C3AED, #5B2C8F)", color: "#FFFFFF" }}
                   >
-                    {featuredArticle.categoryName}
+                    <TrendingUp className="w-3 h-3" />
+                    Nota de la Semana
                   </span>
-                )}
-              </div>
-
-              {/* Title */}
-              <Link href={`/articulo/${featuredArticle.slug}`} className="no-underline group">
-                <h1
-                  className="font-bold leading-tight mb-3 group-hover:opacity-90 transition-opacity"
-                  style={{ fontFamily: "Poppins, sans-serif", color: "#FFFFFF", fontSize: "clamp(1.75rem, 4vw, 2.75rem)" }}
-                >
-                  {featuredArticle.title}
-                </h1>
-              </Link>
-
-              {/* Excerpt */}
-              {featuredArticle.excerpt && (
-                <p
-                  className="text-base mb-4 line-clamp-2"
-                  style={{ color: "rgba(255,255,255,0.82)" }}
-                >
-                  {featuredArticle.excerpt}
-                </p>
-              )}
-
-              {/* Meta + CTA */}
-              <div className="flex flex-wrap items-center gap-4">
-                <div className="flex items-center gap-3 text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>
-                  {featuredArticle.publishedAt && (
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5" />
-                      {formatDate(featuredArticle.publishedAt)}
+                  {featuredArticle.categoryName && (
+                    <span
+                      className="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider"
+                      style={{ background: "rgba(255,255,255,0.18)", color: "#FFFFFF", backdropFilter: "blur(4px)", border: "1px solid rgba(255,255,255,0.25)" }}
+                    >
+                      {featuredArticle.categoryName}
                     </span>
                   )}
                 </div>
-                <Link
-                  href={`/articulo/${featuredArticle.slug}`}
-                  className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold no-underline transition-all hover:opacity-90"
-                  style={{ background: "linear-gradient(135deg, #7C3AED, #5B2C8F)", color: "#FFFFFF" }}
-                >
-                  Leer nota <ArrowRight className="w-4 h-4" />
+
+                {/* Title */}
+                <Link href={`/articulo/${featuredArticle.slug}`} className="no-underline group">
+                  <h1
+                    className="font-bold leading-tight mb-3 group-hover:opacity-90 transition-opacity"
+                    style={{ fontFamily: "Poppins, sans-serif", color: "#FFFFFF", fontSize: "clamp(1.75rem, 4vw, 2.75rem)" }}
+                  >
+                    {featuredArticle.title}
+                  </h1>
                 </Link>
-              </div>
-            </div>
-          </div>
-        </section>
-      ) : (
-        /* Sin artículo destacado: banner simple */
-        <section
-          className={bannerBg ? "" : "ca-gradient-hero"}
-          style={{ ...(bannerBg ? { background: bannerBg } : {}), paddingTop: "2.5rem", paddingBottom: "2.5rem" }}
-        >
-          <div className="container">
-            <div className="max-w-3xl">
-              <span className="ca-badge mb-4">Portal de Noticias</span>
-              <h1 className="text-white font-bold text-4xl md:text-5xl leading-tight mb-3" style={{ fontFamily: "Poppins, sans-serif" }}>
-                {bannerConfig?.title || "Curioseando Ando"}
-              </h1>
-              {bannerConfig?.subtitle && (
+
+                {/* Excerpt */}
+                {featuredArticle.excerpt && (
+                  <p
+                    className="text-base mb-4 line-clamp-2"
+                    style={{ color: "rgba(255,255,255,0.82)" }}
+                  >
+                    {featuredArticle.excerpt}
+                  </p>
+                )}
+
+                {/* Meta + CTA */}
+                <div className="flex flex-wrap items-center gap-4">
+                  <div className="flex items-center gap-3 text-sm" style={{ color: "rgba(255,255,255,0.65)" }}>
+                    {featuredArticle.publishedAt && (
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3.5 h-3.5" />
+                        {formatDate(featuredArticle.publishedAt)}
+                      </span>
+                    )}
+                  </div>
+                  <Link
+                    href={`/articulo/${featuredArticle.slug}`}
+                    className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold no-underline transition-all hover:opacity-90"
+                    style={{ background: "linear-gradient(135deg, #7C3AED, #5B2C8F)", color: "#FFFFFF" }}
+                  >
+                    Leer nota <ArrowRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              </>
+            ) : (
+              <>
+                <span className="ca-badge mb-4">Portal de Noticias</span>
+                <h1 className="text-white font-bold text-4xl md:text-5xl leading-tight mb-3" style={{ fontFamily: "Poppins, sans-serif" }}>
+                  {fallbackTitle}
+                </h1>
                 <p className="text-base md:text-lg" style={{ color: "#D0C0FF" }}>
-                  {bannerConfig.subtitle}
+                  {fallbackSubtitle}
                 </p>
-              )}
-            </div>
+              </>
+            )}
           </div>
-        </section>
-      )}
+        </div>
+      </section>
 
       <main className="flex-1">
         <div className="container py-6 md:py-10">
