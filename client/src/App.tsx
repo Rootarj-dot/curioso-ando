@@ -7,10 +7,10 @@ import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import Home from "./pages/Home";
+import ArticlePage from "./pages/ArticlePage";
+import CategoryPage from "./pages/CategoryPage";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 
-const ArticlePage = lazy(() => import("./pages/ArticlePage"));
-const CategoryPage = lazy(() => import("./pages/CategoryPage"));
-const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
 const AdminArticles = lazy(() => import("./pages/Admin/AdminArticles"));
 const ArticleEditor = lazy(() => import("./pages/Admin/ArticleEditor"));

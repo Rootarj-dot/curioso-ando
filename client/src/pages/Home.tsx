@@ -205,15 +205,7 @@ export default function Home() {
                 {articlesLoading ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 justify-items-center">
                     {Array.from({ length: 6 }).map((_, i) => (
-                      <div key={i} className="w-full max-w-sm rounded-xl overflow-hidden animate-pulse" style={{ minHeight: 330, backgroundColor: "#FFFFFF", border: "1px solid #E5E3DE" }}>
-                        <div style={{ aspectRatio: "1792 / 1024", backgroundColor: "#E5E3DE" }} />
-                        <div className="p-4 space-y-3">
-                          <div className="h-4 rounded" style={{ width: "85%", backgroundColor: "#E5E3DE" }} />
-                          <div className="h-4 rounded" style={{ width: "62%", backgroundColor: "#E5E3DE" }} />
-                          <div className="h-3 rounded" style={{ width: "76%", backgroundColor: "#E5E3DE" }} />
-                          <div className="h-3 rounded ml-auto" style={{ width: "34%", backgroundColor: "#E5E3DE" }} />
-                        </div>
-                      </div>
+                      <div key={i} className="w-full max-w-sm rounded-xl animate-pulse" style={{ height: 280, backgroundColor: "#E5E3DE" }} />
                     ))}
                   </div>
                 ) : articles && articles.length > 0 ? (
