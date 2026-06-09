@@ -136,7 +136,7 @@ export default function Home() {
                 <Link href={`/articulo/${featuredArticle.slug}`} className="no-underline group">
                   <h1
                     className="font-bold leading-tight mb-3 group-hover:opacity-90 transition-opacity"
-                    style={{ fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", color: "#FFFFFF", fontSize: "clamp(1.75rem, 4vw, 2.75rem)" }}
+                    style={{ fontFamily: "Poppins, sans-serif", color: "#FFFFFF", fontSize: "clamp(1.75rem, 4vw, 2.75rem)" }}
                   >
                     {featuredArticle.title}
                   </h1>
@@ -174,7 +174,7 @@ export default function Home() {
             ) : (
               <>
                 <span className="ca-badge mb-4">Portal de Noticias</span>
-                <h1 className="text-white font-bold text-4xl md:text-5xl leading-tight mb-3" style={{ fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
+                <h1 className="text-white font-bold text-4xl md:text-5xl leading-tight mb-3" style={{ fontFamily: "Poppins, sans-serif" }}>
                   {fallbackTitle}
                 </h1>
                 <p className="text-base md:text-lg" style={{ color: "#D0C0FF" }}>
