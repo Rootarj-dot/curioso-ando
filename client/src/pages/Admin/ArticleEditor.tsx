@@ -11,6 +11,19 @@ import { TriviaEditor } from "@/components/Admin/TriviaEditor";
 import type { DraftTriviaItem } from "@/components/Admin/TriviaEditor";
 import type { LexicalEditor } from "lexical";
 
+function toDatetimeLocalValue(value: Date | string) {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+  return localDate.toISOString().slice(0, 16);
+}
+
+function toIsoStringFromDatetimeLocal(value: string) {
+  if (!value) return undefined;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
+}
+
 export default function ArticleEditor() {
   const params = useParams<{ id: string }>();
   const parsedArticleId = params.id ? parseInt(params.id, 10) : undefined;
@@ -94,8 +107,7 @@ export default function ArticleEditor() {
       setFeatured(existingArticle.featured);
       setCategoryId(existingArticle.categoryId ?? undefined);
       if (existingArticle.publishedAt) {
-        const d = new Date(existingArticle.publishedAt);
-        setPublishedAt(d.toISOString().slice(0, 16));
+        setPublishedAt(toDatetimeLocalValue(existingArticle.publishedAt));
       }
     }
   }, [existingArticle]);
@@ -150,7 +162,7 @@ export default function ArticleEditor() {
       status: finalStatus,
       featured,
       categoryId,
-      publishedAt: publishedAt || undefined,
+      publishedAt: toIsoStringFromDatetimeLocal(publishedAt),
     };
 
     if (isEditing && articleId) {

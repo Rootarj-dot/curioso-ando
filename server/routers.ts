@@ -13,6 +13,7 @@ import {
   getFeaturedArticle,
   getArticleBySlug,
   getArticleById,
+  isArticleCurrentlyPublished,
   getAllArticlesAdmin,
   createArticle,
   updateArticle,
@@ -149,9 +150,12 @@ export const appRouter = router({
 
     bySlug: publicProcedure
       .input(z.object({ slug: z.string() }))
-      .query(async ({ input }) => {
+      .query(async ({ input, ctx }) => {
         const article = await getArticleBySlug(input.slug);
-        if (!article) throw new TRPCError({ code: "NOT_FOUND", message: "Artículo no encontrado" });
+        const isAdmin = ctx.user?.role === "admin";
+        if (!article || (!isAdmin && !isArticleCurrentlyPublished(article))) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Artículo no encontrado" });
+        }
         return article;
       }),
 

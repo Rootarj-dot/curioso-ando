@@ -124,6 +124,20 @@ export async function getAllCategories() {
 
 // ─── Articles ────────────────────────────────────────────────────────────────
 
+function publishedAtHasArrivedCondition() {
+  return sql`(${articles.publishedAt} IS NULL OR ${articles.publishedAt} <= CURRENT_TIMESTAMP)`;
+}
+
+function publicArticleCondition() {
+  return and(eq(articles.status, "published"), publishedAtHasArrivedCondition());
+}
+
+export function isArticleCurrentlyPublished(article: { status?: string | null; publishedAt?: Date | string | null }) {
+  if (article.status !== "published") return false;
+  if (!article.publishedAt) return true;
+  return new Date(article.publishedAt).getTime() <= Date.now();
+}
+
 export async function getPublishedArticles(opts?: { categorySlug?: string; limit?: number; offset?: number }) {
   const db = await getDb();
   if (!db) return [];
@@ -152,7 +166,7 @@ export async function getPublishedArticles(opts?: { categorySlug?: string; limit
       .from(articles)
       .leftJoin(categories, eq(articles.categoryId, categories.id))
       .leftJoin(users, eq(articles.authorId, users.id))
-      .where(and(eq(articles.status, "published"), eq(categories.slug, opts.categorySlug)))
+      .where(and(publicArticleCondition(), eq(categories.slug, opts.categorySlug)))
       .orderBy(desc(articles.publishedAt))
       .limit(limit)
       .offset(offset);
@@ -179,7 +193,7 @@ export async function getPublishedArticles(opts?: { categorySlug?: string; limit
     .from(articles)
     .leftJoin(categories, eq(articles.categoryId, categories.id))
     .leftJoin(users, eq(articles.authorId, users.id))
-    .where(eq(articles.status, "published"))
+    .where(publicArticleCondition())
     .orderBy(desc(articles.publishedAt))
     .limit(limit)
     .offset(offset);
@@ -211,7 +225,7 @@ export async function getFeaturedArticle() {
     .from(articles)
     .leftJoin(categories, eq(articles.categoryId, categories.id))
     .leftJoin(users, eq(articles.authorId, users.id))
-    .where(and(eq(articles.status, "published"), eq(articles.featured, true)))
+    .where(and(publicArticleCondition(), eq(articles.featured, true)))
     .orderBy(desc(articles.publishedAt))
     .limit(1);
   return result[0] ?? null;
@@ -415,7 +429,7 @@ export async function getArticlesByIds(ids: number[]) {
       .from(articles)
       .leftJoin(categories, eq(articles.categoryId, categories.id))
       .leftJoin(users, eq(articles.authorId, users.id))
-      .where(and(eq(articles.id, id), eq(articles.status, "published")))
+      .where(and(eq(articles.id, id), publicArticleCondition()))
       .limit(1);
     if (rows[0]) results.push(rows[0]);
   }
@@ -464,7 +478,7 @@ export async function searchArticles(query: string) {
     })
     .from(articles)
     .leftJoin(categories, eq(articles.categoryId, categories.id))
-    .where(and(eq(articles.status, "published"), like(articles.title, term)))
+    .where(and(publicArticleCondition(), like(articles.title, term)))
     .orderBy(desc(articles.publishedAt))
     .limit(10);
 }

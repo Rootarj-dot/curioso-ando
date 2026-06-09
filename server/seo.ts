@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import type { Express, NextFunction, Request, Response } from "express";
-import { getPublishedArticles, getAllCategories, getArticleBySlug } from "./db";
+import { getPublishedArticles, getAllCategories, getArticleBySlug, isArticleCurrentlyPublished } from "./db";
 
 const SITE_NAME = "Curioseando Ando";
 const DEFAULT_DESCRIPTION = "Datos raros, curiosos y sorprendentes. Noticias, entretenimiento, geek y tecnología en un solo lugar.";
@@ -117,7 +117,7 @@ export function registerSeoRoutes(app: Express) {
 
     try {
       const article = await getArticleBySlug(slug);
-      if (!article || article.status !== "published") {
+      if (!article || !isArticleCurrentlyPublished(article)) {
         return next();
       }
 
