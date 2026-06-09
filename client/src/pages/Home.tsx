@@ -82,11 +82,17 @@ export default function Home() {
           className="relative overflow-hidden"
           style={{ minHeight: "clamp(280px, 50vw, 480px)" }}
         >
-          {/* Imagen de fondo */}
+          {/* Imagen de fondo priorizada para mejorar LCP */}
           {featuredImg ? (
-            <div
-              className="absolute inset-0 bg-cover bg-center"
-              style={{ backgroundImage: `url(${featuredImg})` }}
+            <img
+              src={featuredImg}
+              alt=""
+              width={1792}
+              height={1024}
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+              className="absolute inset-0 h-full w-full object-cover"
             />
           ) : (
             <div

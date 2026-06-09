@@ -1,10 +1,51 @@
 import React, { useRef, useState, useLayoutEffect } from "react";
-import * as LucideIcons from "lucide-react";
+import {
+  Atom,
+  BookOpen,
+  Brain,
+  CheckCircle2,
+  Cpu,
+  Flame,
+  FlaskConical,
+  Globe,
+  Heart,
+  HelpCircle,
+  Leaf,
+  Lightbulb,
+  Palette,
+  Rocket,
+  Sparkles,
+  Star,
+  Telescope,
+  Waves,
+  XCircle,
+  Zap,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { HelpCircle, CheckCircle2, XCircle } from "lucide-react";
+
+const ICON_MAP: Record<string, LucideIcon> = {
+  Atom,
+  BookOpen,
+  Brain,
+  Cpu,
+  Flame,
+  FlaskConical,
+  Globe,
+  Heart,
+  HelpCircle,
+  Leaf,
+  Lightbulb,
+  Palette,
+  Rocket,
+  Sparkles,
+  Star,
+  Telescope,
+  Waves,
+  Zap,
+};
 
 function RenderIcon({ name, size = 28, color }: { name: string; size?: number; color?: string }) {
-  const Icon = (LucideIcons as unknown as Record<string, LucideIcon>)[name] || HelpCircle;
+  const Icon = ICON_MAP[name] || HelpCircle;
   return <Icon width={size} height={size} color={color || "currentColor"} />;
 }
 

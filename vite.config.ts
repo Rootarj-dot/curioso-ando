@@ -194,7 +194,6 @@ export default defineConfig({
             "@lexical/selection",
             "@lexical/utils",
           ],
-          "vendor-icons": ["lucide-react"],
         },
       },
     },

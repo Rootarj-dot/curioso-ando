@@ -279,12 +279,16 @@ export default function ArticlePage() {
         <main className="flex-1">
           {/* Hero Image */}
           {(article.ogImage || article.featuredImage) && (
-            <div className="w-full" style={{ maxHeight: 480, overflow: "hidden" }}>
+            <div className="relative w-full overflow-hidden" style={{ maxHeight: 480, aspectRatio: "1792 / 720" }}>
               <img
                 src={article.ogImage || article.featuredImage || ""}
                 alt={article.title}
-                className="w-full object-cover"
-                style={{ maxHeight: 480 }}
+                width={1792}
+                height={720}
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
+                className="absolute inset-0 h-full w-full object-cover"
               />
             </div>
           )}
