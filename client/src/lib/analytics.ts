@@ -31,16 +31,25 @@ function loadScript(src: string, attrs: Record<string, string> = {}): void {
   document.head.appendChild(s);
 }
 
-/** Initialize Google Analytics 4 */
+/** Initialize Google Analytics 4 as a fallback when the static tag is not present */
 export function initGA(): void {
   const gaId = getGaMeasurementId();
   if (!gaId || !gaId.startsWith("G-")) return;
 
-  loadScript(`https://www.googletagmanager.com/gtag/js?id=${gaId}`);
+  const gtagScriptSrc = `https://www.googletagmanager.com/gtag/js?id=${gaId}`;
+  const hasStaticGtag = Boolean(document.querySelector(`script[src="${gtagScriptSrc}"]`));
+
   window.dataLayer = window.dataLayer || [];
-  window.gtag = function gtag(...args: unknown[]) {
-    window.dataLayer.push(args);
-  };
+
+  if (typeof window.gtag !== "function") {
+    window.gtag = function gtag(...args: unknown[]) {
+      window.dataLayer.push(args);
+    };
+  }
+
+  if (hasStaticGtag) return;
+
+  loadScript(gtagScriptSrc);
   window.gtag("js", new Date());
   window.gtag("config", gaId, { anonymize_ip: true });
 }

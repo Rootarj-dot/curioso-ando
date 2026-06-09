@@ -68,7 +68,17 @@
     }
     </script>
 
-    <!-- GA4 and AdSense are initialized from React via import.meta.env -->
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LH9VJZWW1F"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-LH9VJZWW1F');
+    </script>
+
+    <!-- AdSense is initialized from React via import.meta.env -->
     <!-- See: client/src/lib/analytics.ts -->
   </head>
 
