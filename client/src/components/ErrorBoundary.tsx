@@ -11,6 +11,32 @@ interface State {
   error: Error | null;
 }
 
+function isDynamicImportError(error: Error) {
+  const message = `${error.name} ${error.message} ${error.stack ?? ""}`.toLowerCase();
+
+  return (
+    message.includes("failed to fetch dynamically imported module") ||
+    message.includes("importing a module script failed") ||
+    message.includes("chunkloaderror") ||
+    message.includes("loading chunk") ||
+    message.includes("dynamically imported module")
+  );
+}
+
+function reloadOnceForCurrentRoute() {
+  const key = `ca:chunk-reload:${window.location.pathname}${window.location.search}`;
+
+  try {
+    if (sessionStorage.getItem(key) === "1") return false;
+    sessionStorage.setItem(key, "1");
+  } catch {
+    return false;
+  }
+
+  window.location.reload();
+  return true;
+}
+
 class ErrorBoundary extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -19,6 +45,12 @@ class ErrorBoundary extends Component<Props, State> {
 
   static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error) {
+    if (isDynamicImportError(error)) {
+      reloadOnceForCurrentRoute();
+    }
   }
 
   render() {
@@ -31,7 +63,7 @@ class ErrorBoundary extends Component<Props, State> {
               className="text-destructive mb-6 flex-shrink-0"
             />
 
-            <h2 className="text-xl mb-4">An unexpected error occurred.</h2>
+            <h2 className="text-xl mb-4">Ocurrió un error inesperado.</h2>
 
             <div className="p-4 w-full rounded bg-muted overflow-auto mb-6">
               <pre className="text-sm text-muted-foreground whitespace-break-spaces">
@@ -48,7 +80,7 @@ class ErrorBoundary extends Component<Props, State> {
               )}
             >
               <RotateCcw size={16} />
-              Reload Page
+              Recargar página
             </button>
           </div>
         </div>

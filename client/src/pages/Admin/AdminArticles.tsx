@@ -2,8 +2,41 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { AdminLayout } from "./AdminLayout";
-import { Plus, Edit, Trash2, Eye, EyeOff, Star } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, EyeOff, Star, CalendarClock } from "lucide-react";
 import { toast } from "sonner";
+
+function isScheduledArticle(article: { status: string; publishedAt?: Date | string | null }) {
+  if (article.status !== "published" || !article.publishedAt) return false;
+  const publishDate = new Date(article.publishedAt);
+  return !Number.isNaN(publishDate.getTime()) && publishDate.getTime() > Date.now();
+}
+
+function getArticleStatusDisplay(article: { status: string; publishedAt?: Date | string | null }) {
+  if (isScheduledArticle(article)) {
+    return {
+      label: "Programado",
+      background: "rgba(91,44,143,0.15)",
+      color: "#5B2C8F",
+      icon: <CalendarClock className="w-3 h-3" />,
+    };
+  }
+
+  if (article.status === "published") {
+    return {
+      label: "Publicado",
+      background: "rgba(22,163,74,0.2)",
+      color: "#16a34a",
+      icon: <Eye className="w-3 h-3" />,
+    };
+  }
+
+  return {
+    label: "Borrador",
+    background: "rgba(217,119,6,0.2)",
+    color: "#d97706",
+    icon: <EyeOff className="w-3 h-3" />,
+  };
+}
 
 export default function AdminArticles() {
   const { data: articles, refetch } = trpc.articles.adminList.useQuery();
@@ -65,7 +98,9 @@ export default function AdminArticles() {
                   </tr>
                 </thead>
                 <tbody>
-                  {articles.map((article) => (
+                  {articles.map((article) => {
+                    const statusDisplay = getArticleStatusDisplay(article);
+                    return (
                     <tr key={article.id} style={{ borderBottom: "1px solid #E5E3DE" }}>
                       <td className="px-4 py-3">
                         <p className="font-medium line-clamp-1 max-w-xs" style={{ color: "#1A1A1A" }}>{article.title}</p>
@@ -79,12 +114,12 @@ export default function AdminArticles() {
                           onClick={() => toggleStatus(article.id, article.status)}
                           className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium transition-opacity hover:opacity-80"
                           style={{
-                            background: article.status === "published" ? "rgba(22,163,74,0.2)" : "rgba(217,119,6,0.2)",
-                            color: article.status === "published" ? "#16a34a" : "#d97706",
+                            background: statusDisplay.background,
+                            color: statusDisplay.color,
                           }}
                         >
-                          {article.status === "published" ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
-                          {article.status === "published" ? "Publicado" : "Borrador"}
+                          {statusDisplay.icon}
+                          {statusDisplay.label}
                         </button>
                       </td>
                       <td className="px-4 py-3">
@@ -129,7 +164,8 @@ export default function AdminArticles() {
                         </div>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

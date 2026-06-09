@@ -24,6 +24,12 @@ function toIsoStringFromDatetimeLocal(value: string) {
   return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
 }
 
+function isFutureDatetimeLocal(value: string) {
+  if (!value) return false;
+  const date = new Date(value);
+  return !Number.isNaN(date.getTime()) && date.getTime() > Date.now();
+}
+
 export default function ArticleEditor() {
   const params = useParams<{ id: string }>();
   const parsedArticleId = params.id ? parseInt(params.id, 10) : undefined;
@@ -186,6 +192,8 @@ export default function ArticleEditor() {
   };
 
   const isSaving = createMutation.isPending || updateMutation.isPending || createTriviaMutation.isPending;
+  const publishActionLabel = isFutureDatetimeLocal(publishedAt) ? "Programar" : "Publicar";
+  const selectedStatusLabel = status === "published" && isFutureDatetimeLocal(publishedAt) ? "Programado" : status === "published" ? "Publicado" : "Borrador";
 
   return (
     <AdminLayout>
@@ -234,7 +242,7 @@ export default function ArticleEditor() {
               className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
               style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#FFFFFF" }}
             >
-              {isSaving ? "Guardando..." : "Publicar"}
+              {isSaving ? "Guardando..." : publishActionLabel}
             </button>
           </div>
         </div>
@@ -283,7 +291,18 @@ export default function ArticleEditor() {
           <div className="flex flex-col gap-4">
             {/* Publish settings */}
             <div className="ca-card p-4">
-              <h3 className="font-semibold text-sm mb-4">Publicación</h3>
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-sm">Publicación</h3>
+                    <span
+                      className="text-xs px-2 py-1 rounded-full font-medium"
+                      style={{
+                        background: selectedStatusLabel === "Programado" ? "rgba(91,44,143,0.15)" : selectedStatusLabel === "Publicado" ? "rgba(22,163,74,0.2)" : "rgba(217,119,6,0.2)",
+                        color: selectedStatusLabel === "Programado" ? "#5B2C8F" : selectedStatusLabel === "Publicado" ? "#16a34a" : "#d97706",
+                      }}
+                    >
+                      {selectedStatusLabel}
+                    </span>
+                  </div>
               <div className="flex flex-col gap-3">
                 <div>
                   <label className="block text-xs mb-1.5" style={{ color: "#6B6B6B" }}>Estado</label>
@@ -294,7 +313,7 @@ export default function ArticleEditor() {
                     style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE", color: "#1A1A1A" }}
                   >
                     <option value="draft">Borrador</option>
-                    <option value="published">Publicado</option>
+                    <option value="published">Publicado / Programado</option>
                   </select>
                 </div>
                 <div>

@@ -2,7 +2,40 @@ import { Link } from "wouter";
 import { useState, useEffect } from "react";
 import { trpc } from "@/lib/trpc";
 import { AdminLayout } from "./AdminLayout";
-import { FileText, Image, Plus, Eye, Edit, TrendingUp, X, Check, Search, Palette, Save } from "lucide-react";
+import { FileText, Image, Plus, Eye, Edit, TrendingUp, X, Check, Search, Palette, Save, CalendarClock } from "lucide-react";
+
+function isScheduledArticle(article: { status: string; publishedAt?: Date | string | null }) {
+  if (article.status !== "published" || !article.publishedAt) return false;
+  const publishDate = new Date(article.publishedAt);
+  return !Number.isNaN(publishDate.getTime()) && publishDate.getTime() > Date.now();
+}
+
+function getArticleStatusDisplay(article: { status: string; publishedAt?: Date | string | null }) {
+  if (isScheduledArticle(article)) {
+    return {
+      label: "Programado",
+      background: "rgba(91,44,143,0.15)",
+      color: "#5B2C8F",
+      icon: <CalendarClock className="w-3 h-3" />,
+    };
+  }
+
+  if (article.status === "published") {
+    return {
+      label: "Publicado",
+      background: "rgba(22,163,74,0.2)",
+      color: "#16a34a",
+      icon: <Eye className="w-3 h-3" />,
+    };
+  }
+
+  return {
+    label: "Borrador",
+    background: "rgba(217,119,6,0.2)",
+    color: "#d97706",
+    icon: null,
+  };
+}
 
 export default function AdminDashboard() {
   const utils = trpc.useUtils();
@@ -50,11 +83,12 @@ export default function AdminDashboard() {
     }
   }, [bannerConfig]);
 
-  const published = articles?.filter((a) => a.status === "published") ?? [];
+  const actuallyPublished = articles?.filter((a) => a.status === "published" && !isScheduledArticle(a)) ?? [];
+  const scheduled = articles?.filter(isScheduledArticle) ?? [];
   const drafts = articles?.filter((a) => a.status === "draft").length ?? 0;
   const total = articles?.length ?? 0;
 
-  const filteredPublished = published.filter((a) =>
+  const filteredPublished = actuallyPublished.filter((a) =>
     a.title.toLowerCase().includes(search.toLowerCase())
   );
 
@@ -69,10 +103,11 @@ export default function AdminDashboard() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {[
             { label: "Total artículos", value: total, icon: FileText, color: "#2B037D" },
-            { label: "Publicados", value: published.length, icon: Eye, color: "#16a34a" },
+            { label: "Publicados", value: actuallyPublished.length, icon: Eye, color: "#16a34a" },
+            { label: "Programados", value: scheduled.length, icon: CalendarClock, color: "#5B2C8F" },
             { label: "Borradores", value: drafts, icon: Edit, color: "#d97706" },
           ].map(({ label, value, icon: Icon, color }) => (
             <div key={label} className="ca-card p-5 flex items-center gap-4">
@@ -247,7 +282,9 @@ export default function AdminDashboard() {
                 <p>No hay artículos aún.</p>
               </div>
             ) : (
-              articles.slice(0, 5).map((article) => (
+              articles.slice(0, 5).map((article) => {
+                const statusDisplay = getArticleStatusDisplay(article);
+                return (
                 <div
                   key={article.id}
                   className="flex items-center gap-4 p-4 transition-colors"
@@ -261,19 +298,21 @@ export default function AdminDashboard() {
                     </p>
                   </div>
                   <span
-                    className="text-xs px-2 py-1 rounded-full font-medium"
+                    className="text-xs px-2 py-1 rounded-full font-medium inline-flex items-center gap-1"
                     style={{
-                      background: article.status === "published" ? "rgba(22,163,74,0.2)" : "rgba(217,119,6,0.2)",
-                      color: article.status === "published" ? "#16a34a" : "#d97706",
+                      background: statusDisplay.background,
+                      color: statusDisplay.color,
                     }}
                   >
-                    {article.status === "published" ? "Publicado" : "Borrador"}
+                    {statusDisplay.icon}
+                    {statusDisplay.label}
                   </span>
                   <Link href={`/admin/editar/${article.id}`} className="p-1.5 rounded no-underline" style={{ color: "#6B6B6B" }}>
                     <Edit className="w-4 h-4" />
                   </Link>
                 </div>
-              ))
+                );
+              })
             )}
           </div>
         </div>
@@ -325,7 +364,7 @@ export default function AdminDashboard() {
             <div className="overflow-y-auto flex-1">
               {filteredPublished.length === 0 ? (
                 <p className="text-sm text-center py-8" style={{ color: "#9B9B9B" }}>
-                  {published.length === 0 ? "No hay artículos publicados." : "Sin resultados para esa búsqueda."}
+                  {actuallyPublished.length === 0 ? "No hay artículos publicados." : "Sin resultados para esa búsqueda."}
                 </p>
               ) : (
                 filteredPublished.map((article) => {
