@@ -30,8 +30,6 @@ export function ArticleCard({
   excerpt,
   featuredImage,
   ogImage,
-  categoryName,
-  categorySlug,
   publishedAt,
   size = "normal",
 }: ArticleCardProps) {
@@ -56,9 +54,12 @@ export function ArticleCard({
           )}
           <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(28,28,29,0.97) 0%, rgba(28,28,29,0.5) 50%, transparent 100%)" }} />
           <div className="absolute bottom-0 left-0 right-0 p-6">
-            {categoryName && (
-              <span className="ca-badge mb-3">{categoryName}</span>
-            )}
+            <span
+              className="inline-flex w-fit items-center rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-wide shadow-lg transition-transform duration-200 group-hover:scale-105"
+              style={{ backgroundColor: "#D90429", color: "#FFFFFF", boxShadow: "0 8px 18px rgba(217,4,41,0.35)" }}
+            >
+              Clic aquí para leer
+            </span>
             <h2 className="font-bold text-2xl md:text-3xl leading-tight mb-2 group-hover:text-purple-300 transition-colors" style={{ color: "#FFFFFF" }}>
               {title}
             </h2>
@@ -98,11 +99,14 @@ export function ArticleCard({
               <span className="text-white/30 text-4xl font-bold">CA</span>
             </div>
           )}
-          {categoryName && (
-            <div className="absolute top-3 left-3">
-              <span className="ca-badge">{categoryName}</span>
-            </div>
-          )}
+          <div className="absolute top-3 left-3">
+            <span
+              className="inline-flex items-center rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide shadow-lg transition-transform duration-200 group-hover:scale-105"
+              style={{ backgroundColor: "#D90429", color: "#FFFFFF", boxShadow: "0 8px 18px rgba(217,4,41,0.35)" }}
+            >
+              Clic aquí para leer
+            </span>
+          </div>
         </div>
         <div className="p-4 flex flex-col flex-1">
           <h3 className="font-bold text-base leading-snug mb-2 group-hover:text-purple-600 transition-colors line-clamp-2" style={{ color: "#1A1A1A" }}>
