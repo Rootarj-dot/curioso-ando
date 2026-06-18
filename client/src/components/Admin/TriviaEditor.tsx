@@ -28,8 +28,44 @@ export interface DraftTriviaItem {
   respuesta: string;
   opcionCorrecta: string;
   opcionIncorrecta: string;
+  opciones?: string | null;
+  opcionCorrectaIndex?: number | null;
   icono: string | null;
   color: string | null;
+}
+
+const EMPTY_OPTIONS = Array.from({ length: 5 }, () => "");
+
+function parseTriviaOptions(item: Pick<DraftTriviaItem, "opcionCorrecta" | "opcionIncorrecta" | "opciones" | "opcionCorrectaIndex">) {
+  try {
+    const parsed = item.opciones ? JSON.parse(item.opciones) : null;
+    if (Array.isArray(parsed)) {
+      const normalized = parsed.slice(0, 5).map((option) => String(option ?? ""));
+      while (normalized.length < 5) normalized.push("");
+      return normalized;
+    }
+  } catch {
+    // Fall back to legacy fields below.
+  }
+
+  return [item.opcionCorrecta || "", item.opcionIncorrecta || "", "", "", ""];
+}
+
+function normalizeCorrectIndex(value: number | null | undefined) {
+  return typeof value === "number" && value >= 0 && value <= 4 ? value : 0;
+}
+
+function buildTriviaPayload(options: string[], correctIndex: number) {
+  const trimmedOptions = options.map((option) => option.trim());
+  const correctOption = trimmedOptions[correctIndex] || "";
+  const firstIncorrect = trimmedOptions.find((option, index) => index !== correctIndex && option) || "";
+
+  return {
+    opciones: JSON.stringify(trimmedOptions),
+    opcionCorrectaIndex: correctIndex,
+    opcionCorrecta: correctOption,
+    opcionIncorrecta: firstIncorrect,
+  };
 }
 
 
@@ -49,8 +85,8 @@ export function TriviaEditor({ articleId, draftItems = [], onDraftItemsChange }:
   // Form state
   const [pregunta, setPregunta] = useState("");
   const [respuesta, setRespuesta] = useState("");
-  const [opcionCorrecta, setOpcionCorrecta] = useState("");
-  const [opcionIncorrecta, setOpcionIncorrecta] = useState("");
+  const [opciones, setOpciones] = useState<string[]>(EMPTY_OPTIONS);
+  const [opcionCorrectaIndex, setOpcionCorrectaIndex] = useState(0);
   const [icono, setIcono] = useState("HelpCircle");
   const [color, setColor] = useState("#7C3AED");
 
@@ -89,8 +125,8 @@ export function TriviaEditor({ articleId, draftItems = [], onDraftItemsChange }:
   const resetForm = () => {
     setPregunta("");
     setRespuesta("");
-    setOpcionCorrecta("");
-    setOpcionIncorrecta("");
+    setOpciones(EMPTY_OPTIONS);
+    setOpcionCorrectaIndex(0);
     setIcono("HelpCircle");
     setColor("#7C3AED");
     setEditingId(null);
@@ -101,25 +137,35 @@ export function TriviaEditor({ articleId, draftItems = [], onDraftItemsChange }:
     setEditingId(item.id);
     setPregunta(item.pregunta);
     setRespuesta(item.respuesta);
-    setOpcionCorrecta(item.opcionCorrecta);
-    setOpcionIncorrecta(item.opcionIncorrecta);
+    setOpciones(parseTriviaOptions(item));
+    setOpcionCorrectaIndex(normalizeCorrectIndex(item.opcionCorrectaIndex));
     setIcono(item.icono || "HelpCircle");
     setColor(item.color || "#7C3AED");
     setShowForm(true);
   };
 
+  const updateOption = (index: number, value: string) => {
+    setOpciones((current) => current.map((option, optionIndex) => (optionIndex === index ? value : option)));
+  };
+
   const handleSubmit = () => {
-    if (!pregunta.trim() || !respuesta.trim() || !opcionCorrecta.trim() || !opcionIncorrecta.trim()) {
-      toast.error("Completa todos los campos");
+    const trimmedOptions = opciones.map((option) => option.trim());
+    const hasFiveOptions = trimmedOptions.every(Boolean);
+    const correctIndex = normalizeCorrectIndex(opcionCorrectaIndex);
+
+    if (!pregunta.trim() || !respuesta.trim() || !hasFiveOptions) {
+      toast.error("Completa la pregunta, la respuesta y las 5 opciones");
       return;
     }
+
+    const payload = buildTriviaPayload(trimmedOptions, correctIndex);
+
     if (isDraftMode) {
       const draftItem: DraftTriviaItem = {
         id: editingId ?? -Date.now(),
         pregunta,
         respuesta,
-        opcionCorrecta,
-        opcionIncorrecta,
+        ...payload,
         icono,
         color,
       };
@@ -141,9 +187,9 @@ export function TriviaEditor({ articleId, draftItems = [], onDraftItemsChange }:
     }
 
     if (editingId) {
-      updateMutation.mutate({ id: editingId, pregunta, respuesta, opcionCorrecta, opcionIncorrecta, icono, color });
+      updateMutation.mutate({ id: editingId, pregunta, respuesta, ...payload, icono, color });
     } else {
-      createMutation.mutate({ articleId, pregunta, respuesta, opcionCorrecta, opcionIncorrecta, icono, color });
+      createMutation.mutate({ articleId, pregunta, respuesta, ...payload, icono, color });
     }
   };
 
@@ -182,7 +228,7 @@ export function TriviaEditor({ articleId, draftItems = [], onDraftItemsChange }:
                   <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold text-foreground line-clamp-2">{item.pregunta}</p>
                     <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
-                      ✓ {item.opcionCorrecta} &nbsp;✗ {item.opcionIncorrecta}
+                      ✓ {item.opcionCorrecta} · 5 opciones configuradas
                     </p>
                   </div>
                 </div>
@@ -279,25 +325,41 @@ export function TriviaEditor({ articleId, draftItems = [], onDraftItemsChange }:
               </div>
 
               {/* Opciones */}
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="text-xs text-green-600 mb-1 block font-medium">✓ Opción correcta *</label>
-                  <input
-                    value={opcionCorrecta}
-                    onChange={(e) => setOpcionCorrecta(e.target.value)}
-                    placeholder="París"
-                    className="w-full text-sm border border-green-200 rounded px-2 py-1.5 bg-background focus:outline-none focus:ring-1 focus:ring-green-500"
-                  />
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between gap-2">
+                  <label className="text-xs text-muted-foreground block font-medium">Opciones de respuesta *</label>
+                  <span className="text-[11px] text-green-600 font-medium">Marca la correcta</span>
                 </div>
-                <div>
-                  <label className="text-xs text-red-500 mb-1 block font-medium">✗ Opción incorrecta *</label>
-                  <input
-                    value={opcionIncorrecta}
-                    onChange={(e) => setOpcionIncorrecta(e.target.value)}
-                    placeholder="Madrid"
-                    className="w-full text-sm border border-red-200 rounded px-2 py-1.5 bg-background focus:outline-none focus:ring-1 focus:ring-red-500"
-                  />
-                </div>
+                {opciones.map((option, index) => {
+                  const isCorrect = opcionCorrectaIndex === index;
+                  return (
+                    <div key={index} className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setOpcionCorrectaIndex(index)}
+                        className={`w-8 h-8 rounded-full border text-xs font-bold transition-colors ${
+                          isCorrect
+                            ? "bg-green-600 border-green-600 text-white"
+                            : "bg-background border-border text-muted-foreground hover:border-green-400"
+                        }`}
+                        aria-label={`Marcar opción ${index + 1} como correcta`}
+                        title="Marcar como correcta"
+                      >
+                        {isCorrect ? "✓" : index + 1}
+                      </button>
+                      <input
+                        value={option}
+                        onChange={(e) => updateOption(index, e.target.value)}
+                        placeholder={`Opción ${index + 1}`}
+                        className={`w-full text-sm border rounded px-2 py-1.5 bg-background focus:outline-none focus:ring-1 ${
+                          isCorrect
+                            ? "border-green-300 focus:ring-green-500"
+                            : "border-border focus:ring-purple-500"
+                        }`}
+                      />
+                    </div>
+                  );
+                })}
               </div>
 
               {/* Botones */}

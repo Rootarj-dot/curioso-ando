@@ -77,6 +77,8 @@ export default function ArticleEditor() {
                 respuesta: item.respuesta,
                 opcionCorrecta: item.opcionCorrecta,
                 opcionIncorrecta: item.opcionIncorrecta,
+                opciones: item.opciones || undefined,
+                opcionCorrectaIndex: item.opcionCorrectaIndex ?? undefined,
                 icono: item.icono || undefined,
                 color: item.color || undefined,
               })

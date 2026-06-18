@@ -94,6 +94,8 @@ export const articleTrivia = mysqlTable("article_trivia", {
   respuesta: text("respuesta").notNull(),
   opcionCorrecta: varchar("opcionCorrecta", { length: 255 }).notNull(),
   opcionIncorrecta: varchar("opcionIncorrecta", { length: 255 }).notNull(),
+  opciones: text("opciones"),
+  opcionCorrectaIndex: int("opcionCorrectaIndex").default(0),
   icono: varchar("icono", { length: 50 }).default("HelpCircle"),
   color: varchar("color", { length: 30 }).default("#7C3AED"),
   createdAt: timestamp("createdAt").defaultNow().notNull(),

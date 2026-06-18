@@ -396,6 +396,8 @@ export default function ArticlePage() {
                             respuesta={t.respuesta}
                             opcionCorrecta={t.opcionCorrecta}
                             opcionIncorrecta={t.opcionIncorrecta}
+                            opciones={t.opciones}
+                            opcionCorrectaIndex={t.opcionCorrectaIndex}
                             icono={t.icono}
                             color={t.color}
                           />

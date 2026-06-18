@@ -457,6 +457,8 @@ export const appRouter = router({
         respuesta: z.string().min(1),
         opcionCorrecta: z.string().min(1).max(255),
         opcionIncorrecta: z.string().min(1).max(255),
+        opciones: z.string().optional(),
+        opcionCorrectaIndex: z.number().int().min(0).max(4).optional(),
         icono: z.string().max(50).optional(),
         color: z.string().max(30).optional(),
       }))
@@ -471,6 +473,8 @@ export const appRouter = router({
         respuesta: z.string().min(1).optional(),
         opcionCorrecta: z.string().min(1).max(255).optional(),
         opcionIncorrecta: z.string().min(1).max(255).optional(),
+        opciones: z.string().optional(),
+        opcionCorrectaIndex: z.number().int().min(0).max(4).optional(),
         icono: z.string().max(50).optional(),
         color: z.string().max(30).optional(),
       }))

@@ -55,6 +55,8 @@ export interface CuriousCardProps {
   respuesta: string;
   opcionCorrecta: string;
   opcionIncorrecta: string;
+  opciones?: string | null;
+  opcionCorrectaIndex?: number | null;
   icono?: string | null;
   color?: string | null;
   // Legacy props (ignored)
@@ -69,6 +71,8 @@ export function CuriousCard({
   respuesta,
   opcionCorrecta,
   opcionIncorrecta,
+  opciones,
+  opcionCorrectaIndex,
   icono,
   color,
 }: CuriousCardProps) {
@@ -81,11 +85,22 @@ export function CuriousCard({
 
   // Shuffle options once (stable per component instance)
   const [options] = useState(() => {
-    const opts = [
-      { label: opcionCorrecta, isCorrect: true },
-      { label: opcionIncorrecta, isCorrect: false },
-    ];
-    return Math.random() > 0.5 ? opts : [opts[1], opts[0]];
+    let labels = [opcionCorrecta, opcionIncorrecta].filter(Boolean);
+    let correctIndex = 0;
+
+    try {
+      const parsed = opciones ? JSON.parse(opciones) : null;
+      if (Array.isArray(parsed)) {
+        labels = parsed.map((option) => String(option ?? "").trim()).filter(Boolean);
+        correctIndex = typeof opcionCorrectaIndex === "number" && opcionCorrectaIndex >= 0 && opcionCorrectaIndex < labels.length ? opcionCorrectaIndex : 0;
+      }
+    } catch {
+      labels = [opcionCorrecta, opcionIncorrecta].filter(Boolean);
+      correctIndex = 0;
+    }
+
+    const opts = labels.map((label, index) => ({ label, isCorrect: index === correctIndex }));
+    return opts.sort(() => Math.random() - 0.5);
   });
 
   const handleOpenModal = () => {

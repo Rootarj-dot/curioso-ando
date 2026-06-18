@@ -43,6 +43,13 @@
       "when": 1780088964184,
       "tag": "0005_secure_admin_roles",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1781741290132,
+      "tag": "0006_add_trivia_five_options",
+      "breakpoints": true
     }
   ]
 }

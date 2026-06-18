@@ -560,7 +560,21 @@ export async function getTriviaByArticle(articleId: number) {
   return db.select().from(articleTrivia).where(eq(articleTrivia.articleId, articleId)).orderBy(articleTrivia.createdAt);
 }
 
-export async function createTrivia(data: { articleId: number; pregunta: string; respuesta: string; opcionCorrecta: string; opcionIncorrecta: string; icono?: string; color?: string }) {
+type TriviaWriteData = {
+  articleId: number;
+  pregunta: string;
+  respuesta: string;
+  opcionCorrecta: string;
+  opcionIncorrecta: string;
+  opciones?: string;
+  opcionCorrectaIndex?: number;
+  icono?: string;
+  color?: string;
+};
+
+type TriviaUpdateData = Partial<Omit<TriviaWriteData, "articleId">>;
+
+export async function createTrivia(data: TriviaWriteData) {
   const db = await getDb();
   if (!db) throw new Error("DB not available");
   const now = toMysqlDatetime(new Date());
@@ -568,8 +582,8 @@ export async function createTrivia(data: { articleId: number; pregunta: string; 
   const color = data.color || "#7C3AED";
   // Use raw SQL to avoid Drizzle generating DEFAULT keyword for id (incompatible with MariaDB 10.4)
   await db.execute(
-    sql`INSERT INTO article_trivia (articleId, pregunta, respuesta, opcionCorrecta, opcionIncorrecta, icono, color, createdAt, updatedAt)
-        VALUES (${data.articleId}, ${data.pregunta}, ${data.respuesta}, ${data.opcionCorrecta}, ${data.opcionIncorrecta}, ${icono}, ${color}, ${now}, ${now})`
+    sql`INSERT INTO article_trivia (articleId, pregunta, respuesta, opcionCorrecta, opcionIncorrecta, opciones, opcionCorrectaIndex, icono, color, createdAt, updatedAt)
+        VALUES (${data.articleId}, ${data.pregunta}, ${data.respuesta}, ${data.opcionCorrecta}, ${data.opcionIncorrecta}, ${data.opciones ?? null}, ${data.opcionCorrectaIndex ?? 0}, ${icono}, ${color}, ${now}, ${now})`
   );
   const rows = await db.select().from(articleTrivia)
     .where(eq(articleTrivia.articleId, data.articleId))
@@ -578,7 +592,7 @@ export async function createTrivia(data: { articleId: number; pregunta: string; 
   return rows[0];
 }
 
-export async function updateTrivia(id: number, data: Partial<{ pregunta: string; respuesta: string; opcionCorrecta: string; opcionIncorrecta: string; icono: string; color: string }>) {
+export async function updateTrivia(id: number, data: TriviaUpdateData) {
   const db = await getDb();
   if (!db) throw new Error("DB not available");
   await db.update(articleTrivia).set({ ...data, updatedAt: toMysqlDatetime(new Date()) as unknown as Date }).where(eq(articleTrivia.id, id));
