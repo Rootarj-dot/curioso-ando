@@ -225,6 +225,8 @@ export const appRouter = router({
         const updateData: Record<string, unknown> = { ...rest };
         if (publishedAt !== undefined) {
           updateData.publishedAt = publishedAt ? new Date(publishedAt) : null;
+        } else if (input.status === "published") {
+          updateData.publishedAt = new Date();
         }
         await updateArticle(id, updateData as Parameters<typeof updateArticle>[1]);
         return { success: true };

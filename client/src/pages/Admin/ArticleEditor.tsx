@@ -158,6 +158,11 @@ export default function ArticleEditor() {
       toast.error("El título es obligatorio");
       return;
     }
+
+    const selectedPublishedAt = toIsoStringFromDatetimeLocal(publishedAt);
+    const shouldPublishNow = finalStatus === "published" && !selectedPublishedAt;
+    const finalPublishedAt = shouldPublishNow ? new Date().toISOString() : selectedPublishedAt;
+
     const data = {
       title,
       slug: slug || undefined,
@@ -170,7 +175,7 @@ export default function ArticleEditor() {
       status: finalStatus,
       featured,
       categoryId,
-      publishedAt: toIsoStringFromDatetimeLocal(publishedAt),
+      publishedAt: finalPublishedAt,
     };
 
     if (isEditing && articleId) {
