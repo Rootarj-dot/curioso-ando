@@ -208,7 +208,8 @@ export function CuriousCard({
                           className="tc-flip-opt"
                           onClick={() => handleAnswer(opt.isCorrect)}
                         >
-                          {opt.label}
+                          <span className="tc-flip-opt-label">Respuesta {i + 1}</span>
+                          <span className="tc-flip-opt-text">{opt.label}</span>
                         </button>
                       ))}
                     </div>
@@ -522,6 +523,12 @@ export function CuriousCard({
           margin-top: 4px;
         }
         .tc-flip-opt {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 5px;
+          min-height: 74px;
           font-size: 0.78rem;
           font-weight: 600;
           padding: 12px 10px;
@@ -534,6 +541,32 @@ export function CuriousCard({
           line-height: 1.35;
           text-align: center;
           word-break: break-word;
+        }
+        .tc-flip-opt:nth-child(odd):last-child {
+          grid-column: 1 / -1;
+          justify-self: center;
+          width: calc(50% - 5px);
+        }
+        .tc-flip-opt-label {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: fit-content;
+          border-radius: 999px;
+          padding: 2px 8px;
+          font-size: 0.58rem;
+          font-weight: 800;
+          line-height: 1.2;
+          letter-spacing: 0.06em;
+          text-transform: uppercase;
+          color: rgba(255,255,255,0.82);
+          background: rgba(255,255,255,0.1);
+          border: 1px solid rgba(255,255,255,0.12);
+        }
+        .tc-flip-opt-text {
+          display: block;
+          width: 100%;
+          overflow-wrap: break-word;
         }
         .tc-flip-opt:hover {
           background: rgba(139,92,246,0.45);
