@@ -6,8 +6,49 @@ import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
 let secureAdminRolesMigration: Promise<void> | null = null;
+let articleTriviaFiveOptionsMigration: Promise<void> | null = null;
 
 const SECURE_ADMIN_EMAILS = ["shuraand@gmail.com", "mechanicmurry23@gmail.com"];
+
+async function ensureArticleTriviaFiveOptionsSchema() {
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) return;
+
+  articleTriviaFiveOptionsMigration ??= (async () => {
+    const conn = await mysql.createConnection(databaseUrl);
+    try {
+      const [columns] = await conn.query(
+        `SELECT COLUMN_NAME
+         FROM INFORMATION_SCHEMA.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE()
+           AND TABLE_NAME = 'article_trivia'
+           AND COLUMN_NAME IN ('opciones', 'opcionCorrectaIndex')`
+      );
+
+      const existingColumns = new Set(
+        Array.isArray(columns) ? columns.map((column: any) => String(column.COLUMN_NAME)) : []
+      );
+
+      if (!existingColumns.has('opciones')) {
+        await conn.execute("ALTER TABLE `article_trivia` ADD `opciones` text");
+        console.log("[Database] ✅ Columna article_trivia.opciones creada automáticamente");
+      }
+
+      if (!existingColumns.has('opcionCorrectaIndex')) {
+        await conn.execute("ALTER TABLE `article_trivia` ADD `opcionCorrectaIndex` int DEFAULT 0");
+        console.log("[Database] ✅ Columna article_trivia.opcionCorrectaIndex creada automáticamente");
+      }
+    } catch (error) {
+      articleTriviaFiveOptionsMigration = null;
+      console.error("[Database] ❌ Error aplicando migración de trivia con 5 opciones:", error);
+      throw error;
+    } finally {
+      await conn.end();
+    }
+  })();
+
+  await articleTriviaFiveOptionsMigration;
+}
 
 async function ensureSecureAdminRolesSchema() {
   const databaseUrl = process.env.DATABASE_URL;
@@ -557,6 +598,7 @@ export async function deleteDatoCurioso(id: number) {
 export async function getTriviaByArticle(articleId: number) {
   const db = await getDb();
   if (!db) return [];
+  await ensureArticleTriviaFiveOptionsSchema();
   return db.select().from(articleTrivia).where(eq(articleTrivia.articleId, articleId)).orderBy(articleTrivia.createdAt);
 }
 
@@ -577,6 +619,7 @@ type TriviaUpdateData = Partial<Omit<TriviaWriteData, "articleId">>;
 export async function createTrivia(data: TriviaWriteData) {
   const db = await getDb();
   if (!db) throw new Error("DB not available");
+  await ensureArticleTriviaFiveOptionsSchema();
   const existingRows = await db
     .select({ total: sql<number>`count(*)` })
     .from(articleTrivia)
@@ -605,6 +648,7 @@ export async function createTrivia(data: TriviaWriteData) {
 export async function updateTrivia(id: number, data: TriviaUpdateData) {
   const db = await getDb();
   if (!db) throw new Error("DB not available");
+  await ensureArticleTriviaFiveOptionsSchema();
   await db.update(articleTrivia).set({ ...data, updatedAt: toMysqlDatetime(new Date()) as unknown as Date }).where(eq(articleTrivia.id, id));
   const rows = await db.select().from(articleTrivia).where(eq(articleTrivia.id, id)).limit(1);
   return rows[0];
