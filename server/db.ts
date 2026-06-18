@@ -577,6 +577,16 @@ type TriviaUpdateData = Partial<Omit<TriviaWriteData, "articleId">>;
 export async function createTrivia(data: TriviaWriteData) {
   const db = await getDb();
   if (!db) throw new Error("DB not available");
+  const existingRows = await db
+    .select({ total: sql<number>`count(*)` })
+    .from(articleTrivia)
+    .where(eq(articleTrivia.articleId, data.articleId));
+  const existingCount = Number(existingRows[0]?.total ?? 0);
+
+  if (existingCount >= 5) {
+    throw new Error("Solo puedes agregar hasta 5 preguntas trivia por artículo");
+  }
+
   const now = toMysqlDatetime(new Date());
   const icono = data.icono || "HelpCircle";
   const color = data.color || "#7C3AED";
