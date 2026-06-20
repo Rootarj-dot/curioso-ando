@@ -35,25 +35,31 @@ export interface DraftTriviaItem {
 }
 
 const MAX_TRIVIA_QUESTIONS = 5;
-const EMPTY_OPTIONS = Array.from({ length: 5 }, () => "");
+const MIN_TRIVIA_OPTIONS = 2;
+const MAX_TRIVIA_OPTIONS = 5;
+const DEFAULT_TRIVIA_OPTIONS = 5;
+
+function createEmptyOptions(count = DEFAULT_TRIVIA_OPTIONS) {
+  return Array.from({ length: count }, () => "");
+}
 
 function parseTriviaOptions(item: Pick<DraftTriviaItem, "opcionCorrecta" | "opcionIncorrecta" | "opciones" | "opcionCorrectaIndex">) {
   try {
     const parsed = item.opciones ? JSON.parse(item.opciones) : null;
     if (Array.isArray(parsed)) {
-      const normalized = parsed.slice(0, 5).map((option) => String(option ?? ""));
-      while (normalized.length < 5) normalized.push("");
+      const normalized = parsed.slice(0, MAX_TRIVIA_OPTIONS).map((option) => String(option ?? ""));
+      while (normalized.length < MIN_TRIVIA_OPTIONS) normalized.push("");
       return normalized;
     }
   } catch {
     // Fall back to legacy fields below.
   }
 
-  return [item.opcionCorrecta || "", item.opcionIncorrecta || "", "", "", ""];
+  return [item.opcionCorrecta || "", item.opcionIncorrecta || ""];
 }
 
-function normalizeCorrectIndex(value: number | null | undefined) {
-  return typeof value === "number" && value >= 0 && value <= 4 ? value : 0;
+function normalizeCorrectIndex(value: number | null | undefined, optionCount = MAX_TRIVIA_OPTIONS) {
+  return typeof value === "number" && value >= 0 && value < optionCount ? value : 0;
 }
 
 function buildTriviaPayload(options: string[], correctIndex: number) {
@@ -86,7 +92,7 @@ export function TriviaEditor({ articleId, draftItems = [], onDraftItemsChange }:
   // Form state
   const [pregunta, setPregunta] = useState("");
   const [respuesta, setRespuesta] = useState("");
-  const [opciones, setOpciones] = useState<string[]>(EMPTY_OPTIONS);
+  const [opciones, setOpciones] = useState<string[]>(() => createEmptyOptions());
   const [opcionCorrectaIndex, setOpcionCorrectaIndex] = useState(0);
   const [icono, setIcono] = useState("HelpCircle");
   const [color, setColor] = useState("#7C3AED");
@@ -128,7 +134,7 @@ export function TriviaEditor({ articleId, draftItems = [], onDraftItemsChange }:
   const resetForm = () => {
     setPregunta("");
     setRespuesta("");
-    setOpciones(EMPTY_OPTIONS);
+    setOpciones(createEmptyOptions());
     setOpcionCorrectaIndex(0);
     setIcono("HelpCircle");
     setColor("#7C3AED");
@@ -140,8 +146,9 @@ export function TriviaEditor({ articleId, draftItems = [], onDraftItemsChange }:
     setEditingId(item.id);
     setPregunta(item.pregunta);
     setRespuesta(item.respuesta);
-    setOpciones(parseTriviaOptions(item));
-    setOpcionCorrectaIndex(normalizeCorrectIndex(item.opcionCorrectaIndex));
+    const parsedOptions = parseTriviaOptions(item);
+    setOpciones(parsedOptions);
+    setOpcionCorrectaIndex(normalizeCorrectIndex(item.opcionCorrectaIndex, parsedOptions.length));
     setIcono(item.icono || "HelpCircle");
     setColor(item.color || "#7C3AED");
     setShowForm(true);
@@ -151,13 +158,22 @@ export function TriviaEditor({ articleId, draftItems = [], onDraftItemsChange }:
     setOpciones((current) => current.map((option, optionIndex) => (optionIndex === index ? value : option)));
   };
 
+  const updateAnswerCount = (count: number) => {
+    setOpciones((current) => {
+      const nextOptions = current.slice(0, count);
+      while (nextOptions.length < count) nextOptions.push("");
+      return nextOptions;
+    });
+    setOpcionCorrectaIndex((current) => normalizeCorrectIndex(current, count));
+  };
+
   const handleSubmit = () => {
     const trimmedOptions = opciones.map((option) => option.trim());
-    const hasFiveOptions = trimmedOptions.every(Boolean);
-    const correctIndex = normalizeCorrectIndex(opcionCorrectaIndex);
+    const hasAllOptions = trimmedOptions.length >= MIN_TRIVIA_OPTIONS && trimmedOptions.every(Boolean);
+    const correctIndex = normalizeCorrectIndex(opcionCorrectaIndex, trimmedOptions.length);
 
-    if (!pregunta.trim() || !respuesta.trim() || !hasFiveOptions) {
-      toast.error("Completa la pregunta, la respuesta y las 5 opciones");
+    if (!pregunta.trim() || !respuesta.trim() || !hasAllOptions) {
+      toast.error(`Completa la pregunta, la respuesta y las ${opciones.length} opciones configuradas`);
       return;
     }
 
@@ -235,7 +251,7 @@ export function TriviaEditor({ articleId, draftItems = [], onDraftItemsChange }:
                     <p className="text-[11px] font-semibold text-purple-600 mb-0.5">Pregunta {itemIndex + 1}</p>
                     <p className="text-xs font-semibold text-foreground line-clamp-2">{item.pregunta}</p>
                     <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
-                      ✓ {item.opcionCorrecta} · 5 opciones configuradas
+                      ✓ {item.opcionCorrecta} · {parseTriviaOptions(item).length} opciones configuradas
                     </p>
                   </div>
                 </div>
@@ -336,6 +352,20 @@ export function TriviaEditor({ articleId, draftItems = [], onDraftItemsChange }:
                 <div className="flex items-center justify-between gap-2">
                   <label className="text-xs text-muted-foreground block font-medium">Opciones de respuesta *</label>
                   <span className="text-[11px] text-green-600 font-medium">Marca la correcta</span>
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">Cantidad de respuestas</label>
+                  <select
+                    value={opciones.length}
+                    onChange={(e) => updateAnswerCount(Number(e.target.value))}
+                    className="w-full text-sm border border-border rounded px-2 py-1.5 bg-background focus:outline-none focus:ring-1 focus:ring-purple-500"
+                  >
+                    {Array.from({ length: MAX_TRIVIA_OPTIONS - MIN_TRIVIA_OPTIONS + 1 }, (_, index) => MIN_TRIVIA_OPTIONS + index).map((count) => (
+                      <option key={count} value={count}>
+                        {count} respuestas
+                      </option>
+                    ))}
+                  </select>
                 </div>
                 {opciones.map((option, index) => {
                   const isCorrect = opcionCorrectaIndex === index;
