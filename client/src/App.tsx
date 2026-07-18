@@ -10,6 +10,8 @@ import Home from "./pages/Home";
 import ArticlePage from "./pages/ArticlePage";
 import CategoryPage from "./pages/CategoryPage";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import TermsOfService from "./pages/TermsOfService";
+import ContactPage from "./pages/ContactPage";
 
 const AdminDashboard = lazy(() => import("./pages/Admin/AdminDashboard"));
 const AdminArticles = lazy(() => import("./pages/Admin/AdminArticles"));
@@ -59,6 +61,8 @@ function Router() {
 
         {/* Legal */}
         <Route path="/aviso-de-privacidad" component={PrivacyPolicy} />
+        <Route path="/terminos-y-condiciones" component={TermsOfService} />
+        <Route path="/contacto" component={ContactPage} />
 
         {/* 404 */}
         <Route path="/404" component={NotFound} />
