@@ -177,7 +177,7 @@ try {
   console.log("[Database] Esquema de producción verificado correctamente");
 } catch (error) {
   console.error("[Database] No se pudo verificar o reparar el esquema:", error);
-  process.exitCode = 1;
+  throw error;
 } finally {
   await connection.end();
 }

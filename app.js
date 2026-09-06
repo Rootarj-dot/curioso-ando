@@ -12,8 +12,11 @@
 // y controla el puerto a través del socket interno.
 process.env.NODE_ENV = "production";
 
-// Importar el servidor compilado (dist/index.js generado por pnpm build)
-import("./dist/index.js").catch((err) => {
-  console.error("Error al iniciar el servidor:", err);
-  process.exit(1);
-});
+// Verificar el esquema de la base de datos antes de iniciar el servidor compilado.
+// Esto evita que la aplicación quede en línea sin las tablas necesarias para mostrar artículos.
+import("./scripts/ensure-production-schema.mjs")
+  .then(() => import("./dist/index.js"))
+  .catch((err) => {
+    console.error("Error al preparar la base de datos o iniciar el servidor:", err);
+    process.exit(1);
+  });
