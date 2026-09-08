@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Calendar } from "lucide-react";
+import { ArrowUpRight, CalendarDays } from "lucide-react";
 
 interface ArticleCardProps {
   id: number;
@@ -12,16 +12,12 @@ interface ArticleCardProps {
   categorySlug?: string | null;
   publishedAt?: Date | null;
   featured?: boolean;
-  size?: "normal" | "large";
+  size?: "normal" | "large" | "compact" | "legacyMobile";
 }
 
 function formatDate(date: Date | null | undefined): string {
   if (!date) return "";
-  return new Date(date).toLocaleDateString("es-ES", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
+  return new Date(date).toLocaleDateString("es-MX", { day: "numeric", month: "short", year: "numeric" });
 }
 
 export function ArticleCard({
@@ -30,50 +26,71 @@ export function ArticleCard({
   excerpt,
   featuredImage,
   ogImage,
+  categoryName,
   publishedAt,
   size = "normal",
 }: ArticleCardProps) {
   const image = ogImage || featuredImage;
+  const label = categoryName || "Curioseando";
+
+  if (size === "legacyMobile") {
+    return (
+      <Link href={`/articulo/${slug}`} className="no-underline group block h-full">
+        <article className="ca-legacy-mobile-card overflow-hidden transition-transform duration-200 group-hover:-translate-y-1 h-full flex flex-col">
+          <div className="relative aspect-[1792/1024] overflow-hidden bg-white">
+            {image ? (
+              <img src={image} alt={title} width={1792} height={1024} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]" />
+            ) : (
+              <div className="ca-gradient-hero flex h-full w-full items-center justify-center"><span className="text-white/30 text-4xl font-bold">CA</span></div>
+            )}
+            <div className="absolute top-3 left-3"><span className="ca-legacy-mobile-card__cta">Clic aquí para leer</span></div>
+          </div>
+          <div className="p-4 flex flex-col flex-1">
+            <h3>{title}</h3>
+            {excerpt && <p>{excerpt}</p>}
+            {publishedAt && <span className="ca-legacy-mobile-card__date"><CalendarDays className="w-3 h-3" aria-hidden="true" /> {formatDate(publishedAt)}</span>}
+          </div>
+        </article>
+      </Link>
+    );
+  }
+
+  if (size === "compact") {
+    return (
+      <Link href={`/articulo/${slug}`} className="no-underline group block h-full">
+        <article className="ca-rail-card h-full">
+          {image ? (
+            <img src={image} alt={title} width={480} height={360} loading="lazy" decoding="async" className="ca-rail-card__image" />
+          ) : (
+            <div className="ca-rail-card__fallback">CA</div>
+          )}
+          <div className="ca-rail-card__shade" />
+          <div className="ca-rail-card__content">
+            <span className="ca-rail-card__category">{label}</span>
+            <h2>{title}</h2>
+            {publishedAt && <span className="ca-rail-card__date"><CalendarDays className="w-3 h-3" aria-hidden="true" /> {formatDate(publishedAt)}</span>}
+          </div>
+          <span className="ca-rail-card__open" aria-hidden="true"><ArrowUpRight className="w-3.5 h-3.5" /></span>
+        </article>
+      </Link>
+    );
+  }
 
   if (size === "large") {
     return (
       <Link href={`/articulo/${slug}`} className="no-underline group block">
-        <article className="relative rounded-xl overflow-hidden" style={{ minHeight: 420 }}>
+        <article className="ca-story-card ca-story-card--large">
           {image ? (
-            <img
-              src={image}
-              alt={title}
-              width={1792}
-              height={1024}
-              loading="lazy"
-              decoding="async"
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            />
+            <img src={image} alt={title} width={1792} height={1024} loading="lazy" decoding="async" className="ca-story-card__image" />
           ) : (
-            <div className="absolute inset-0 ca-gradient-hero" />
+            <div className="ca-story-card__fallback">CA</div>
           )}
-          <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(28,28,29,0.97) 0%, rgba(28,28,29,0.5) 50%, transparent 100%)" }} />
-          <div className="absolute bottom-0 left-0 right-0 p-6">
-            <span
-              className="inline-flex w-fit items-center rounded-full px-3 py-1.5 text-xs font-bold uppercase tracking-wide shadow-lg transition-transform duration-200 group-hover:scale-105"
-              style={{ backgroundColor: "#D90429", color: "#FFFFFF", boxShadow: "0 8px 18px rgba(217,4,41,0.35)" }}
-            >
-              Clic aquí para leer
-            </span>
-            <h2 className="font-bold text-2xl md:text-3xl leading-tight mb-2 group-hover:text-purple-300 transition-colors" style={{ color: "#FFFFFF" }}>
-              {title}
-            </h2>
-            {excerpt && (
-              <p className="text-sm mb-3 line-clamp-2" style={{ color: "#E0D8FF" }}>{excerpt}</p>
-            )}
-            <div className="flex items-center gap-4 text-xs" style={{ color: "#C0B8E8" }}>
-              {publishedAt && (
-                <span className="flex items-center gap-1">
-                  <Calendar className="w-3 h-3" />
-                  {formatDate(publishedAt)}
-                </span>
-              )}
-            </div>
+          <div className="ca-story-card__shade" />
+          <div className="ca-story-card__content">
+            <span className="ca-story-card__category">{label}</span>
+            <h2>{title}</h2>
+            {excerpt && <p>{excerpt}</p>}
+            <span className="ca-story-card__read-link">Leer historia <ArrowUpRight className="w-4 h-4" aria-hidden="true" /></span>
           </div>
         </article>
       </Link>
@@ -81,48 +98,24 @@ export function ArticleCard({
   }
 
   return (
-    <Link href={`/articulo/${slug}`} className="no-underline group block">
-      <article className="ca-card overflow-hidden transition-transform duration-200 group-hover:-translate-y-1 h-full flex flex-col">
-        <div className="relative aspect-[1792/1024] overflow-hidden bg-white">
+    <Link href={`/articulo/${slug}`} className="no-underline group block h-full">
+      <article className="ca-story-card h-full">
+        <div className="ca-story-card__media">
           {image ? (
-            <img
-              src={image}
-              alt={title}
-              width={1792}
-              height={1024}
-              loading="lazy"
-              decoding="async"
-              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-            />
+            <img src={image} alt={title} width={720} height={480} loading="lazy" decoding="async" className="ca-story-card__image" />
           ) : (
-            <div className="ca-gradient-hero flex h-full w-full items-center justify-center">
-              <span className="text-white/30 text-4xl font-bold">CA</span>
-            </div>
+            <div className="ca-story-card__fallback">CA</div>
           )}
-          <div className="absolute top-3 left-3">
-            <span
-              className="inline-flex items-center rounded-full px-3 py-1.5 text-[11px] font-bold uppercase tracking-wide shadow-lg transition-transform duration-200 group-hover:scale-105"
-              style={{ backgroundColor: "#D90429", color: "#FFFFFF", boxShadow: "0 8px 18px rgba(217,4,41,0.35)" }}
-            >
-              Clic aquí para leer
-            </span>
-          </div>
+          <div className="ca-story-card__shade" />
+          <span className="ca-story-card__category">{label}</span>
+          <span className="ca-story-card__open" aria-hidden="true"><ArrowUpRight className="w-4 h-4" /></span>
         </div>
-        <div className="p-4 flex flex-col flex-1">
-          <h3 className="font-bold text-base leading-snug mb-2 group-hover:text-purple-600 transition-colors line-clamp-2" style={{ color: "#1A1A1A" }}>
-            {title}
-          </h3>
-          {excerpt && (
-            <p className="text-sm mb-3 line-clamp-2 flex-1" style={{ color: "#6B6B6B" }}>{excerpt}</p>
+        <div className="ca-story-card__body">
+          <h3>{title}</h3>
+          {excerpt && <p>{excerpt}</p>}
+          {publishedAt && (
+            <span className="ca-story-card__date"><CalendarDays className="w-3.5 h-3.5" aria-hidden="true" /> {formatDate(publishedAt)}</span>
           )}
-          <div className="flex items-center gap-3 text-xs mt-auto" style={{ color: "#9B9890" }}>
-            {publishedAt && (
-              <span className="flex items-center gap-1 ml-auto">
-                <Calendar className="w-3 h-3" />
-                {formatDate(publishedAt)}
-              </span>
-            )}
-          </div>
         </div>
       </article>
     </Link>
