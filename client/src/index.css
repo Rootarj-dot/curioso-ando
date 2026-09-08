@@ -882,3 +882,13 @@
 @media (min-width: 768px) {
   .ca-reference-home .ca-site-header { border-bottom: 0; }
 }
+
+/* Compact the five-card desktop rail: distribute card width, not empty space. */
+@media (min-width: 768px) {
+  .ca-reference-rail {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    justify-content: initial;
+    gap: clamp(0.48rem, 0.62vw, 0.7rem);
+  }
+  .ca-rail-card { min-height: clamp(10rem, 11.9vw, 11.9rem); }
+}
