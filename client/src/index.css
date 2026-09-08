@@ -801,3 +801,13 @@
   .ca-reference-home .ca-footer-column a { color: rgba(255,255,255,0.75); }
   .ca-reference-home .ca-site-footer__bottom { margin-top: 2rem; border-top-color: rgba(255,255,255,0.15); color: rgba(255,255,255,0.45); }
 }
+
+/* Prevent long featured headlines from overlapping the desktop story rail. */
+@media (min-width: 768px) {
+  .ca-reference-hero, .ca-reference-hero__inner { min-height: 43.5rem; height: auto; }
+  .ca-reference-hero__inner { display: flex; flex-direction: column; }
+  .ca-reference-hero__copy { padding-top: clamp(6.7rem, 9.5vw, 8.75rem); padding-bottom: 1.5rem; }
+  .ca-reference-hero__title { max-width: 10.5em; font-size: clamp(2.6rem, 4vw, 4.35rem); }
+  .ca-reference-hero__intro { display: -webkit-box; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+  .ca-reference-rail { position: relative; right: auto; bottom: auto; left: auto; flex: none; margin-top: auto; margin-bottom: 2.35rem; }
+}
