@@ -877,3 +877,8 @@
   .ca-reference-rail { grid-template-columns: repeat(5, minmax(0, var(--ca-rail-card-width))); overflow-x: auto; scrollbar-width: none; }
   .ca-reference-rail::-webkit-scrollbar { display: none; }
 }
+
+/* Remove the desktop header divider while preserving the mobile header border. */
+@media (min-width: 768px) {
+  .ca-reference-home .ca-site-header { border-bottom: 0; }
+}
