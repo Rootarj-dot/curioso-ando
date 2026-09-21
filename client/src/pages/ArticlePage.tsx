@@ -47,13 +47,8 @@ function InlineArticlesBlock({
       : "grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4";
 
   return (
-    <div className="my-8 py-6" style={{ borderTop: "2px solid #E5E3DE", borderBottom: "2px solid #E5E3DE" }}>
-      <h3
-        className="font-bold text-lg mb-4"
-        style={{ fontFamily: "Poppins, sans-serif", color: "#2B037D" }}
-      >
-        {label}
-      </h3>
+    <div className="ca-inline-articles my-8 py-6">
+      <h3 className="ca-inline-articles__title font-bold text-lg mb-4">{label}</h3>
       <div className={`grid ${cols} gap-4`}>
         {filtered.map((a) => (
           <ArticleCard key={a.id} {...a} />
@@ -245,19 +240,19 @@ export default function ArticlePage() {
   }, []);
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#F8F7F4" }}>
+    <div className="ca-article-page min-h-screen flex flex-col">
       <Navbar />
 
       {isLoading && (
         <div className="container py-12">
           <div className="max-w-3xl mx-auto">
             <div className="animate-pulse space-y-4">
-              <div className="h-8 rounded" style={{ backgroundColor: "#FFFFFF", width: "60%" }} />
-              <div className="h-4 rounded" style={{ backgroundColor: "#FFFFFF", width: "40%" }} />
-              <div className="h-64 rounded-xl" style={{ backgroundColor: "#FFFFFF" }} />
+              <div className="ca-article-skeleton h-8 rounded" style={{ width: "60%" }} />
+              <div className="ca-article-skeleton h-4 rounded" style={{ width: "40%" }} />
+              <div className="ca-article-skeleton h-64 rounded-xl" />
               <div className="space-y-2">
                 {Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className="h-4 rounded" style={{ backgroundColor: "#FFFFFF" }} />
+                  <div key={i} className="ca-article-skeleton h-4 rounded" />
                 ))}
               </div>
             </div>
@@ -267,9 +262,9 @@ export default function ArticlePage() {
 
       {error && (
         <div className="container py-20 text-center">
-          <h1 className="text-2xl font-bold mb-4">Artículo no encontrado</h1>
-          <p style={{ color: "#6B6B6B" }} className="mb-6">El artículo que buscas no existe o fue eliminado.</p>
-          <Link href="/" className="px-6 py-2 rounded-lg no-underline font-medium" style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#fff" }}>
+          <h1 className="ca-article-title text-2xl font-bold mb-4">Artículo no encontrado</h1>
+          <p className="ca-article-muted mb-6">El artículo que buscas no existe o fue eliminado.</p>
+          <Link href="/" className="ca-article-cta px-6 py-2 rounded-lg no-underline font-medium">
             Volver al inicio
           </Link>
         </div>
@@ -279,7 +274,7 @@ export default function ArticlePage() {
         <main className="flex-1">
           {/* Hero Image */}
           {(article.ogImage || article.featuredImage) && (
-            <div className="relative w-full overflow-hidden" style={{ maxHeight: 480, aspectRatio: "1792 / 720" }}>
+            <div className="ca-article-hero relative w-full overflow-hidden">
               <img
                 src={article.ogImage || article.featuredImage || ""}
                 alt={article.title}
@@ -298,8 +293,8 @@ export default function ArticlePage() {
               {/* Article */}
               <article className="lg:col-span-3">
                 {/* Breadcrumb */}
-                <div className="flex items-center gap-2 mb-6 text-sm" style={{ color: "#6B6B6B" }}>
-                  <Link href="/" className="no-underline hover:text-purple-700 transition-colors" style={{ color: "#6B6B6B" }}>
+                <div className="ca-article-breadcrumb flex items-center gap-2 mb-6 text-sm">
+                  <Link href="/" className="no-underline transition-colors">
                     Inicio
                   </Link>
                   <span>/</span>
@@ -307,15 +302,14 @@ export default function ArticlePage() {
                     <>
                       <Link
                         href={`/categoria/${article.categorySlug}`}
-                        className="no-underline hover:text-purple-700 transition-colors capitalize"
-                        style={{ color: "#6B6B6B" }}
+                        className="no-underline transition-colors capitalize"
                       >
                         {article.categoryName}
                       </Link>
                       <span>/</span>
                     </>
                   )}
-                  <span className="line-clamp-1" style={{ color: "#1A1A1A" }}>{article.title}</span>
+                  <span className="ca-article-breadcrumb__current line-clamp-1">{article.title}</span>
                 </div>
 
                 {/* Category badge */}
@@ -326,27 +320,26 @@ export default function ArticlePage() {
                 )}
 
                 {/* Title */}
-                <h1 className="font-bold text-2xl sm:text-3xl md:text-4xl leading-tight mt-3 mb-4" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
+                <h1 className="ca-article-title font-bold text-2xl sm:text-3xl md:text-4xl leading-tight mt-3 mb-4">
                   {article.title}
                 </h1>
 
                 {/* Excerpt */}
                 {article.excerpt && (
-                  <p className="text-lg mb-6" style={{ color: "#6B6B6B" }}>{article.excerpt}</p>
+                  <p className="ca-article-excerpt text-lg mb-6">{article.excerpt}</p>
                 )}
 
                 {/* Meta */}
-                <div className="flex flex-wrap items-center gap-4 pb-6 mb-6" style={{ borderBottom: "1px solid #E5E3DE" }}>
+                <div className="ca-article-meta flex flex-wrap items-center gap-4 pb-6 mb-6">
                   {article.publishedAt && (
-                    <span className="flex items-center gap-1.5 text-sm" style={{ color: "#6B6B6B" }}>
+                    <span className="ca-article-meta__date flex items-center gap-1.5 text-sm">
                       <Calendar className="w-4 h-4" />
                       {formatDate(article.publishedAt)}
                     </span>
                   )}
                   <button
                     onClick={shareOnFacebook}
-                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium ml-auto transition-opacity hover:opacity-80"
-                    style={{ background: "#1877F2", color: "#fff" }}
+                    className="ca-share-button flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium ml-auto transition-opacity hover:opacity-80"
                   >
                     <Facebook className="w-4 h-4" />
                     Compartir
@@ -357,12 +350,11 @@ export default function ArticlePage() {
                 <ArticleContent content={article.content ?? "{}"} currentSlug={slug || ""} />
 
                 {/* Share footer */}
-                <div className="mt-8 pt-6 flex items-center gap-4" style={{ borderTop: "1px solid #E5E3DE" }}>
-                  <span className="text-sm font-medium" style={{ color: "#1A1A1A" }}>Compartir:</span>
+                <div className="ca-article-share mt-8 pt-6 flex items-center gap-4">
+                  <span className="ca-article-share__label text-sm font-medium">Compartir:</span>
                   <button
                     onClick={shareOnFacebook}
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-opacity hover:opacity-80"
-                    style={{ background: "#1877F2", color: "#fff" }}
+                    className="ca-share-button flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-opacity hover:opacity-80"
                   >
                     <Facebook className="w-4 h-4" />
                     Facebook
@@ -371,7 +363,7 @@ export default function ArticlePage() {
 
                 {/* Back */}
                 <div className="mt-8">
-                  <Link href="/" className="flex items-center gap-2 text-sm no-underline" style={{ color: "#7B4FB8" }}>
+                  <Link href="/" className="ca-article-back flex items-center gap-2 text-sm no-underline">
                     <ArrowLeft className="w-4 h-4" />
                     Volver al inicio
                   </Link>
@@ -384,7 +376,7 @@ export default function ArticlePage() {
                   {/* Trivia del artículo */}
                   {triviaList && triviaList.length > 0 && (
                     <div>
-                      <h3 className="font-bold text-sm mb-3 uppercase tracking-wide" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
+                      <h3 className="ca-article-aside-title font-bold text-sm mb-3 uppercase tracking-wide">
                         ¿Cuánto sabes?
                       </h3>
                       <div className="flex flex-col gap-3">
@@ -412,8 +404,8 @@ export default function ArticlePage() {
 
             {/* Recomendados — sección de ancho completo debajo del artículo */}
             {sidebarData && sidebarData.recommendedArticles.length > 0 && (
-              <section className="mt-10 pt-8" style={{ borderTop: "2px solid #E5E3DE" }}>
-                <h2 className="font-bold text-xl mb-6" style={{ fontFamily: "Poppins, sans-serif", color: "#2B037D" }}>
+              <section className="ca-article-section ca-article-section--accent mt-10 pt-8">
+                <h2 className="ca-article-section__title ca-article-section__title--accent font-bold text-xl mb-6">
                   Recomendados
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
@@ -426,8 +418,8 @@ export default function ArticlePage() {
 
             {/* Related Articles */}
             {relatedArticles && relatedArticles.filter((a) => a.slug !== slug).length > 0 && (
-              <section className="mt-12 pt-8" style={{ borderTop: "1px solid #E5E3DE" }}>
-                <h2 className="font-bold text-xl mb-6" style={{ fontFamily: "Poppins, sans-serif", color: "#1A1A1A" }}>
+              <section className="ca-article-section mt-12 pt-8">
+                <h2 className="ca-article-section__title font-bold text-xl mb-6">
                   Artículos Relacionados
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
