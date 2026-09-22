@@ -131,7 +131,15 @@ export default function Home() {
                   <Link href={`/articulo/${featuredArticle.slug}`} className="no-underline group">
                     <h1 className="ca-reference-hero__title group-hover:opacity-90">{featuredArticle.title}</h1>
                   </Link>
-                  <p className="ca-reference-hero__intro">{featuredArticle.excerpt || "Historias reales, misterios increíbles y datos curiosos que expanden tu mente."}</p>
+                  <p className="ca-reference-hero__intro">
+                    {featuredArticle.excerpt || (
+                      <>
+                        Datos raros, curiosos y sorprendentes en un scroll.
+                        <br />
+                        Aprende, ríe y di “¡no lo sabía!”. 🚀
+                      </>
+                    )}
+                  </p>
                   <div className="ca-reference-hero__actions">
                     <Link href={`/articulo/${featuredArticle.slug}`} className="ca-reference-hero__cta">
                       Explorar historias <ArrowRight className="w-4 h-4" aria-hidden="true" />

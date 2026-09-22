@@ -1,7 +1,11 @@
 import { Link } from "wouter";
-import { Facebook, Instagram, Compass } from "lucide-react";
+import { Facebook, Instagram, Compass, Youtube } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { TikTokIcon } from "@/components/TikTokIcon";
+
+// YouTube is fixed here because site_config has no field for it yet, unlike the
+// networks above, which the admin panel manages.
+const YOUTUBE_URL = "https://www.youtube.com/@curioseandoandomx";
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -10,6 +14,7 @@ export function Footer() {
     { label: "Facebook", href: socialLinks?.facebook, icon: Facebook },
     { label: "Instagram", href: socialLinks?.instagram, icon: Instagram },
     { label: "TikTok", href: socialLinks?.tiktok, icon: TikTokIcon },
+    { label: "YouTube", href: YOUTUBE_URL, icon: Youtube },
   ].filter((item) => item.href && item.href.trim().length > 0);
 
   return (
