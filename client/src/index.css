@@ -927,6 +927,36 @@
   transition: transform 90ms linear;
 }
 
+/* Back to top — appears once a quarter of the story has been read. */
+.ca-to-top {
+  position: fixed;
+  z-index: 55;
+  right: 1.1rem;
+  bottom: 1.1rem;
+  display: grid;
+  width: 2.95rem;
+  height: 2.95rem;
+  border: 1px solid rgba(189, 145, 255, 0.5);
+  border-radius: 50%;
+  background: linear-gradient(135deg, #7541ea, #a14cf6);
+  box-shadow: 0 10px 26px rgba(101, 49, 209, 0.42);
+  color: #fff;
+  opacity: 0;
+  pointer-events: none;
+  place-items: center;
+  transform: translateY(0.6rem) scale(0.92);
+  transition: opacity 220ms ease, transform 220ms ease, filter 180ms ease;
+}
+.ca-to-top.is-visible { opacity: 1; pointer-events: auto; transform: none; }
+.ca-to-top:hover { filter: brightness(1.12); }
+.ca-to-top:focus-visible { outline: 2px solid #d6c0ff; outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) {
+  .ca-to-top { transition: opacity 220ms ease; transform: none; }
+}
+@media (min-width: 768px) {
+  .ca-to-top { right: 1.6rem; bottom: 1.6rem; width: 3.15rem; height: 3.15rem; }
+}
+
 /* Hero — show the whole artwork. Source images are 16:9 (1672x941), so the box
    matches that ratio and the image is contained, never cropped. When a short
    viewport clamps the height, the blurred copy fills the sides. */

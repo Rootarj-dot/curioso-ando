@@ -4,7 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArticleCard } from "@/components/ArticleCard";
-import { Calendar, ArrowLeft, Facebook, Clock, Check, Link2, MessageCircle } from "lucide-react";
+import { Calendar, ArrowLeft, ArrowUp, Facebook, Clock, Check, Link2, MessageCircle } from "lucide-react";
 import { useSeoMeta } from "@/hooks/useSeoMeta";
 
 function formatDate(date: Date | null | undefined): string {
@@ -44,6 +44,10 @@ function readingMinutes(content: string | null | undefined): number {
 }
 
 // ─── Reading progress ─────────────────────────────────────────────────────────
+// Renders the progress bar and the back-to-top button. Both derive from the same
+// scroll position, so they share one listener.
+const TO_TOP_AT_PERCENT = 25;
+
 function ReadingProgress({ targetRef }: { targetRef: React.RefObject<HTMLElement | null> }) {
   const [progress, setProgress] = useState(0);
 
@@ -79,10 +83,29 @@ function ReadingProgress({ targetRef }: { targetRef: React.RefObject<HTMLElement
     };
   }, [targetRef]);
 
+  const backToTop = useCallback(() => {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduced ? "auto" : "smooth" });
+  }, []);
+
+  const showToTop = progress >= TO_TOP_AT_PERCENT;
+
   return (
-    <div className="ca-reading-progress" aria-hidden="true">
-      <span className="ca-reading-progress__bar" style={{ transform: `scaleX(${progress / 100})` }} />
-    </div>
+    <>
+      <div className="ca-reading-progress" aria-hidden="true">
+        <span className="ca-reading-progress__bar" style={{ transform: `scaleX(${progress / 100})` }} />
+      </div>
+      <button
+        type="button"
+        onClick={backToTop}
+        className={`ca-to-top${showToTop ? " is-visible" : ""}`}
+        aria-label="Volver al principio de la nota"
+        aria-hidden={!showToTop}
+        tabIndex={showToTop ? 0 : -1}
+      >
+        <ArrowUp className="w-5 h-5" aria-hidden="true" />
+      </button>
+    </>
   );
 }
 
