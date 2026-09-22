@@ -303,10 +303,12 @@ export default function ArticlePage() {
   const minutes = useMemo(() => readingMinutes(article?.content), [article?.content]);
 
   // Same-category articles that feed the "Sigue leyendo" rail beside the story.
-  const readNext = useMemo(
-    () => (relatedArticles || []).filter((a) => a.slug !== slug).slice(0, 5),
-    [relatedArticles, slug]
-  );
+  // Compare against the stored slug as well as the one in the URL, so an encoded
+  // or differently cased address can never make a story recommend itself.
+  const readNext = useMemo(() => {
+    const current = new Set([slug, article?.slug].filter(Boolean));
+    return (relatedArticles || []).filter((a) => !current.has(a.slug)).slice(0, 5);
+  }, [relatedArticles, slug, article?.slug]);
 
   const shareOnFacebook = useCallback(() => {
     const url = encodeURIComponent(window.location.href);
