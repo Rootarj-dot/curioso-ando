@@ -28,7 +28,7 @@ interface SeoMetaOptions {
 }
 
 const SITE_NAME = "Curioseando Ando";
-const SITE_URL = "https://curiosoando.manus.space";
+const SITE_URL = "https://curioseandoando.com";
 
 function setMeta(attr: string, value: string, content: string): void {
   let el = document.querySelector(`meta[${attr}="${value}"]`) as HTMLMetaElement | null;
