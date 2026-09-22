@@ -6,6 +6,7 @@ import { Footer } from "@/components/Footer";
 import { ArticleCard } from "@/components/ArticleCard";
 import { Calendar, ArrowLeft, ArrowUp, Facebook, Clock, Check, Link2, MessageCircle } from "lucide-react";
 import { useSeoMeta } from "@/hooks/useSeoMeta";
+import { trackEvent } from "@/lib/analytics";
 
 function formatDate(date: Date | null | undefined): string {
   if (!date) return "";
@@ -44,12 +45,42 @@ function readingMinutes(content: string | null | undefined): number {
 }
 
 // ─── Reading progress ─────────────────────────────────────────────────────────
-// Renders the progress bar and the back-to-top button. Both derive from the same
-// scroll position, so they share one listener.
+// Renders the progress bar and the back-to-top button, and reports how far the
+// reader got. All three derive from the same scroll position, so they share one
+// listener.
 const TO_TOP_AT_PERCENT = 25;
+const DEPTH_MILESTONES = [25, 50, 75, 100] as const;
 
-function ReadingProgress({ targetRef }: { targetRef: React.RefObject<HTMLElement | null> }) {
+type ReadingProgressProps = {
+  targetRef: React.RefObject<HTMLElement | null>;
+  slug: string;
+  title: string;
+  category: string;
+};
+
+function ReadingProgress({ targetRef, slug, title, category }: ReadingProgressProps) {
   const [progress, setProgress] = useState(0);
+  const reported = useRef<Set<number>>(new Set());
+
+  // A new story starts its own measurement.
+  useEffect(() => {
+    reported.current = new Set();
+  }, [slug]);
+
+  useEffect(() => {
+    if (!slug) return;
+    for (const milestone of DEPTH_MILESTONES) {
+      if (progress >= milestone && !reported.current.has(milestone)) {
+        reported.current.add(milestone);
+        trackEvent("avance_lectura", {
+          porcentaje: String(milestone),
+          nota: title,
+          slug,
+          categoria: category || "sin categoría",
+        });
+      }
+    }
+  }, [progress, slug, title, category]);
 
   useEffect(() => {
     let frame = 0;
@@ -333,24 +364,40 @@ export default function ArticlePage() {
     return (relatedArticles || []).filter((a) => !current.has(a.slug)).slice(0, 5);
   }, [relatedArticles, slug, article?.slug]);
 
+  // Sharing is the strongest signal that a story landed, so it is measured too.
+  const reportShare = useCallback(
+    (medio: string) => {
+      trackEvent("compartir_nota", {
+        medio,
+        nota: article?.title || "",
+        slug: article?.slug || "",
+        categoria: article?.categoryName || "sin categoría",
+      });
+    },
+    [article?.title, article?.slug, article?.categoryName]
+  );
+
   const shareOnFacebook = useCallback(() => {
+    reportShare("facebook");
     const url = encodeURIComponent(window.location.href);
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank", "width=600,height=400");
-  }, []);
+  }, [reportShare]);
 
   const shareOnWhatsApp = useCallback(() => {
+    reportShare("whatsapp");
     const text = encodeURIComponent(`${document.title} ${window.location.href}`);
     window.open(`https://wa.me/?text=${text}`, "_blank", "noopener");
-  }, []);
+  }, [reportShare]);
 
   const copyLink = useCallback(async () => {
+    reportShare("copiar_enlace");
     try {
       await navigator.clipboard.writeText(window.location.href);
       setCopied(true);
     } catch {
       setCopied(false);
     }
-  }, []);
+  }, [reportShare]);
 
   useEffect(() => {
     if (!copied) return;
@@ -391,7 +438,12 @@ export default function ArticlePage() {
 
       {article && (
         <main className="flex-1">
-          <ReadingProgress targetRef={articleRef} />
+          <ReadingProgress
+            targetRef={articleRef}
+            slug={article.slug}
+            title={article.title}
+            category={article.categoryName || ""}
+          />
 
           {/* Hero Image */}
           {(article.ogImage || article.featuredImage) && (

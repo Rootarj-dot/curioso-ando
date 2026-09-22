@@ -62,6 +62,17 @@ export function trackPageView(path: string): void {
   window.gtag("config", gaId, { page_path: path });
 }
 
+/**
+ * Send a custom event to GA4.
+ *
+ * Parameters only show up in reports once they are registered under
+ * Admin -> Custom definitions, so keep the names stable.
+ */
+export function trackEvent(name: string, params: Record<string, string | number> = {}): void {
+  if (typeof window.gtag !== "function") return;
+  window.gtag("event", name, params);
+}
+
 /** Initialize Google AdSense */
 export function initAdSense(): void {
   const pubId = import.meta.env.VITE_ADSENSE_PUBLISHER_ID as string | undefined;
