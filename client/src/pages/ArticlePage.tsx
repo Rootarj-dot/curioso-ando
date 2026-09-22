@@ -263,7 +263,7 @@ export default function ArticlePage() {
     { enabled: !!slug }
   );
   const { data: relatedArticles } = trpc.articles.list.useQuery(
-    { categorySlug: article?.categorySlug || undefined, limit: 9 },
+    { categorySlug: article?.categorySlug || undefined, limit: 6 },
     { enabled: !!article?.categorySlug }
   );
   const { data: sidebarData } = trpc.siteConfig.getSidebarArticleData.useQuery();
@@ -307,12 +307,6 @@ export default function ArticlePage() {
     () => (relatedArticles || []).filter((a) => a.slug !== slug).slice(0, 5),
     [relatedArticles, slug]
   );
-
-  // Whatever the rail did not take is still worth showing further down.
-  const relatedRest = useMemo(() => {
-    const taken = new Set(readNext.map((a) => a.slug));
-    return (relatedArticles || []).filter((a) => a.slug !== slug && !taken.has(a.slug));
-  }, [relatedArticles, readNext, slug]);
 
   const shareOnFacebook = useCallback(() => {
     const url = encodeURIComponent(window.location.href);
@@ -554,18 +548,6 @@ export default function ArticlePage() {
             )}
 
             {/* Related Articles */}
-            {relatedRest.length > 0 && (
-              <section className="ca-article-section mt-12 pt-8">
-                <h2 className="ca-article-section__title font-bold text-xl mb-6">
-                  Artículos Relacionados
-                </h2>
-                <div className="ca-card-grid--compact grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {relatedRest.slice(0, 4).map((a) => (
-                    <ArticleCard key={a.id} {...a} />
-                  ))}
-                </div>
-              </section>
-            )}
           </div>
         </main>
       )}
