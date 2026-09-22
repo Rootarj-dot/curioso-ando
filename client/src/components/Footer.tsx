@@ -1,11 +1,11 @@
 import { Link } from "wouter";
-import { Facebook, Instagram, Compass, Youtube } from "lucide-react";
+import { Facebook, Instagram, Youtube } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import { TikTokIcon } from "@/components/TikTokIcon";
 
-// YouTube is fixed here because site_config has no field for it yet, unlike the
-// networks above, which the admin panel manages.
-const YOUTUBE_URL = "https://www.youtube.com/@curioseandoandomx";
+// Used until someone saves a YouTube address in the panel, so the link works on
+// a site_config record written before the field existed.
+const YOUTUBE_FALLBACK = "https://www.youtube.com/@curioseandoandomx";
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -14,7 +14,7 @@ export function Footer() {
     { label: "Facebook", href: socialLinks?.facebook, icon: Facebook },
     { label: "Instagram", href: socialLinks?.instagram, icon: Instagram },
     { label: "TikTok", href: socialLinks?.tiktok, icon: TikTokIcon },
-    { label: "YouTube", href: YOUTUBE_URL, icon: Youtube },
+    { label: "YouTube", href: socialLinks?.youtube || YOUTUBE_FALLBACK, icon: Youtube },
   ].filter((item) => item.href && item.href.trim().length > 0);
 
   return (
@@ -23,7 +23,7 @@ export function Footer() {
         <div className="ca-site-footer__top">
           <div className="ca-footer-brand">
             <Link href="/" className="ca-footer-brand__title">
-              <span><Compass className="w-4 h-4" aria-hidden="true" /></span>
+              <span><img src="/logo.png" alt="" width={64} height={64} loading="lazy" decoding="async" /></span>
               CURIOSEANDO <strong>ANDO</strong>
             </Link>
             <p>Historias sorprendentes, misterios e ideas que invitan a mirar más allá de lo conocido.</p>

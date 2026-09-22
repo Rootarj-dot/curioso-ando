@@ -60,6 +60,7 @@ const socialLinksSchema = z.object({
   facebook: z.string().url("URL de Facebook inválida").or(z.literal("")),
   instagram: z.string().url("URL de Instagram inválida").or(z.literal("")),
   tiktok: z.string().url("URL de TikTok inválida").or(z.literal("")),
+  youtube: z.string().url("URL de YouTube inválida").or(z.literal("")),
 });
 
 type SocialLinks = z.infer<typeof socialLinksSchema>;
@@ -68,6 +69,7 @@ const emptySocialLinks: SocialLinks = {
   facebook: "",
   instagram: "",
   tiktok: "",
+  youtube: "",
 };
 
 function parseSocialLinks(raw: string | null): SocialLinks {

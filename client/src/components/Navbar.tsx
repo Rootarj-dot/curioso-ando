@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
-import { Menu, X, Search, User, Compass, ArrowUpRight } from "lucide-react";
+import { Menu, X, Search, User, ArrowUpRight } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 
 function NavSearch() {
@@ -73,7 +73,9 @@ export function Navbar() {
       <div className="container">
         <div className="ca-site-header__bar">
           <Link href="/" className="ca-site-brand" aria-label="Ir al inicio de Curioseando Ando">
-            <span className="ca-site-brand__mark"><Compass className="w-4 h-4" /></span>
+            <span className="ca-site-brand__mark">
+              <img src="/logo.png" alt="" width={64} height={64} decoding="async" />
+            </span>
             <span className="ca-site-brand__name">Curioseando Ando</span>
           </Link>
 

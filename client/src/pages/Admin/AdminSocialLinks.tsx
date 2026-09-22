@@ -2,9 +2,9 @@ import { type ComponentType, type SVGProps, useEffect, useState } from "react";
 import { AdminLayout } from "./AdminLayout";
 import { trpc } from "@/lib/trpc";
 import { TikTokIcon } from "@/components/TikTokIcon";
-import { Check, ExternalLink, Facebook, Instagram, Link as LinkIcon, Save } from "lucide-react";
+import { Check, ExternalLink, Facebook, Instagram, Link as LinkIcon, Save, Youtube } from "lucide-react";
 
-type SocialLinkKey = "facebook" | "instagram" | "tiktok";
+type SocialLinkKey = "facebook" | "instagram" | "tiktok" | "youtube";
 
 const SOCIAL_FIELDS: Array<{
   key: SocialLinkKey;
@@ -34,6 +34,13 @@ const SOCIAL_FIELDS: Array<{
     icon: TikTokIcon,
     helper: "URL completa del perfil de TikTok.",
   },
+  {
+    key: "youtube",
+    label: "YouTube",
+    placeholder: "https://www.youtube.com/@tu-canal",
+    icon: Youtube,
+    helper: "URL completa del canal de YouTube.",
+  },
 ];
 
 export default function AdminSocialLinks() {
@@ -42,13 +49,15 @@ export default function AdminSocialLinks() {
   const [facebook, setFacebook] = useState("");
   const [instagram, setInstagram] = useState("");
   const [tiktok, setTiktok] = useState("");
+  const [youtube, setYoutube] = useState("");
   const [saved, setSaved] = useState(false);
 
-  const values: Record<SocialLinkKey, string> = { facebook, instagram, tiktok };
+  const values: Record<SocialLinkKey, string> = { facebook, instagram, tiktok, youtube };
   const setters: Record<SocialLinkKey, (value: string) => void> = {
     facebook: setFacebook,
     instagram: setInstagram,
     tiktok: setTiktok,
+    youtube: setYoutube,
   };
 
   const setSocialLinksMutation = trpc.siteConfig.setSocialLinks.useMutation({
@@ -64,6 +73,7 @@ export default function AdminSocialLinks() {
       setFacebook(socialLinks.facebook || "");
       setInstagram(socialLinks.instagram || "");
       setTiktok(socialLinks.tiktok || "");
+      setYoutube(socialLinks.youtube || "");
     }
   }, [socialLinks]);
 
@@ -73,6 +83,7 @@ export default function AdminSocialLinks() {
       facebook: facebook.trim(),
       instagram: instagram.trim(),
       tiktok: tiktok.trim(),
+      youtube: youtube.trim(),
     });
   };
 

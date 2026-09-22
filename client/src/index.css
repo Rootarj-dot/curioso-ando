@@ -927,6 +927,13 @@
   transition: transform 90ms linear;
 }
 
+/* Brand mark — the logo artwork fills the badge, so its own purple ground
+   replaces the gradient that used to sit behind the placeholder icon. */
+.ca-site-brand__mark { overflow: hidden; background: #2d0080; }
+.ca-site-brand__mark img,
+.ca-footer-brand__title > span img { width: 100%; height: 100%; object-fit: cover; }
+.ca-footer-brand__title > span { overflow: hidden; background: #2d0080; }
+
 /* Back to top — appears once a quarter of the story has been read. */
 .ca-to-top {
   position: fixed;
