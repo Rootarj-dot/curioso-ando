@@ -376,15 +376,25 @@ export default function ArticlePage() {
           {/* Hero Image */}
           {(article.ogImage || article.featuredImage) && (
             <div className="ca-article-hero relative w-full overflow-hidden">
+              {/* Blurred copy fills whatever the full image does not cover, so the
+                  artwork is never cropped and never sits on empty bars. */}
+              <img
+                src={article.ogImage || article.featuredImage || ""}
+                alt=""
+                aria-hidden="true"
+                loading="eager"
+                decoding="async"
+                className="ca-article-hero__backdrop"
+              />
               <img
                 src={article.ogImage || article.featuredImage || ""}
                 alt={article.title}
-                width={1792}
-                height={720}
+                width={1672}
+                height={941}
                 loading="eager"
                 decoding="async"
                 fetchPriority="high"
-                className="absolute inset-0 h-full w-full object-cover"
+                className="ca-article-hero__image"
               />
             </div>
           )}
