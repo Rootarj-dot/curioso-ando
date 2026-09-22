@@ -1018,7 +1018,10 @@
 }
 .ca-article-back { color: #b48cff; }
 .ca-article-back:hover { color: #d6c0ff; }
-.ca-article-aside-title { color: #ad82fb; font-family: "Poppins", "Inter", sans-serif; letter-spacing: 0.09em; }
+
+/* No sidebar: centre the reading column so the headline does not span the
+   full container width on wide screens. */
+.ca-article-body { max-width: 48rem; margin-inline: auto; }
 
 .ca-article-section { border-top: 1px solid var(--ca-line); }
 .ca-article-section__title,
@@ -1062,7 +1065,7 @@
 .ca-next-article:hover .ca-next-article__cta { color: #e3d2ff; }
 
 /* Body copy */
-.ca-article-body .article-content { max-width: 44rem; }
+.ca-article-body .article-content { max-width: 100%; }
 .article-content h1,
 .article-content h2,
 .article-content h3,

@@ -5,7 +5,6 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArticleCard } from "@/components/ArticleCard";
 import { Calendar, ArrowLeft, ArrowRight, Facebook, Clock, Check, Link2, MessageCircle } from "lucide-react";
-import { CuriousCard } from "@/components/CuriousCard";
 import { useSeoMeta } from "@/hooks/useSeoMeta";
 
 function formatDate(date: Date | null | undefined): string {
@@ -268,10 +267,6 @@ export default function ArticlePage() {
     { enabled: !!article?.categorySlug }
   );
   const { data: sidebarData } = trpc.siteConfig.getSidebarArticleData.useQuery();
-  const { data: triviaList } = trpc.trivia.listByArticle.useQuery(
-    { articleId: article?.id ?? 0 },
-    { enabled: !!article?.id }
-  );
 
   // Dynamic SEO meta tags + JSON-LD for this article
   const ogImage = article?.ogImage || article?.featuredImage || "";
@@ -400,9 +395,9 @@ export default function ArticlePage() {
           )}
 
           <div className="container py-6 md:py-8">
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
+            <div>
               {/* Article */}
-              <article ref={articleRef} className="ca-article-body lg:col-span-3">
+              <article ref={articleRef} className="ca-article-body">
                 {/* Breadcrumb */}
                 <div className="ca-article-breadcrumb flex items-center gap-2 mb-6 text-sm">
                   <Link href="/" className="no-underline transition-colors">
@@ -529,37 +524,6 @@ export default function ArticlePage() {
                   </Link>
                 </div>
               </article>
-
-              {/* Sidebar */}
-              <aside className="lg:col-span-1">
-                <div className="lg:sticky lg:top-24 flex flex-col gap-6">
-                  {/* Trivia del artículo */}
-                  {triviaList && triviaList.length > 0 && (
-                    <div>
-                      <h3 className="ca-article-aside-title font-bold text-sm mb-3 uppercase tracking-wide">
-                        ¿Cuánto sabes?
-                      </h3>
-                      <div className="flex flex-col gap-3">
-                        {triviaList.map((t) => (
-                          <CuriousCard
-                            key={t.id}
-                            id={t.id}
-                            pregunta={t.pregunta}
-                            respuesta={t.respuesta}
-                            opcionCorrecta={t.opcionCorrecta}
-                            opcionIncorrecta={t.opcionIncorrecta}
-                            opciones={t.opciones}
-                            opcionCorrectaIndex={t.opcionCorrectaIndex}
-                            icono={t.icono}
-                            color={t.color}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                </div>
-              </aside>
             </div>
 
             {/* Recomendados — sección de ancho completo debajo del artículo */}
