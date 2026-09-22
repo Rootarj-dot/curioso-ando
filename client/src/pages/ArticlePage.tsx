@@ -4,7 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArticleCard } from "@/components/ArticleCard";
-import { Calendar, ArrowLeft, ArrowRight, Facebook, Clock, Check, Link2, MessageCircle } from "lucide-react";
+import { Calendar, ArrowLeft, Facebook, Clock, Check, Link2, MessageCircle } from "lucide-react";
 import { useSeoMeta } from "@/hooks/useSeoMeta";
 
 function formatDate(date: Date | null | undefined): string {
@@ -263,7 +263,7 @@ export default function ArticlePage() {
     { enabled: !!slug }
   );
   const { data: relatedArticles } = trpc.articles.list.useQuery(
-    { categorySlug: article?.categorySlug || undefined, limit: 4 },
+    { categorySlug: article?.categorySlug || undefined, limit: 9 },
     { enabled: !!article?.categorySlug }
   );
   const { data: sidebarData } = trpc.siteConfig.getSidebarArticleData.useQuery();
@@ -302,11 +302,17 @@ export default function ArticlePage() {
 
   const minutes = useMemo(() => readingMinutes(article?.content), [article?.content]);
 
-  // First article of the same category that is not the one being read.
-  const nextArticle = useMemo(
-    () => (relatedArticles || []).find((a) => a.slug !== slug),
+  // Same-category articles that feed the "Sigue leyendo" rail beside the story.
+  const readNext = useMemo(
+    () => (relatedArticles || []).filter((a) => a.slug !== slug).slice(0, 5),
     [relatedArticles, slug]
   );
+
+  // Whatever the rail did not take is still worth showing further down.
+  const relatedRest = useMemo(() => {
+    const taken = new Set(readNext.map((a) => a.slug));
+    return (relatedArticles || []).filter((a) => a.slug !== slug && !taken.has(a.slug));
+  }, [relatedArticles, readNext, slug]);
 
   const shareOnFacebook = useCallback(() => {
     const url = encodeURIComponent(window.location.href);
@@ -395,9 +401,9 @@ export default function ArticlePage() {
           )}
 
           <div className="container py-6 md:py-8">
-            <div>
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:gap-10">
               {/* Article */}
-              <article ref={articleRef} className="ca-article-body">
+              <article ref={articleRef} className="ca-article-body lg:col-span-3">
                 {/* Breadcrumb */}
                 <div className="ca-article-breadcrumb flex items-center gap-2 mb-6 text-sm">
                   <Link href="/" className="no-underline transition-colors">
@@ -487,35 +493,6 @@ export default function ArticlePage() {
                   </div>
                 </div>
 
-                {/* Next article — keep the reader moving instead of sending them away */}
-                {nextArticle && (
-                  <Link href={`/articulo/${nextArticle.slug}`} className="ca-next-article">
-                    <span className="ca-next-article__media">
-                      {(nextArticle.ogImage || nextArticle.featuredImage) ? (
-                        <img
-                          src={nextArticle.ogImage || nextArticle.featuredImage || ""}
-                          alt=""
-                          loading="lazy"
-                          decoding="async"
-                          className="ca-next-article__image"
-                        />
-                      ) : (
-                        <span className="ca-next-article__fallback">CA</span>
-                      )}
-                    </span>
-                    <span className="ca-next-article__content">
-                      <span className="ca-next-article__kicker">Sigue leyendo</span>
-                      <span className="ca-next-article__title">{nextArticle.title}</span>
-                      {nextArticle.excerpt && (
-                        <span className="ca-next-article__excerpt">{nextArticle.excerpt}</span>
-                      )}
-                      <span className="ca-next-article__cta">
-                        Leer ahora <ArrowRight className="w-4 h-4" aria-hidden="true" />
-                      </span>
-                    </span>
-                  </Link>
-                )}
-
                 {/* Back */}
                 <div className="mt-8">
                   <Link href="/" className="ca-article-back flex items-center gap-2 text-sm no-underline">
@@ -524,6 +501,42 @@ export default function ArticlePage() {
                   </Link>
                 </div>
               </article>
+
+              {/* Sigue leyendo — vertical rail beside the story */}
+              {readNext.length > 0 && (
+                <aside className="lg:col-span-1">
+                  <div className="lg:sticky lg:top-24">
+                    <h2 className="ca-read-next__heading">Sigue leyendo</h2>
+                    <ul className="ca-read-next">
+                      {readNext.map((a) => (
+                        <li key={a.id}>
+                          <Link href={`/articulo/${a.slug}`} className="ca-read-next__item">
+                            <span className="ca-read-next__media">
+                              {(a.ogImage || a.featuredImage) ? (
+                                <img
+                                  src={a.ogImage || a.featuredImage || ""}
+                                  alt=""
+                                  loading="lazy"
+                                  decoding="async"
+                                  className="ca-read-next__image"
+                                />
+                              ) : (
+                                <span className="ca-read-next__fallback">CA</span>
+                              )}
+                            </span>
+                            <span className="ca-read-next__body">
+                              {a.categoryName && (
+                                <span className="ca-read-next__category">{a.categoryName}</span>
+                              )}
+                              <span className="ca-read-next__title">{a.title}</span>
+                            </span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </aside>
+              )}
             </div>
 
             {/* Recomendados — sección de ancho completo debajo del artículo */}
@@ -532,7 +545,7 @@ export default function ArticlePage() {
                 <h2 className="ca-article-section__title ca-article-section__title--accent font-bold text-xl mb-6">
                   Recomendados
                 </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-5">
+                <div className="ca-card-grid--compact grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
                   {sidebarData.recommendedArticles.map((a) => (
                     <ArticleCard key={a.id} {...a} />
                   ))}
@@ -541,18 +554,15 @@ export default function ArticlePage() {
             )}
 
             {/* Related Articles */}
-            {relatedArticles && relatedArticles.filter((a) => a.slug !== slug && a.slug !== nextArticle?.slug).length > 0 && (
+            {relatedRest.length > 0 && (
               <section className="ca-article-section mt-12 pt-8">
                 <h2 className="ca-article-section__title font-bold text-xl mb-6">
                   Artículos Relacionados
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-                  {relatedArticles
-                    .filter((a) => a.slug !== slug && a.slug !== nextArticle?.slug)
-                    .slice(0, 3)
-                    .map((a) => (
-                      <ArticleCard key={a.id} {...a} />
-                    ))}
+                <div className="ca-card-grid--compact grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {relatedRest.slice(0, 4).map((a) => (
+                    <ArticleCard key={a.id} {...a} />
+                  ))}
                 </div>
               </section>
             )}
