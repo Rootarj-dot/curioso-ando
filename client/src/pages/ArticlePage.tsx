@@ -1,10 +1,10 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArticleCard } from "@/components/ArticleCard";
-import { Calendar, ArrowLeft, Facebook } from "lucide-react";
+import { Calendar, ArrowLeft, ArrowRight, Facebook, Clock, Check, Link2, MessageCircle } from "lucide-react";
 import { CuriousCard } from "@/components/CuriousCard";
 import { useSeoMeta } from "@/hooks/useSeoMeta";
 
@@ -18,6 +18,74 @@ function formatDate(date: Date | null | undefined): string {
 }
 
 // setMetaTags replaced by useSeoMeta hook
+
+// ─── Reading time ─────────────────────────────────────────────────────────────
+const WORDS_PER_MINUTE = 200;
+
+function countWordsInNode(node: any): number {
+  if (!node) return 0;
+  if (node.type === "text") {
+    const words = String(node.text || "").trim();
+    return words ? words.split(/\s+/).length : 0;
+  }
+  return (node.children || []).reduce((sum: number, child: any) => sum + countWordsInNode(child), 0);
+}
+
+function readingMinutes(content: string | null | undefined): number {
+  if (!content) return 0;
+  let words = 0;
+  try {
+    const parsed = JSON.parse(content);
+    words = countWordsInNode(parsed?.root);
+  } catch {
+    words = String(content).replace(/<[^>]*>/g, " ").trim().split(/\s+/).filter(Boolean).length;
+  }
+  if (!words) return 0;
+  return Math.max(1, Math.round(words / WORDS_PER_MINUTE));
+}
+
+// ─── Reading progress ─────────────────────────────────────────────────────────
+function ReadingProgress({ targetRef }: { targetRef: React.RefObject<HTMLElement | null> }) {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    let frame = 0;
+
+    const measure = () => {
+      frame = 0;
+      const el = targetRef.current;
+      if (!el) return;
+      const { top, height } = el.getBoundingClientRect();
+      const travelled = -top;
+      const distance = height - window.innerHeight;
+      if (distance <= 0) {
+        setProgress(travelled > 0 ? 100 : 0);
+        return;
+      }
+      setProgress(Math.min(100, Math.max(0, (travelled / distance) * 100)));
+    };
+
+    const onScroll = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(measure);
+    };
+
+    measure();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, [targetRef]);
+
+  return (
+    <div className="ca-reading-progress" aria-hidden="true">
+      <span className="ca-reading-progress__bar" style={{ transform: `scaleX(${progress / 100})` }} />
+    </div>
+  );
+}
 
 // ─── Inline Articles Block ────────────────────────────────────────────────────
 function InlineArticlesBlock({
@@ -228,16 +296,47 @@ export default function ArticlePage() {
       "publisher": {
         "@type": "Organization",
         "name": "Curioseando Ando",
-        "url": "https://curiosoando.manus.space"
+        "url": "https://curioseandoando.com"
       },
       "mainEntityOfPage": { "@type": "WebPage", "@id": ogUrl },
     } : undefined,
   });
 
+  const articleRef = useRef<HTMLElement | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const minutes = useMemo(() => readingMinutes(article?.content), [article?.content]);
+
+  // First article of the same category that is not the one being read.
+  const nextArticle = useMemo(
+    () => (relatedArticles || []).find((a) => a.slug !== slug),
+    [relatedArticles, slug]
+  );
+
   const shareOnFacebook = useCallback(() => {
     const url = encodeURIComponent(window.location.href);
     window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}`, "_blank", "width=600,height=400");
   }, []);
+
+  const shareOnWhatsApp = useCallback(() => {
+    const text = encodeURIComponent(`${document.title} ${window.location.href}`);
+    window.open(`https://wa.me/?text=${text}`, "_blank", "noopener");
+  }, []);
+
+  const copyLink = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!copied) return;
+    const timer = window.setTimeout(() => setCopied(false), 2200);
+    return () => window.clearTimeout(timer);
+  }, [copied]);
 
   return (
     <div className="ca-article-page min-h-screen flex flex-col">
@@ -272,6 +371,8 @@ export default function ArticlePage() {
 
       {article && (
         <main className="flex-1">
+          <ReadingProgress targetRef={articleRef} />
+
           {/* Hero Image */}
           {(article.ogImage || article.featuredImage) && (
             <div className="ca-article-hero relative w-full overflow-hidden">
@@ -291,7 +392,7 @@ export default function ArticlePage() {
           <div className="container py-6 md:py-8">
             <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
               {/* Article */}
-              <article className="lg:col-span-3">
+              <article ref={articleRef} className="ca-article-body lg:col-span-3">
                 {/* Breadcrumb */}
                 <div className="ca-article-breadcrumb flex items-center gap-2 mb-6 text-sm">
                   <Link href="/" className="no-underline transition-colors">
@@ -330,36 +431,85 @@ export default function ArticlePage() {
                 )}
 
                 {/* Meta */}
-                <div className="ca-article-meta flex flex-wrap items-center gap-4 pb-6 mb-6">
+                <div className="ca-article-meta flex flex-wrap items-center gap-x-4 gap-y-3 pb-6 mb-6">
                   {article.publishedAt && (
                     <span className="ca-article-meta__date flex items-center gap-1.5 text-sm">
                       <Calendar className="w-4 h-4" />
                       {formatDate(article.publishedAt)}
                     </span>
                   )}
-                  <button
-                    onClick={shareOnFacebook}
-                    className="ca-share-button flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium ml-auto transition-opacity hover:opacity-80"
-                  >
-                    <Facebook className="w-4 h-4" />
-                    Compartir
-                  </button>
+                  {minutes > 0 && (
+                    <span className="ca-article-meta__date flex items-center gap-1.5 text-sm">
+                      <Clock className="w-4 h-4" />
+                      {minutes} min de lectura
+                    </span>
+                  )}
+                  <div className="ca-share-row flex items-center gap-2 sm:ml-auto">
+                    <button onClick={shareOnWhatsApp} className="ca-share-button ca-share-button--whatsapp" aria-label="Compartir por WhatsApp">
+                      <MessageCircle className="w-4 h-4" />
+                      <span>WhatsApp</span>
+                    </button>
+                    <button onClick={shareOnFacebook} className="ca-share-button" aria-label="Compartir en Facebook">
+                      <Facebook className="w-4 h-4" />
+                      <span>Facebook</span>
+                    </button>
+                    <button onClick={copyLink} className="ca-share-button" aria-label="Copiar enlace">
+                      {copied ? <Check className="w-4 h-4" /> : <Link2 className="w-4 h-4" />}
+                      <span>{copied ? "¡Copiado!" : "Copiar"}</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Content — supports inline articles blocks */}
                 <ArticleContent content={article.content ?? "{}"} currentSlug={slug || ""} />
 
                 {/* Share footer */}
-                <div className="ca-article-share mt-8 pt-6 flex items-center gap-4">
-                  <span className="ca-article-share__label text-sm font-medium">Compartir:</span>
-                  <button
-                    onClick={shareOnFacebook}
-                    className="ca-share-button flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-opacity hover:opacity-80"
-                  >
-                    <Facebook className="w-4 h-4" />
-                    Facebook
-                  </button>
+                <div className="ca-article-share mt-10 pt-6">
+                  <span className="ca-article-share__label">¿Te gustó? Compártelo</span>
+                  <div className="ca-share-row flex flex-wrap items-center gap-2 mt-3">
+                    <button onClick={shareOnWhatsApp} className="ca-share-button ca-share-button--whatsapp">
+                      <MessageCircle className="w-4 h-4" />
+                      <span>WhatsApp</span>
+                    </button>
+                    <button onClick={shareOnFacebook} className="ca-share-button">
+                      <Facebook className="w-4 h-4" />
+                      <span>Facebook</span>
+                    </button>
+                    <button onClick={copyLink} className="ca-share-button">
+                      {copied ? <Check className="w-4 h-4" /> : <Link2 className="w-4 h-4" />}
+                      <span>{copied ? "¡Copiado!" : "Copiar enlace"}</span>
+                    </button>
+                  </div>
                 </div>
+
+                {/* Next article — keep the reader moving instead of sending them away */}
+                {nextArticle && (
+                  <Link href={`/articulo/${nextArticle.slug}`} className="ca-next-article">
+                    <span className="ca-next-article__media">
+                      {(nextArticle.ogImage || nextArticle.featuredImage) ? (
+                        <img
+                          src={nextArticle.ogImage || nextArticle.featuredImage || ""}
+                          alt=""
+                          loading="lazy"
+                          decoding="async"
+                          className="ca-next-article__image"
+                        />
+                      ) : (
+                        <span className="ca-next-article__fallback">CA</span>
+                      )}
+                    </span>
+                    <span className="ca-next-article__content">
+                      <span className="ca-next-article__kicker">Sigue leyendo</span>
+                      <span className="ca-next-article__title">{nextArticle.title}</span>
+                      {nextArticle.excerpt && (
+                        <span className="ca-next-article__excerpt">{nextArticle.excerpt}</span>
+                      )}
+                      <span className="ca-next-article__cta">
+                        Leer ahora <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                      </span>
+                    </span>
+                  </Link>
+                )}
 
                 {/* Back */}
                 <div className="mt-8">
@@ -417,14 +567,14 @@ export default function ArticlePage() {
             )}
 
             {/* Related Articles */}
-            {relatedArticles && relatedArticles.filter((a) => a.slug !== slug).length > 0 && (
+            {relatedArticles && relatedArticles.filter((a) => a.slug !== slug && a.slug !== nextArticle?.slug).length > 0 && (
               <section className="ca-article-section mt-12 pt-8">
                 <h2 className="ca-article-section__title font-bold text-xl mb-6">
                   Artículos Relacionados
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                   {relatedArticles
-                    .filter((a) => a.slug !== slug)
+                    .filter((a) => a.slug !== slug && a.slug !== nextArticle?.slug)
                     .slice(0, 3)
                     .map((a) => (
                       <ArticleCard key={a.id} {...a} />
