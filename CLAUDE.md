@@ -60,6 +60,46 @@ Hay acceso SSH configurado en la máquina de Alberto bajo el alias `curioso-host
 La carpeta `~/domains/curioseandoando.com/nodejs/` es un despliegue manual viejo (julio),
 ya no se usa y ocupa 834 MB.
 
+El formulario de contacto envía por SMTP y necesita, en el panel, `SMTP_HOST`
+(`smtp.hostinger.com`), `SMTP_PORT` (`465`), `SMTP_USER` y `SMTP_PASS`. El buzón vive en
+**otro dominio de Alberto** (`alverichrj.tech`): su plan de correo gratuito no cubre
+`curioseandoando.com`. Por eso esa dirección no se publica en ninguna parte del sitio.
+`CONTACT_TO` es opcional; sin ella el destino está fijo en `server/contactMailer.ts`.
+
+## SEO: historial que conviene no repetir
+
+El sitio estuvo meses casi invisible en Google por **tres fallos técnicos**, todos corregidos
+el 2026-09-25. Si vuelven a aparecer síntomas raros de indexación, empezar por aquí:
+
+1. `client/index.html` declaraba `curiosoando.manus.space` como canónica, og:url y URL del
+   JSON-LD. Solo `/articulo/:slug` se reescribía en servidor, así que la portada, las
+   categorías y las páginas legales le decían a Google que su versión real vivía en un
+   dominio muerto. Hoy `server/seo.ts` reescribe también categorías y páginas estáticas.
+2. El sitemap **nunca se había enviado** a Search Console: solo constaban cuatro de 2015 del
+   dueño anterior del dominio, apuntando a `/Online/sitemapN.xml`. Google conocía 9 páginas
+   de 132.
+3. `www` respondía 200 con su propia copia y cualquier URL inventada devolvía 200. Ahora
+   `server/_core/index.ts` redirige `www` con 301 y `server/_core/vite.ts` responde 404 para
+   rutas que no existen, usando la lista `CLIENT_ROUTES` — **hay que añadir ahí toda ruta
+   pública nueva**, o devolverá 404.
+
+Ningún artículo tiene `excerpt`, así que las 126 compartían la misma meta descripción.
+`shared/excerpt.ts` genera una a partir del cuerpo de la nota; la usan el servidor y el
+cliente. No hace falta rellenar extractos a mano.
+
+## Analítica
+
+Además de las páginas vistas, se miden dos eventos propios en GA4 (`G-LH9VJZWW1F`), ambos
+disparados desde `ReadingProgress` y los botones de compartir de `ArticlePage`:
+
+- `avance_lectura` — al 25, 50, 75 y 100 % de la nota, una vez por hito. Parámetros:
+  `porcentaje`, `nota`, `slug`, `categoria`.
+- `compartir_nota` — parámetros: `medio` (whatsapp / facebook / copiar_enlace), `nota`,
+  `slug`, `categoria`.
+
+Los parámetros no aparecen desglosados en los informes hasta registrarlos como dimensiones
+personalizadas en GA4, y **eso no se aplica retroactivamente**.
+
 ## Reglas de trabajo
 
 **Vía libre — se hace y se publica sin preguntar**, siempre que `pnpm check` y `pnpm build`
@@ -111,7 +151,19 @@ vertical). Fusionarlas o borrar una rompería el móvil. Aísla siempre con
 
 **Hay 5 categorías en producción, no 4**: Noticias, Entretenimiento, Geek, Tecnología y
 **Salud**. `ensure-production-schema.mjs` solo hace `INSERT IGNORE` de las cuatro base y no
-borra nada, así que Salud está a salvo.
+borra nada, así que Salud está a salvo. El nombre que se muestra sale de la base, no de una
+lista en el código: una categoría nueva funciona sin tocar nada.
+
+**Las imágenes que sube Alberto son 1672 × 941, exactamente 16:9.** Usar esa proporción en
+cualquier componente que las muestre. Para medir una imagen de Cloudinary sin credenciales,
+insertar `fl_getinfo/` después de `/upload/` en su URL.
+
+**Las trivias ya no se muestran.** Alberto las retiró de todas las notas ("ya no las
+usaremos"). Las filas de `article_trivia`, el router y los editores del panel siguen en pie,
+y `client/src/components/CuriousCard.tsx` quedó huérfano. No proponer volver a mostrarlas.
+
+**La frase del hero de la portada es un respaldo**: solo se ve cuando el artículo destacado
+no tiene extracto, que es el caso hoy. Si se destaca una nota con extracto, desaparece.
 
 **`APP_PUBLIC_URL` está en MAYÚSCULAS** en Hostinger (`HTTPS://CURIOSEANDOANDO.COM`), y el
 log de arranque lo refleja en el callback de Google. **El login funciona igual** — Google
