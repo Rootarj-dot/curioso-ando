@@ -201,6 +201,10 @@ export function registerSeoRoutes(app: Express) {
       title: "Términos y condiciones",
       description: `Condiciones de uso del sitio ${SITE_NAME}.`,
     },
+    "/acerca-de": {
+      title: "Acerca de",
+      description: `Quién está detrás de ${SITE_NAME}, por qué existe y cómo se eligen y verifican las historias que se publican.`,
+    },
     "/contacto": {
       title: "Contacto",
       description: `Escríbenos: dudas, sugerencias y colaboraciones con ${SITE_NAME}.`,
@@ -261,6 +265,10 @@ Sitemap: ${baseUrl}/sitemap.xml
 
       const staticPages = [
         { url: "/", priority: "1.0", changefreq: "daily", lastmod: today },
+        { url: "/acerca-de", priority: "0.6", changefreq: "monthly", lastmod: today },
+        { url: "/contacto", priority: "0.4", changefreq: "yearly", lastmod: today },
+        { url: "/aviso-de-privacidad", priority: "0.3", changefreq: "yearly", lastmod: today },
+        { url: "/terminos-y-condiciones", priority: "0.3", changefreq: "yearly", lastmod: today },
       ];
 
       // Dynamic category pages

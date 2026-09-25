@@ -87,6 +87,7 @@ export function serveStatic(app: Express) {
   // prefixes that reaches this point does not exist.
   const CLIENT_ROUTES = new Set([
     "/",
+    "/acerca-de",
     "/aviso-de-privacidad",
     "/terminos-y-condiciones",
     "/contacto",

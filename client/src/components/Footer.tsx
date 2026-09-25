@@ -52,6 +52,7 @@ export function Footer() {
           <div className="ca-footer-column">
             <h2>Información</h2>
             <ul>
+              <li><Link href="/acerca-de">Acerca de</Link></li>
               <li><Link href="/aviso-de-privacidad">Aviso de privacidad</Link></li>
               <li><Link href="/terminos-y-condiciones">Términos y condiciones</Link></li>
               <li><Link href="/contacto">Contacto</Link></li>

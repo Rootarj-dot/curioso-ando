@@ -1265,3 +1265,84 @@
 /* Byline: the author is a trust signal, so give it a little more weight. */
 .ca-article-meta__author { color: #bcb4cb; }
 .ca-article-meta__author strong { color: #e7ddff; font-weight: 650; }
+
+/* ─── About page ──────────────────────────────────────────────────────────── */
+.ca-about-page {
+  --ca-line: rgba(232, 222, 255, 0.12);
+  --ca-copy: #f8f5ff;
+  --ca-copy-muted: #b8b0c8;
+  background:
+    radial-gradient(circle at 81% 10%, rgba(111, 54, 209, 0.13), transparent 25rem),
+    radial-gradient(circle at 10% 32%, rgba(68, 26, 160, 0.12), transparent 22rem),
+    #08070d;
+  color: var(--ca-copy);
+}
+.ca-about-hero {
+  padding: clamp(2.6rem, 5vw, 4rem) 0 clamp(2rem, 3.5vw, 2.75rem);
+  border-bottom: 1px solid var(--ca-line);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(124, 66, 232, 0.24), transparent 20rem),
+    radial-gradient(circle at 78% 120%, rgba(88, 36, 190, 0.18), transparent 18rem);
+}
+.ca-about-hero__title {
+  margin: 1rem 0 0;
+  color: #fff;
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 750;
+  letter-spacing: -0.04em;
+  line-height: 1.06;
+}
+.ca-about-hero__intro {
+  max-width: 40rem;
+  margin: 1.1rem 0 0;
+  color: #d2cbdc;
+  font-size: clamp(1rem, 2.4vw, 1.12rem);
+  line-height: 1.7;
+}
+.ca-about-grid { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.1rem; }
+@media (min-width: 900px) { .ca-about-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.ca-about-card {
+  padding: 1.5rem 1.4rem 1.6rem;
+  border: 1px solid var(--ca-line);
+  border-radius: 1rem;
+  background: #15101e;
+}
+.ca-about-card__icon {
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(189, 145, 255, 0.4);
+  border-radius: 0.7rem;
+  background: rgba(139, 92, 246, 0.16);
+  color: #c9aaff;
+  place-items: center;
+}
+.ca-about-card h2 {
+  margin: 0 0 0.7rem;
+  color: #fbfaff;
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.ca-about-card p { margin: 0 0 0.8rem; color: #cfc8dd; font-size: 0.95rem; line-height: 1.75; }
+.ca-about-card p:last-child { margin-bottom: 0; }
+.ca-about-card strong { color: #fff; font-weight: 650; }
+.ca-about-note {
+  margin-top: 2.5rem;
+  padding: clamp(1.6rem, 3vw, 2.2rem);
+  border: 1px solid var(--ca-line);
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #17111f 0%, #1d1430 100%);
+}
+.ca-about-note h2 {
+  margin: 0 0 0.6rem;
+  color: #fbfaff;
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: clamp(1.2rem, 2.6vw, 1.5rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+.ca-about-note p { max-width: 42rem; margin: 0 0 1.2rem; color: #cfc8dd; font-size: 0.95rem; line-height: 1.75; }
