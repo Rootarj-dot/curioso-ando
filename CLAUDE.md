@@ -57,8 +57,12 @@ Hostinger usa despliegue por versiones bajo `~/domains/curioseandoando.com/hbuil
 `public_html/` solo tiene un `.htaccess` que apunta Passenger a `hbuilds/current/nodejs`.
 
 Hay acceso SSH configurado en la máquina de Alberto bajo el alias `curioso-hostinger`.
-La carpeta `~/domains/curioseandoando.com/nodejs/` es un despliegue manual viejo (julio),
-ya no se usa y ocupa 834 MB.
+
+**MySQL remoto acepta intentos de conexión desde cualquier IP de internet.** Comprobado el
+2026-09-25 conectando desde fuera con un usuario inventado: devuelve `1045 Access denied`
+(credenciales incorrectas) en vez de `1130 Host not allowed`, es decir, la regla de MySQL
+remoto no acota por IP. Alberto lo sabe y **decidió dejarlo así**; no volver a plantearlo
+salvo que él lo pida.
 
 El formulario de contacto envía por SMTP y necesita, en el panel, `SMTP_HOST`
 (`smtp.hostinger.com`), `SMTP_PORT` (`465`), `SMTP_USER` y `SMTP_PASS`. El buzón vive en
