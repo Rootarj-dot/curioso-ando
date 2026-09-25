@@ -82,11 +82,27 @@ export function serveStatic(app: Express) {
     })
   );
 
-  // fall through to index.html if the file doesn't exist
-  app.use("*", (_req, res) => {
+  // Routes the client can actually render. Valid /articulo/ and /categoria/
+  // addresses are answered earlier by the SEO routes, so anything with those
+  // prefixes that reaches this point does not exist.
+  const CLIENT_ROUTES = new Set([
+    "/",
+    "/aviso-de-privacidad",
+    "/terminos-y-condiciones",
+    "/contacto",
+  ]);
+
+  // Fall through to index.html so the client can route, but answer 404 for
+  // addresses that lead nowhere. Serving them as 200 made every mistyped URL
+  // look like a real page to search engines.
+  app.use("*", (req, res) => {
+    const pathname = req.originalUrl.split("?")[0].replace(/\/+$/, "") || "/";
+    const exists = CLIENT_ROUTES.has(pathname) || pathname.startsWith("/admin");
+
     res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
     res.setHeader("Pragma", "no-cache");
     res.setHeader("Expires", "0");
+    res.status(exists ? 200 : 404);
     res.sendFile(path.resolve(distPath, "index.html"));
   });
 }

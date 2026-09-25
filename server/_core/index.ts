@@ -58,6 +58,16 @@ async function startServer() {
   // Trust proxy headers (needed for correct redirect_uri in Google OAuth behind Cloud Run / reverse proxies)
   app.set("trust proxy", true);
 
+  // Serve the site from a single hostname. With www answering as well, search
+  // engines saw two copies of every page.
+  app.use((req, res, next) => {
+    const host = req.get("host");
+    if (host?.startsWith("www.")) {
+      return res.redirect(301, `${req.protocol}://${host.slice(4)}${req.originalUrl}`);
+    }
+    next();
+  });
+
   // Google OAuth 2.0
   setupGoogleAuth(app);
 
