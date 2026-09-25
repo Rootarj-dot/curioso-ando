@@ -1346,3 +1346,68 @@
   letter-spacing: -0.025em;
 }
 .ca-about-note p { max-width: 42rem; margin: 0 0 1.2rem; color: #cfc8dd; font-size: 0.95rem; line-height: 1.75; }
+
+/* ─── Search results page ─────────────────────────────────────────────────── */
+.ca-search-page {
+  --ca-line: rgba(232, 222, 255, 0.12);
+  --ca-copy: #f8f5ff;
+  --ca-copy-muted: #b8b0c8;
+  background:
+    radial-gradient(circle at 81% 10%, rgba(111, 54, 209, 0.13), transparent 25rem),
+    radial-gradient(circle at 10% 32%, rgba(68, 26, 160, 0.12), transparent 22rem),
+    #08070d;
+  color: var(--ca-copy);
+}
+.ca-search-hero {
+  padding: clamp(2.6rem, 5vw, 4rem) 0 clamp(1.8rem, 3vw, 2.4rem);
+  border-bottom: 1px solid var(--ca-line);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(124, 66, 232, 0.24), transparent 20rem),
+    radial-gradient(circle at 78% 120%, rgba(88, 36, 190, 0.18), transparent 18rem);
+}
+.ca-search-hero__title {
+  margin: 1rem 0 0;
+  color: #fff;
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: clamp(1.7rem, 4.4vw, 2.8rem);
+  font-weight: 750;
+  letter-spacing: -0.04em;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+.ca-search-hero__count { margin: 1rem 0 0; color: var(--ca-copy-muted); font-size: 0.85rem; }
+.ca-search-form {
+  display: flex;
+  max-width: 34rem;
+  align-items: center;
+  gap: 0.6rem;
+  margin-top: 1.4rem;
+  padding: 0.35rem 0.4rem 0.35rem 0.9rem;
+  border: 1px solid rgba(226, 213, 255, 0.2);
+  border-radius: 0.8rem;
+  background: rgba(255, 255, 255, 0.06);
+  color: #b89cff;
+}
+.ca-search-form input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #fff;
+  font-size: 0.92rem;
+}
+.ca-search-form input::placeholder { color: #958da7; }
+.ca-search-form button {
+  flex: none;
+  padding: 0.55rem 1rem;
+  border: 1px solid rgba(189, 145, 255, 0.6);
+  border-radius: 0.6rem;
+  background: linear-gradient(135deg, #7541ea, #a14cf6);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  transition: filter 180ms ease, transform 180ms ease;
+}
+.ca-search-form button:hover { filter: brightness(1.1); transform: translateY(-1px); }
+.ca-search-empty { color: var(--ca-copy-muted); font-size: 0.95rem; text-align: center; padding: 3rem 0; }

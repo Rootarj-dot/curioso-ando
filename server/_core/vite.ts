@@ -88,6 +88,7 @@ export function serveStatic(app: Express) {
   const CLIENT_ROUTES = new Set([
     "/",
     "/acerca-de",
+    "/buscar",
     "/aviso-de-privacidad",
     "/terminos-y-condiciones",
     "/contacto",

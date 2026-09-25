@@ -501,7 +501,7 @@ export async function deleteCategory(id: number) {
 
 // ─── Search Articles ────────────────────────────────────────────────────────
 
-export async function searchArticles(query: string) {
+export async function searchArticles(query: string, limit = 10) {
   const db = await getDb();
   if (!db) return [];
   const term = `%${query}%`;
@@ -521,7 +521,7 @@ export async function searchArticles(query: string) {
     .leftJoin(categories, eq(articles.categoryId, categories.id))
     .where(and(publicArticleCondition(), like(articles.title, term)))
     .orderBy(desc(articles.publishedAt))
-    .limit(10);
+    .limit(limit);
 }
 
 // ─── Featured Article of the Week ────────────────────────────────────────────────────

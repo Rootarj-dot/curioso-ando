@@ -146,9 +146,9 @@ export const appRouter = router({
     }),
 
     search: publicProcedure
-      .input(z.object({ q: z.string().min(1).max(100) }))
+      .input(z.object({ q: z.string().min(1).max(100), limit: z.number().min(1).max(50).optional() }))
       .query(async ({ input }) => {
-        return searchArticles(input.q);
+        return searchArticles(input.q, input.limit ?? 10);
       }),
 
     bySlug: publicProcedure

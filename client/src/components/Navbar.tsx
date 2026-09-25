@@ -9,6 +9,7 @@ function NavSearch() {
   const [query, setQuery] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const [, navigate] = useLocation();
   const { data: results, isFetching } = trpc.articles.search.useQuery({ q: query }, { enabled: query.trim().length >= 2 });
 
   useEffect(() => {
@@ -38,7 +39,21 @@ function NavSearch() {
       ) : (
         <div className="ca-nav-search-field">
           <Search className="w-4 h-4 shrink-0" aria-hidden="true" />
-          <input ref={inputRef} type="search" placeholder="Buscar historias..." value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Buscar artículos" />
+          <input
+            ref={inputRef}
+            type="search"
+            placeholder="Buscar historias..."
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key !== "Enter") return;
+              const q = query.trim();
+              if (q.length < 2) return;
+              handleClose();
+              navigate(`/buscar?q=${encodeURIComponent(q)}`);
+            }}
+            aria-label="Buscar artículos"
+          />
           <button onClick={handleClose} aria-label="Cerrar búsqueda"><X className="w-4 h-4" /></button>
         </div>
       )}
@@ -121,13 +136,27 @@ export function Navbar() {
 
 function MobileSearch({ onClose }: { onClose: () => void }) {
   const [query, setQuery] = useState("");
+  const [, navigate] = useLocation();
   const { data: results, isFetching } = trpc.articles.search.useQuery({ q: query }, { enabled: query.trim().length >= 2 });
 
   return (
     <div className="ca-mobile-search">
       <div className="ca-mobile-search__field">
         <Search className="w-4 h-4 shrink-0" aria-hidden="true" />
-        <input type="search" placeholder="Buscar historias..." value={query} onChange={(event) => setQuery(event.target.value)} aria-label="Buscar artículos" />
+        <input
+          type="search"
+          placeholder="Buscar historias..."
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key !== "Enter") return;
+            const q = query.trim();
+            if (q.length < 2) return;
+            onClose();
+            navigate(`/buscar?q=${encodeURIComponent(q)}`);
+          }}
+          aria-label="Buscar artículos"
+        />
         {query && <button onClick={() => setQuery("")} aria-label="Limpiar búsqueda"><X className="w-4 h-4" /></button>}
       </div>
       {query.trim().length >= 2 && (
