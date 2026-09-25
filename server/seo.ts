@@ -39,7 +39,10 @@ function renderArticleMetaTags(params: {
   publishedAt?: Date | string | null;
   updatedAt?: Date | string | null;
   authorName?: string | null;
+  /** "article" for stories, "website" for listings and static pages. */
+  ogType?: "article" | "website";
 }): string {
+  const ogType = params.ogType ?? "article";
   const fullTitle = params.title.includes(SITE_NAME) ? params.title : `${params.title} | ${SITE_NAME}`;
   const escapedTitle = escapeHtml(params.title);
   const escapedFullTitle = escapeHtml(fullTitle);
@@ -65,18 +68,29 @@ function renderArticleMetaTags(params: {
     <meta property="article:published_time" content="${escapeHtml(publishedAt)}" />` : ""}${updatedAt ? `
     <meta property="article:modified_time" content="${escapeHtml(updatedAt)}" />` : ""}`;
 
-  const jsonLd = JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "NewsArticle",
-    headline: params.title,
-    description: params.description || DEFAULT_DESCRIPTION,
-    image: params.imageUrl ? [params.imageUrl] : undefined,
-    datePublished: publishedAt,
-    dateModified: updatedAt,
-    author: { "@type": "Person", name: params.authorName || SITE_NAME },
-    publisher: { "@type": "Organization", name: SITE_NAME, url: new URL("/", params.canonicalUrl).toString() },
-    mainEntityOfPage: { "@type": "WebPage", "@id": params.canonicalUrl },
-  }).replace(/</g, "\\u003c");
+  const jsonLd = JSON.stringify(
+    ogType === "article"
+      ? {
+          "@context": "https://schema.org",
+          "@type": "NewsArticle",
+          headline: params.title,
+          description: params.description || DEFAULT_DESCRIPTION,
+          image: params.imageUrl ? [params.imageUrl] : undefined,
+          datePublished: publishedAt,
+          dateModified: updatedAt,
+          author: { "@type": "Person", name: params.authorName || SITE_NAME },
+          publisher: { "@type": "Organization", name: SITE_NAME, url: new URL("/", params.canonicalUrl).toString() },
+          mainEntityOfPage: { "@type": "WebPage", "@id": params.canonicalUrl },
+        }
+      : {
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          name: params.title,
+          description: params.description || DEFAULT_DESCRIPTION,
+          url: params.canonicalUrl,
+          isPartOf: { "@type": "WebSite", name: SITE_NAME, url: new URL("/", params.canonicalUrl).toString() },
+        }
+  ).replace(/</g, "\\u003c");
 
   return `
     <!-- ── Server-rendered social preview meta ─────────────────────────────── -->
@@ -86,12 +100,12 @@ function renderArticleMetaTags(params: {
     <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
     <meta name="theme-color" content="#2B037D" />
 
-    <meta property="og:type" content="article" />
+    <meta property="og:type" content="${ogType}" />
     <meta property="og:site_name" content="${escapeHtml(SITE_NAME)}" />
     <meta property="og:title" content="${escapedTitle}" />
     <meta property="og:description" content="${escapedDescription}" />
     <meta property="og:url" content="${escapedCanonicalUrl}" />
-    <meta property="og:locale" content="es_ES" />${imageTags}${articleDateTags}
+    <meta property="og:locale" content="es_MX" />${imageTags}${articleDateTags}
 
     <meta name="twitter:card" content="${escapedImageUrl ? "summary_large_image" : "summary"}" />
     <meta name="twitter:title" content="${escapedTitle}" />
@@ -145,6 +159,70 @@ export function registerSeoRoutes(app: Express) {
   });
 
   // ── robots.txt ────────────────────────────────────────────────────────────
+  // ── Category listings ──────────────────────────────────────────────────────
+  // Without this the static template's canonical, which points at the home page,
+  // would tell search engines every category is a duplicate of the home page.
+  app.get("/categoria/:slug", async (req: Request, res: Response, next: NextFunction) => {
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
+    try {
+      const categories = await getAllCategories();
+      const category = categories.find((c) => c.slug === req.params.slug);
+      if (!category) return next();
+
+      const metaTags = renderArticleMetaTags({
+        title: category.name,
+        description: `Lo último en ${category.name}: datos raros, curiosos y sorprendentes en ${SITE_NAME}.`,
+        canonicalUrl: `${baseUrl}/categoria/${category.slug}`,
+        ogType: "website",
+      });
+
+      const template = await fs.promises.readFile(getIndexHtmlPath(), "utf-8");
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.setHeader("Cache-Control", "public, max-age=300");
+      res.send(injectMetaTags(template, metaTags));
+    } catch (err) {
+      console.error("[SEO] category preview error:", err);
+      next();
+    }
+  });
+
+  // ── Static pages ───────────────────────────────────────────────────────────
+  const STATIC_PAGES: Record<string, { title: string; description: string }> = {
+    "/aviso-de-privacidad": {
+      title: "Aviso de privacidad",
+      description: `Cómo trata ${SITE_NAME} los datos de quienes visitan el sitio.`,
+    },
+    "/terminos-y-condiciones": {
+      title: "Términos y condiciones",
+      description: `Condiciones de uso del sitio ${SITE_NAME}.`,
+    },
+    "/contacto": {
+      title: "Contacto",
+      description: `Escríbenos: dudas, sugerencias y colaboraciones con ${SITE_NAME}.`,
+    },
+  };
+
+  for (const [route, meta] of Object.entries(STATIC_PAGES)) {
+    app.get(route, async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const baseUrl = `${req.protocol}://${req.get("host")}`;
+        const metaTags = renderArticleMetaTags({
+          title: meta.title,
+          description: meta.description,
+          canonicalUrl: `${baseUrl}${route}`,
+          ogType: "website",
+        });
+        const template = await fs.promises.readFile(getIndexHtmlPath(), "utf-8");
+        res.setHeader("Content-Type", "text/html; charset=utf-8");
+        res.setHeader("Cache-Control", "public, max-age=300");
+        res.send(injectMetaTags(template, metaTags));
+      } catch (err) {
+        console.error(`[SEO] static page error for ${route}:`, err);
+        next();
+      }
+    });
+  }
+
   app.get("/robots.txt", (req, res) => {
     const baseUrl = `${req.protocol}://${req.get("host")}`;
     res.setHeader("Content-Type", "text/plain");
