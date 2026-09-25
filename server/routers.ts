@@ -44,6 +44,7 @@ import {
 } from "./db";
 import { uploadToCloudinary, deleteFromCloudinary } from "./cloudinaryStorage";
 import { nanoid } from "nanoid";
+import { sendContactMessage, isMailerConfigured, rateLimitOk } from "./contactMailer";
 
 function slugify(text: string): string {
   return text
@@ -491,6 +492,46 @@ export const appRouter = router({
       .input(z.object({ id: z.number() }))
       .mutation(async ({ input }) => {
         await deleteTrivia(input.id);
+        return { success: true };
+      }),
+  }),
+  contact: router({
+    send: publicProcedure
+      .input(z.object({
+        name: z.string().trim().min(2, "Nombre demasiado corto").max(80),
+        email: z.string().trim().email("Correo inválido").max(200),
+        message: z.string().trim().min(10, "Cuéntame un poco más").max(4000),
+        // Bots fill every field they find; humans never see this one.
+        website: z.string().max(0).optional(),
+      }))
+      .mutation(async ({ input, ctx }) => {
+        if (input.website) return { success: true };
+
+        if (!isMailerConfigured()) {
+          console.error("[Contact] SMTP sin configurar: el mensaje no se envió");
+          throw new TRPCError({
+            code: "PRECONDITION_FAILED",
+            message: "El formulario no está disponible ahora mismo. Escríbenos por redes sociales.",
+          });
+        }
+
+        const ip = (ctx.req.ip || ctx.req.socket.remoteAddress || "desconocida").toString();
+        if (!rateLimitOk(ip)) {
+          throw new TRPCError({
+            code: "TOO_MANY_REQUESTS",
+            message: "Has enviado varios mensajes seguidos. Inténtalo de nuevo en unos minutos.",
+          });
+        }
+
+        try {
+          await sendContactMessage({ name: input.name, email: input.email, message: input.message });
+        } catch (err) {
+          console.error("[Contact] fallo al enviar:", err);
+          throw new TRPCError({
+            code: "INTERNAL_SERVER_ERROR",
+            message: "No se pudo enviar el mensaje. Inténtalo más tarde.",
+          });
+        }
         return { success: true };
       }),
   }),

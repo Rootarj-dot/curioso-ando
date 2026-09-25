@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { Mail, MapPin, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
+import { trpc } from "@/lib/trpc";
 
 export default function ContactPage() {
   useEffect(() => {
@@ -12,7 +13,19 @@ export default function ContactPage() {
   }, []);
 
   const [formData, setFormData] = useState({ name: "", email: "", message: "" });
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Left empty by people and filled by bots, which is how we tell them apart.
+  const [website, setWebsite] = useState("");
+
+  const sendMutation = trpc.contact.send.useMutation({
+    onSuccess: () => {
+      toast.success("¡Mensaje enviado! Te responderé en cuanto pueda.");
+      setFormData({ name: "", email: "", message: "" });
+    },
+    onError: (error) => {
+      toast.error(error.message || "No se pudo enviar el mensaje. Intenta de nuevo.");
+    },
+  });
+  const isSubmitting = sendMutation.isPending;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -21,23 +34,18 @@ export default function ContactPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.name.trim() || !formData.email.trim() || !formData.message.trim()) {
       toast.error("Por favor completa todos los campos");
       return;
     }
 
-    setIsSubmitting(true);
-    try {
-      // Simular envío de formulario
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      toast.success("¡Mensaje enviado! Nos pondremos en contacto pronto.");
-      setFormData({ name: "", email: "", message: "" });
-    } catch (error) {
-      toast.error("Error al enviar el mensaje. Intenta de nuevo.");
-    } finally {
-      setIsSubmitting(false);
-    }
+    sendMutation.mutate({
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      message: formData.message.trim(),
+      website,
+    });
   };
 
   return (
@@ -216,6 +224,18 @@ export default function ContactPage() {
               >
                 {isSubmitting ? "Enviando..." : "Enviar Mensaje"}
               </button>
+            {/* Honeypot: hidden from people, irresistible to bots. */}
+            <input
+              type="text"
+              name="website"
+              value={website}
+              onChange={(e) => setWebsite(e.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+              style={{ position: "absolute", left: "-9999px", width: 1, height: 1, opacity: 0 }}
+            />
+
             </form>
           </div>
         </div>
