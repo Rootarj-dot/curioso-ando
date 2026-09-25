@@ -4,7 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArticleCard } from "@/components/ArticleCard";
-import { Calendar, ArrowLeft, ArrowUp, Facebook, Clock, Check, Link2, MessageCircle } from "lucide-react";
+import { Calendar, ArrowLeft, ArrowUp, Facebook, Clock, Check, Link2, MessageCircle, User } from "lucide-react";
 import { useSeoMeta } from "@/hooks/useSeoMeta";
 import { trackEvent } from "@/lib/analytics";
 import { excerptFromContent } from "@shared/excerpt";
@@ -516,6 +516,12 @@ export default function ArticlePage() {
 
                 {/* Meta */}
                 <div className="ca-article-meta flex flex-wrap items-center gap-x-4 gap-y-3 pb-6 mb-6">
+                  {article.authorName && (
+                    <span className="ca-article-meta__author flex items-center gap-1.5 text-sm">
+                      <User className="w-4 h-4" />
+                      Por <strong>{article.authorName}</strong>
+                    </span>
+                  )}
                   {article.publishedAt && (
                     <span className="ca-article-meta__date flex items-center gap-1.5 text-sm">
                       <Calendar className="w-4 h-4" />

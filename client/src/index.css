@@ -1261,3 +1261,7 @@
   color: var(--ca-copy-muted);
 }
 .ca-category-empty p:first-child { color: #fbfaff; }
+
+/* Byline: the author is a trust signal, so give it a little more weight. */
+.ca-article-meta__author { color: #bcb4cb; }
+.ca-article-meta__author strong { color: #e7ddff; font-weight: 650; }
