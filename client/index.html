@@ -52,19 +52,40 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "Curioseando Ando",
-      "url": "https://curioseandoando.com/",
-      "description": "Datos raros, curiosos y sorprendentes. Noticias, entretenimiento, geek y tecnología en un solo lugar.",
-      "inLanguage": "es",
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": {
-          "@type": "EntryPoint",
-          "urlTemplate": "https://curioseandoando.com/?q={search_term_string}"
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://curioseandoando.com/#website",
+          "name": "Curioseando Ando",
+          "alternateName": "Curioseando",
+          "url": "https://curioseandoando.com/",
+          "description": "Datos raros, curiosos y sorprendentes. Noticias, entretenimiento, geek y tecnología en un solo lugar.",
+          "inLanguage": "es-MX",
+          "publisher": { "@id": "https://curioseandoando.com/#organization" },
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://curioseandoando.com/?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
         },
-        "query-input": "required name=search_term_string"
-      }
+        {
+          "@type": "Organization",
+          "@id": "https://curioseandoando.com/#organization",
+          "name": "Curioseando Ando",
+          "url": "https://curioseandoando.com/",
+          "description": "Medio digital mexicano de datos curiosos, historias sorprendentes y noticias de entretenimiento, geek, salud y tecnología.",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://curioseandoando.com/logo1.png",
+            "width": 500,
+            "height": 500
+          },
+          "sameAs": ["https://www.youtube.com/@curioseandoandomx"]
+        }
+      ]
     }
     </script>
 

@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import type { Express, NextFunction, Request, Response } from "express";
 import { getPublishedArticles, getAllCategories, getArticleBySlug, isArticleCurrentlyPublished } from "./db";
+import { excerptFromContent } from "@shared/excerpt";
 
 const SITE_NAME = "Curioseando Ando";
 const DEFAULT_DESCRIPTION = "Datos raros, curiosos y sorprendentes. Noticias, entretenimiento, geek y tecnología en un solo lugar.";
@@ -139,7 +140,11 @@ export function registerSeoRoutes(app: Express) {
       const imageUrl = absoluteUrl(article.ogImage || article.featuredImage, baseUrl);
       const metaTags = renderArticleMetaTags({
         title: article.ogTitle || article.title || SITE_NAME,
-        description: article.ogDescription || article.excerpt || DEFAULT_DESCRIPTION,
+        description:
+          article.ogDescription ||
+          article.excerpt ||
+          excerptFromContent(article.content) ||
+          DEFAULT_DESCRIPTION,
         canonicalUrl,
         imageUrl,
         publishedAt: article.publishedAt,

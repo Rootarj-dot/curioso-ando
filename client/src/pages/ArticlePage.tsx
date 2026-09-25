@@ -7,6 +7,7 @@ import { ArticleCard } from "@/components/ArticleCard";
 import { Calendar, ArrowLeft, ArrowUp, Facebook, Clock, Check, Link2, MessageCircle } from "lucide-react";
 import { useSeoMeta } from "@/hooks/useSeoMeta";
 import { trackEvent } from "@/lib/analytics";
+import { excerptFromContent } from "@shared/excerpt";
 
 function formatDate(date: Date | null | undefined): string {
   if (!date) return "";
@@ -325,7 +326,8 @@ export default function ArticlePage() {
   // Dynamic SEO meta tags + JSON-LD for this article
   const ogImage = article?.ogImage || article?.featuredImage || "";
   const ogTitle = article?.ogTitle || article?.title || "Curioseando Ando";
-  const ogDesc = article?.ogDescription || article?.excerpt || "";
+  const ogDesc =
+    article?.ogDescription || article?.excerpt || excerptFromContent(article?.content) || "";
   const ogUrl = article ? `${window.location.origin}/articulo/${article.slug}` : window.location.href;
 
   useSeoMeta({
