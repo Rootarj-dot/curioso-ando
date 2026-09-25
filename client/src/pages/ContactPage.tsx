@@ -99,10 +99,10 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <h3 style={{ fontFamily: "Poppins, sans-serif", fontWeight: 700, color: "#2B037D", margin: 0, marginBottom: "0.25rem" }}>
-                    Email
+                    Respuesta directa
                   </h3>
                   <p style={{ color: "#666", fontSize: "0.9rem", margin: 0 }}>
-                    contacto@curioseandoando.com
+                    Tu mensaje llega a mi correo personal. Respondo yo, no un sistema automático.
                   </p>
                 </div>
               </div>
@@ -118,7 +118,16 @@ export default function ContactPage() {
                     Redes Sociales
                   </h3>
                   <p style={{ color: "#666", fontSize: "0.9rem", margin: 0 }}>
-                    Síguenos en nuestras redes para actualizaciones
+                    También puedes escribirme por{" "}
+                    <a
+                      href="https://www.youtube.com/@curioseandoandomx"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{ color: "#7C3AED", fontWeight: 600 }}
+                    >
+                      YouTube
+                    </a>{" "}
+                    o por los enlaces del pie de página.
                   </p>
                 </div>
               </div>
