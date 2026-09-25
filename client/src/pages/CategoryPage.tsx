@@ -3,63 +3,61 @@ import { trpc } from "@/lib/trpc";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArticleCard } from "@/components/ArticleCard";
-
-const CATEGORY_LABELS: Record<string, string> = {
-  noticias: "Noticias",
-  entretenimiento: "Entretenimiento",
-  geek: "Geek",
-  tecnologia: "Tecnología",
-};
+import { useSeoMeta } from "@/hooks/useSeoMeta";
 
 export default function CategoryPage() {
   const params = useParams<{ slug: string }>();
   const slug = params.slug || "";
-  const label = CATEGORY_LABELS[slug] || slug;
 
+  const { data: categories } = trpc.categories.list.useQuery(undefined, { staleTime: 60_000 });
   const { data: articles, isLoading } = trpc.articles.list.useQuery({ categorySlug: slug, limit: 20 });
 
+  // The name comes from the database, so a new category needs no code change.
+  const label = categories?.find((c) => c.slug === slug)?.name || slug;
+  const count = articles?.length ?? 0;
+
+  useSeoMeta({
+    title: label,
+    description: `Lo último en ${label}: datos raros, curiosos y sorprendentes en Curioseando Ando.`,
+    url: `${window.location.origin}/categoria/${slug}`,
+  });
+
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: "#F8F7F4" }}>
+    <div className="ca-category-page min-h-screen flex flex-col">
       <Navbar />
 
-      {/* Category Hero */}
-      <section className="ca-gradient-hero py-12">
+      <section className="ca-category-hero">
         <div className="container">
-          <span className="ca-badge mb-3">Categoría</span>
-          <h1 className="font-bold text-4xl mt-2" style={{ fontFamily: "Poppins, sans-serif" }}>
-            {label}
-          </h1>
+          <span className="ca-eyebrow">Categoría</span>
+          <h1 className="ca-category-hero__title">{label}</h1>
+          {!isLoading && count > 0 && (
+            <p className="ca-category-hero__count">
+              {count} {count === 1 ? "historia" : "historias"}
+            </p>
+          )}
         </div>
       </section>
 
       <main className="flex-1">
-        <div className="container py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            <div className="lg:col-span-3">
-              {isLoading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                  {Array.from({ length: 6 }).map((_, i) => (
-                    <div key={i} className="rounded-xl animate-pulse" style={{ height: 280, backgroundColor: "#FFFFFF" }} />
-                  ))}
-                </div>
-              ) : articles && articles.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                  {articles.map((article) => (
-                    <ArticleCard key={article.id} {...article} />
-                  ))}
-                </div>
-              ) : (
-                <div className="rounded-xl p-12 text-center" style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E3DE" }}>
-                  <p className="text-lg font-semibold mb-2">Sin artículos aún</p>
-                  <p style={{ color: "#6B6B6B" }}>Pronto habrá contenido en esta categoría.</p>
-                </div>
-              )}
+        <div className="container py-8 md:py-10">
+          {isLoading ? (
+            <div className="ca-category-grid grid gap-5">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="ca-category-skeleton rounded-xl animate-pulse" />
+              ))}
             </div>
-            <aside className="lg:col-span-1">
-              <div className="sticky top-24">
-              </div>
-            </aside>
-          </div>
+          ) : count > 0 ? (
+            <div className="ca-category-grid grid gap-5">
+              {articles!.map((article) => (
+                <ArticleCard key={article.id} {...article} />
+              ))}
+            </div>
+          ) : (
+            <div className="ca-category-empty rounded-xl p-12 text-center">
+              <p className="text-lg font-semibold mb-2">Sin artículos aún</p>
+              <p>Pronto habrá contenido en esta categoría.</p>
+            </div>
+          )}
         </div>
       </main>
 

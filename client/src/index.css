@@ -1197,3 +1197,67 @@
   .article-content ul,
   .article-content ol { font-size: 1.06rem; line-height: 1.85; }
 }
+
+/* ─── Category page: same editorial language as the story and the home ────── */
+.ca-category-page {
+  --ca-line: rgba(232, 222, 255, 0.12);
+  --ca-copy: #f8f5ff;
+  --ca-copy-muted: #b8b0c8;
+  background:
+    radial-gradient(circle at 81% 10%, rgba(111, 54, 209, 0.13), transparent 25rem),
+    radial-gradient(circle at 10% 32%, rgba(68, 26, 160, 0.12), transparent 22rem),
+    #08070d;
+  color: var(--ca-copy);
+}
+
+/* Extra top room so the kicker is not sitting right under the translucent
+   header the moment the page scrolls. */
+.ca-category-hero {
+  position: relative;
+  padding: clamp(2.6rem, 5vw, 4rem) 0 clamp(2rem, 3.5vw, 2.75rem);
+  border-bottom: 1px solid var(--ca-line);
+  background:
+    radial-gradient(circle at 12% 0%, rgba(124, 66, 232, 0.24), transparent 20rem),
+    radial-gradient(circle at 78% 120%, rgba(88, 36, 190, 0.18), transparent 18rem);
+}
+.ca-category-hero__title {
+  margin: 1rem 0 0;
+  color: #fff;
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 750;
+  letter-spacing: -0.04em;
+  line-height: 1.06;
+}
+.ca-category-hero__count {
+  margin: 0.7rem 0 0;
+  color: var(--ca-copy-muted);
+  font-size: 0.85rem;
+}
+
+.ca-category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 768px) { .ca-category-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (min-width: 1280px) { .ca-category-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+/* Match the 16:9 artwork instead of the taller default crop. */
+.ca-category-grid .ca-story-card__media { aspect-ratio: 16 / 9; }
+.ca-category-grid .ca-story-card__body p { display: none; }
+.ca-category-grid .ca-story-card__body h3 {
+  display: -webkit-box;
+  overflow: hidden;
+  font-size: 0.92rem;
+  line-height: 1.32;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+.ca-category-skeleton {
+  min-height: 15rem;
+  border: 1px solid rgba(227, 214, 255, 0.08);
+  background: linear-gradient(110deg, #16111f 28%, #21172d 45%, #16111f 62%);
+}
+.ca-category-empty {
+  border: 1px solid var(--ca-line);
+  background: #15101e;
+  color: var(--ca-copy-muted);
+}
+.ca-category-empty p:first-child { color: #fbfaff; }
