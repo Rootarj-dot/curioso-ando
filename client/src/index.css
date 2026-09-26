@@ -1411,3 +1411,12 @@
 }
 .ca-search-form button:hover { filter: brightness(1.1); transform: translateY(-1px); }
 .ca-search-empty { color: var(--ca-copy-muted); font-size: 0.95rem; text-align: center; padding: 3rem 0; }
+
+/* Category intro: gives the page words of its own, not just a grid. */
+.ca-category-hero__intro {
+  max-width: 44rem;
+  margin: 1rem 0 0;
+  color: #d2cbdc;
+  font-size: clamp(0.95rem, 2.2vw, 1.05rem);
+  line-height: 1.7;
+}

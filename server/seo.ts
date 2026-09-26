@@ -3,6 +3,7 @@ import path from "path";
 import type { Express, NextFunction, Request, Response } from "express";
 import { getPublishedArticles, getAllCategories, getArticleBySlug, isArticleCurrentlyPublished } from "./db";
 import { excerptFromContent } from "@shared/excerpt";
+import { categoryIntro } from "@shared/categories";
 
 const SITE_NAME = "Curioseando Ando";
 const DEFAULT_DESCRIPTION = "Datos raros, curiosos y sorprendentes. Noticias, entretenimiento, geek y tecnología en un solo lugar.";
@@ -176,7 +177,7 @@ export function registerSeoRoutes(app: Express) {
 
       const metaTags = renderArticleMetaTags({
         title: category.name,
-        description: `Lo último en ${category.name}: datos raros, curiosos y sorprendentes en ${SITE_NAME}.`,
+        description: categoryIntro(category.slug, category.name),
         canonicalUrl: `${baseUrl}/categoria/${category.slug}`,
         ogType: "website",
       });

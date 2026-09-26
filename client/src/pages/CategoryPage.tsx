@@ -4,6 +4,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArticleCard } from "@/components/ArticleCard";
 import { useSeoMeta } from "@/hooks/useSeoMeta";
+import { categoryIntro } from "@shared/categories";
 
 export default function CategoryPage() {
   const params = useParams<{ slug: string }>();
@@ -15,10 +16,11 @@ export default function CategoryPage() {
   // The name comes from the database, so a new category needs no code change.
   const label = categories?.find((c) => c.slug === slug)?.name || slug;
   const count = articles?.length ?? 0;
+  const intro = categoryIntro(slug, label);
 
   useSeoMeta({
     title: label,
-    description: `Lo último en ${label}: datos raros, curiosos y sorprendentes en Curioseando Ando.`,
+    description: intro,
     url: `${window.location.origin}/categoria/${slug}`,
   });
 
@@ -30,6 +32,7 @@ export default function CategoryPage() {
         <div className="container">
           <span className="ca-eyebrow">Categoría</span>
           <h1 className="ca-category-hero__title">{label}</h1>
+          <p className="ca-category-hero__intro">{intro}</p>
           {!isLoading && count > 0 && (
             <p className="ca-category-hero__count">
               {count} {count === 1 ? "historia" : "historias"}
