@@ -145,12 +145,19 @@ function ReadingProgress({ targetRef, slug, title, category }: ReadingProgressPr
 // Stored as free text, one per line, optionally "Etiqueta | https://…".
 type Source = { label: string; url?: string };
 
-function parseSources(raw: string | null | undefined): Source[] {
-  if (!raw) return [];
-  return raw
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter(Boolean)
+type SourceBlock = { sources: Source[]; note?: string };
+
+function parseSources(raw: string | null | undefined): SourceBlock {
+  if (!raw) return { sources: [] };
+  const lines = raw.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+  // A line opening with "!" is an editorial note rather than a citation.
+  // Folklore has no source to cite, and saying so plainly beats inventing one.
+  const note = lines.find((l) => l.startsWith("!"))?.slice(1).trim();
+  return { sources: parseSourceLines(lines.filter((l) => !l.startsWith("!"))), note };
+}
+
+function parseSourceLines(lines: string[]): Source[] {
+  return lines
     .map((line) => {
       const piped = line.split("|").map((p) => p.trim());
       if (piped.length >= 2 && /^https?:\/\//i.test(piped[1])) {
@@ -384,7 +391,7 @@ export default function ArticlePage() {
   const [copied, setCopied] = useState(false);
 
   const minutes = useMemo(() => readingMinutes(article?.content), [article?.content]);
-  const sources = useMemo(() => parseSources(article?.fuentes), [article?.fuentes]);
+  const { sources, note: sourcesNote } = useMemo(() => parseSources(article?.fuentes), [article?.fuentes]);
 
   // Same-category articles that feed the "Sigue leyendo" rail beside the story.
   // Compare against the stored slug as well as the one in the URL, so an encoded
@@ -602,12 +609,13 @@ export default function ArticlePage() {
                 <ArticleContent content={article.content ?? "{}"} currentSlug={slug || ""} />
 
                 {/* Share footer */}
-                {sources.length > 0 && (
+                {(sources.length > 0 || sourcesNote) && (
                   <section className="ca-sources" aria-labelledby="ca-sources-title">
                     <h2 id="ca-sources-title" className="ca-sources__title">
                       <BookOpen className="w-4 h-4" aria-hidden="true" />
-                      Fuentes consultadas
+                      {sources.length > 0 ? "Fuentes consultadas" : "Sobre esta historia"}
                     </h2>
+                    {sourcesNote && <p className="ca-sources__flag">{sourcesNote}</p>}
                     <ol className="ca-sources__list">
                       {sources.map((source, i) => (
                         <li key={i}>
@@ -623,7 +631,9 @@ export default function ArticlePage() {
                       ))}
                     </ol>
                     <p className="ca-sources__note">
-                      Cada dato se contrasta entre varias fuentes antes de publicarse.
+                      {sources.length > 0
+                        ? "Cada dato se contrasta entre varias fuentes antes de publicarse. "
+                        : "Publicamos el folclore como folclore, nunca como hecho comprobado. "}
                       ¿Ves algo que no cuadra? <Link href="/contacto">Escríbeme</Link>.
                     </p>
                   </section>

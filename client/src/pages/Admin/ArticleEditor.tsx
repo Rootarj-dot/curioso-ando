@@ -413,6 +413,9 @@ export default function ArticleEditor() {
               <p className="text-xs mb-3" style={{ color: "#6B6B6B" }}>
                 Una por línea. Puedes pegar solo el enlace, o escribir{" "}
                 <code style={{ background: "#F8F7F4", padding: "0 3px" }}>Nombre | enlace</code>.
+                Una línea que empiece con{" "}
+                <code style={{ background: "#F8F7F4", padding: "0 3px" }}>!</code> se muestra como
+                aviso, no como fuente. Útil para folclore sin origen documentado.
               </p>
               <textarea
                 value={fuentes}

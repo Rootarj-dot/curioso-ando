@@ -1489,3 +1489,14 @@
 }
 .ca-sources__note a { color: #b48cff; text-decoration: none; border-bottom: 1px solid rgba(180, 140, 255, 0.4); }
 .ca-sources__note a:hover { color: #d6c0ff; }
+.ca-sources__flag {
+  margin: 0 0 0.9rem;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid rgba(234, 179, 8, 0.28);
+  border-radius: 0.6rem;
+  background: rgba(234, 179, 8, 0.08);
+  color: #e6d9b0;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+.ca-sources__list:empty { display: none; }
