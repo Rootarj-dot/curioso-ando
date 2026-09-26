@@ -4,7 +4,7 @@ import { trpc } from "@/lib/trpc";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ArticleCard } from "@/components/ArticleCard";
-import { Calendar, ArrowLeft, ArrowUp, Facebook, Clock, Check, Link2, MessageCircle, User } from "lucide-react";
+import { Calendar, ArrowLeft, ArrowUp, Facebook, Clock, Check, Link2, MessageCircle, User, BookOpen, ExternalLink } from "lucide-react";
 import { useSeoMeta } from "@/hooks/useSeoMeta";
 import { trackEvent } from "@/lib/analytics";
 import { excerptFromContent } from "@shared/excerpt";
@@ -139,6 +139,32 @@ function ReadingProgress({ targetRef, slug, title, category }: ReadingProgressPr
       </button>
     </>
   );
+}
+
+// ─── Sources ──────────────────────────────────────────────────────────────────
+// Stored as free text, one per line, optionally "Etiqueta | https://…".
+type Source = { label: string; url?: string };
+
+function parseSources(raw: string | null | undefined): Source[] {
+  if (!raw) return [];
+  return raw
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const piped = line.split("|").map((p) => p.trim());
+      if (piped.length >= 2 && /^https?:\/\//i.test(piped[1])) {
+        return { label: piped[0] || piped[1], url: piped[1] };
+      }
+      if (/^https?:\/\//i.test(line)) {
+        try {
+          return { label: new URL(line).hostname.replace(/^www\./, ""), url: line };
+        } catch {
+          return { label: line };
+        }
+      }
+      return { label: line };
+    });
 }
 
 // ─── Inline Articles Block ────────────────────────────────────────────────────
@@ -358,6 +384,7 @@ export default function ArticlePage() {
   const [copied, setCopied] = useState(false);
 
   const minutes = useMemo(() => readingMinutes(article?.content), [article?.content]);
+  const sources = useMemo(() => parseSources(article?.fuentes), [article?.fuentes]);
 
   // Same-category articles that feed the "Sigue leyendo" rail beside the story.
   // Compare against the stored slug as well as the one in the URL, so an encoded
@@ -575,6 +602,33 @@ export default function ArticlePage() {
                 <ArticleContent content={article.content ?? "{}"} currentSlug={slug || ""} />
 
                 {/* Share footer */}
+                {sources.length > 0 && (
+                  <section className="ca-sources" aria-labelledby="ca-sources-title">
+                    <h2 id="ca-sources-title" className="ca-sources__title">
+                      <BookOpen className="w-4 h-4" aria-hidden="true" />
+                      Fuentes consultadas
+                    </h2>
+                    <ol className="ca-sources__list">
+                      {sources.map((source, i) => (
+                        <li key={i}>
+                          {source.url ? (
+                            <a href={source.url} target="_blank" rel="noopener noreferrer nofollow">
+                              {source.label}
+                              <ExternalLink className="w-3.5 h-3.5" aria-hidden="true" />
+                            </a>
+                          ) : (
+                            <span>{source.label}</span>
+                          )}
+                        </li>
+                      ))}
+                    </ol>
+                    <p className="ca-sources__note">
+                      Cada dato se contrasta entre varias fuentes antes de publicarse.
+                      ¿Ves algo que no cuadra? <Link href="/contacto">Escríbeme</Link>.
+                    </p>
+                  </section>
+                )}
+
                 <div className="ca-article-share mt-10 pt-6">
                   <span className="ca-article-share__label">¿Te gustó? Compártelo</span>
                   <div className="ca-share-row flex flex-wrap items-center gap-2 mt-3">

@@ -47,6 +47,7 @@ export const articles = mysqlTable("articles", {
   ogTitle: varchar("ogTitle", { length: 255 }),
   ogDescription: text("ogDescription"),
   ogImage: text("ogImage"),
+  fuentes: text("fuentes"),
   status: mysqlEnum("status", ["draft", "published"]).notNull().default("draft"),
   featured: boolean("featured").notNull().default(false),
   categoryId: int("categoryId"),

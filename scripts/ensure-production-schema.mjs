@@ -104,6 +104,8 @@ try {
   await ensureColumn("articles", "publishedAt", "TIMESTAMP NULL");
   await ensureColumn("articles", "createdAt", "TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP");
 
+  await ensureColumn("articles", "fuentes", "TEXT NULL");
+
   await ensureTable("media", `
     CREATE TABLE IF NOT EXISTS \`media\` (
       \`id\` INT AUTO_INCREMENT PRIMARY KEY,

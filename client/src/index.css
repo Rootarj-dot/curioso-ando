@@ -1435,3 +1435,57 @@
 }
 .ca-load-more button:hover { border-color: rgba(169, 115, 255, 0.85); background: rgba(139, 92, 246, 0.26); transform: translateY(-1px); }
 .ca-load-more p { margin: 0; color: #8f87a1; font-size: 0.74rem; }
+
+/* ─── Fuentes consultadas ─────────────────────────────────────────────────── */
+.ca-sources {
+  margin-top: 2.75rem;
+  padding: 1.4rem 1.5rem 1.5rem;
+  border: 1px solid rgba(226, 213, 255, 0.14);
+  border-left: 3px solid #8b5cf6;
+  border-radius: 0.9rem;
+  background: linear-gradient(135deg, #16111f 0%, #1b1329 100%);
+}
+.ca-sources__title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.9rem;
+  color: #ad82fb;
+  font-family: "Poppins", "Inter", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.ca-sources__list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin: 0;
+  padding-left: 1.3rem;
+  color: #8f87a1;
+  font-size: 0.86rem;
+}
+.ca-sources__list li { padding-left: 0.2rem; }
+.ca-sources__list a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #cfc8dd;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(180, 140, 255, 0.35);
+  transition: color 160ms ease, border-color 160ms ease;
+}
+.ca-sources__list a:hover { color: #e3d2ff; border-bottom-color: #b48cff; }
+.ca-sources__list a svg { flex: none; opacity: 0.65; }
+.ca-sources__list span { color: #cfc8dd; }
+.ca-sources__note {
+  margin: 1.1rem 0 0;
+  padding-top: 0.9rem;
+  border-top: 1px solid rgba(226, 213, 255, 0.1);
+  color: #8f87a1;
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+.ca-sources__note a { color: #b48cff; text-decoration: none; border-bottom: 1px solid rgba(180, 140, 255, 0.4); }
+.ca-sources__note a:hover { color: #d6c0ff; }

@@ -286,6 +286,7 @@ export async function getArticleBySlug(slug: string) {
       ogTitle: articles.ogTitle,
       ogDescription: articles.ogDescription,
       ogImage: articles.ogImage,
+      fuentes: articles.fuentes,
       status: articles.status,
       featured: articles.featured,
       publishedAt: articles.publishedAt,

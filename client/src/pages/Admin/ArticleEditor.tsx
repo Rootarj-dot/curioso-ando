@@ -45,6 +45,7 @@ export default function ArticleEditor() {
   const [ogTitle, setOgTitle] = useState("");
   const [ogDescription, setOgDescription] = useState("");
   const [ogImage, setOgImage] = useState("");
+  const [fuentes, setFuentes] = useState("");
   const [status, setStatus] = useState<"draft" | "published">("draft");
   const [featured, setFeatured] = useState(false);
   const [categoryId, setCategoryId] = useState<number | undefined>();
@@ -134,6 +135,7 @@ export default function ArticleEditor() {
       setOgTitle(fullArticle.ogTitle || "");
       setOgDescription(fullArticle.ogDescription || "");
       setOgImage(fullArticle.ogImage || "");
+      setFuentes(fullArticle.fuentes || "");
     }
   }, [fullArticle]);
 
@@ -172,6 +174,8 @@ export default function ArticleEditor() {
       ogTitle: ogTitle || undefined,
       ogDescription: ogDescription || undefined,
       ogImage: ogImage || undefined,
+      // Sent as an empty string, not undefined, so clearing the box clears the row.
+      fuentes: fuentes.trim(),
       status: finalStatus,
       featured,
       categoryId,
@@ -401,6 +405,26 @@ export default function ArticleEditor() {
               >
                 {featuredImage ? "Cambiar imagen" : "Seleccionar imagen"}
               </button>
+            </div>
+
+            {/* Fuentes */}
+            <div className="ca-card p-4">
+              <h3 className="font-semibold text-sm mb-1">Fuentes consultadas</h3>
+              <p className="text-xs mb-3" style={{ color: "#6B6B6B" }}>
+                Una por línea. Puedes pegar solo el enlace, o escribir{" "}
+                <code style={{ background: "#F8F7F4", padding: "0 3px" }}>Nombre | enlace</code>.
+              </p>
+              <textarea
+                value={fuentes}
+                onChange={(e) => setFuentes(e.target.value)}
+                rows={5}
+                placeholder={"BBC Mundo | https://www.bbc.com/mundo/articulo\nhttps://es.wikipedia.org/wiki/Ejemplo"}
+                className="w-full rounded-lg px-3 py-2 text-sm outline-none"
+                style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE", color: "#1A1A1A", fontFamily: "inherit" }}
+              />
+              <p className="text-xs mt-2" style={{ color: "#9B9890" }}>
+                Se muestran al final de la nota. Si lo dejas vacío, no aparece nada.
+              </p>
             </div>
 
             {/* Open Graph */}
