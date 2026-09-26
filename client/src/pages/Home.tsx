@@ -32,7 +32,7 @@ export default function Home() {
   const [showError, setShowError] = useState(true);
 
   const { data: featuredArticle } = trpc.articles.featured.useQuery();
-  const { data: articles, isLoading: articlesLoading } = trpc.articles.list.useQuery({ limit: 12 });
+  const { data: articles, isLoading: articlesLoading } = trpc.articles.list.useQuery({ limit: 17 });
   const { data: bannerConfig } = trpc.siteConfig.getBanner.useQuery();
   const { data: categories } = trpc.categories.list.useQuery(undefined, { staleTime: 60_000 });
 
@@ -42,11 +42,13 @@ export default function Home() {
   const fallbackSubtitle = bannerConfig?.subtitle || DEFAULT_BANNER_SUBTITLE;
   const fallbackBackground = bannerConfig?.bgColor || "linear-gradient(118deg, #09070d 0%, #1a0e33 50%, #32126a 100%)";
   const heroCards = articles?.slice(0, 5) ?? [];
-  const moreArticles = articles?.slice(5) ?? [];
+  // Twelve fills whole rows at every breakpoint: 4, 3, 2 and 1 columns.
+  const moreArticles = articles?.slice(5, 17) ?? [];
 
   useSeoMeta({
-    title: "Curioseando Ando - Historias que te cambian",
-    description: DEFAULT_BANNER_SUBTITLE,
+    title: "Datos curiosos, historias sorprendentes y cosas que no sabías",
+    description:
+      "Datos curiosos, curiosidades y historias sorprendentes que casi nadie conoce. Ciencia, historia, entretenimiento, geek, salud y tecnología, contadas de forma sencilla y verificadas antes de publicarlas.",
     url: window.location.origin,
     type: "website",
   });
