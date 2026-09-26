@@ -104,6 +104,18 @@ disparados desde `ReadingProgress` y los botones de compartir de `ArticlePage`:
 Los parámetros no aparecen desglosados en los informes hasta registrarlos como dimensiones
 personalizadas en GA4, y **eso no se aplica retroactivamente**.
 
+## Fuentes de los artículos
+
+La columna `fuentes` guarda texto libre, una fuente por línea, en formato
+`Nombre | https://enlace` o solo el enlace. Una línea que empieza por `!` se
+muestra como **aviso editorial**, no como cita: es lo que se usa para folclore
+sin origen documentado y para el descargo de las notas de salud.
+
+**112 de 126 notas ya tienen fuentes**, investigadas y con cada enlace
+comprobado (HTTP 200) antes de guardarlo. Nunca inventar una cita: si no se
+encuentra una fuente que respalde el dato concreto, se deja sin fuente o se
+marca con `!`.
+
 ## Reglas de trabajo
 
 **Vía libre — se hace y se publica sin preguntar**, siempre que `pnpm check` y `pnpm build`
