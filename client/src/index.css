@@ -1235,9 +1235,9 @@
   font-size: 0.85rem;
 }
 
+/* Three columns at most: six cards then fill whole rows at every width. */
 .ca-category-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 @media (min-width: 768px) { .ca-category-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
-@media (min-width: 1280px) { .ca-category-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
 /* Match the 16:9 artwork instead of the taller default crop. */
 .ca-category-grid .ca-story-card__media { aspect-ratio: 16 / 9; }
@@ -1420,3 +1420,18 @@
   font-size: clamp(0.95rem, 2.2vw, 1.05rem);
   line-height: 1.7;
 }
+
+/* Load more */
+.ca-load-more { display: flex; flex-direction: column; align-items: center; gap: 0.7rem; margin-top: clamp(2rem, 4vw, 3rem); }
+.ca-load-more button {
+  padding: 0.8rem 1.6rem;
+  border: 1px solid rgba(189, 145, 255, 0.55);
+  border-radius: 0.75rem;
+  background: rgba(139, 92, 246, 0.14);
+  color: #e7ddff;
+  font-size: 0.86rem;
+  font-weight: 700;
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+.ca-load-more button:hover { border-color: rgba(169, 115, 255, 0.85); background: rgba(139, 92, 246, 0.26); transform: translateY(-1px); }
+.ca-load-more p { margin: 0; color: #8f87a1; font-size: 0.74rem; }

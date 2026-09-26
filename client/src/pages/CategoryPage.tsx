@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useParams } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { Navbar } from "@/components/Navbar";
@@ -11,11 +12,19 @@ export default function CategoryPage() {
   const slug = params.slug || "";
 
   const { data: categories } = trpc.categories.list.useQuery(undefined, { staleTime: 60_000 });
-  const { data: articles, isLoading } = trpc.articles.list.useQuery({ categorySlug: slug, limit: 20 });
+  const { data: articles, isLoading } = trpc.articles.list.useQuery({ categorySlug: slug, limit: 30 });
+
+  // Six fits whole rows at three, two and one columns, which is every width the
+  // grid uses. Revealing in batches keeps a long category from arriving as a wall.
+  const PER_BATCH = 6;
+  const [visible, setVisible] = useState(PER_BATCH);
+  useEffect(() => setVisible(PER_BATCH), [slug]);
 
   // The name comes from the database, so a new category needs no code change.
   const label = categories?.find((c) => c.slug === slug)?.name || slug;
   const count = articles?.length ?? 0;
+  const shown = articles?.slice(0, visible) ?? [];
+  const remaining = Math.max(0, count - visible);
   const intro = categoryIntro(slug, label);
 
   useSeoMeta({
@@ -50,11 +59,23 @@ export default function CategoryPage() {
               ))}
             </div>
           ) : count > 0 ? (
-            <div className="ca-category-grid grid gap-5">
-              {articles!.map((article) => (
-                <ArticleCard key={article.id} {...article} />
-              ))}
-            </div>
+            <>
+              <div className="ca-category-grid grid gap-5">
+                {shown.map((article) => (
+                  <ArticleCard key={article.id} {...article} />
+                ))}
+              </div>
+              {remaining > 0 && (
+                <div className="ca-load-more">
+                  <button type="button" onClick={() => setVisible((v) => v + PER_BATCH)}>
+                    Ver más historias
+                  </button>
+                  <p>
+                    {visible} de {count}
+                  </p>
+                </div>
+              )}
+            </>
           ) : (
             <div className="ca-category-empty rounded-xl p-12 text-center">
               <p className="text-lg font-semibold mb-2">Sin artículos aún</p>
