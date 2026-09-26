@@ -322,6 +322,7 @@ export default function ArticlePage() {
     { enabled: !!article?.categorySlug }
   );
   const { data: sidebarData } = trpc.siteConfig.getSidebarArticleData.useQuery();
+  const { data: recentArticles } = trpc.articles.list.useQuery({ limit: 12 }, { staleTime: 60_000 });
 
   // Dynamic SEO meta tags + JSON-LD for this article
   const ogImage = article?.ogImage || article?.featuredImage || "";
@@ -365,6 +366,26 @@ export default function ArticlePage() {
     const current = new Set([slug, article?.slug].filter(Boolean));
     return (relatedArticles || []).filter((a) => !current.has(a.slug)).slice(0, 5);
   }, [relatedArticles, slug, article?.slug]);
+
+  // The panel decides what is recommended, but it may hold fewer than a full
+  // row. Top it up with recent stories so the section is never ragged, and skip
+  // anything already shown in the rail.
+  const RECOMMENDED_COUNT = 4;
+  const recommended = useMemo(() => {
+    const seen = new Set<string>([slug, article?.slug, ...readNext.map((a) => a.slug)].filter(Boolean) as string[]);
+    const out: typeof readNext = [];
+    const take = (list?: typeof readNext) => {
+      for (const a of list ?? []) {
+        if (out.length >= RECOMMENDED_COUNT) return;
+        if (seen.has(a.slug)) continue;
+        seen.add(a.slug);
+        out.push(a);
+      }
+    };
+    take(sidebarData?.recommendedArticles as typeof readNext | undefined);
+    take(recentArticles as typeof readNext | undefined);
+    return out;
+  }, [sidebarData?.recommendedArticles, recentArticles, readNext, slug, article?.slug]);
 
   // Sharing is the strongest signal that a story landed, so it is measured too.
   const reportShare = useCallback(
@@ -619,13 +640,13 @@ export default function ArticlePage() {
             </div>
 
             {/* Recomendados — sección de ancho completo debajo del artículo */}
-            {sidebarData && sidebarData.recommendedArticles.length > 0 && (
+            {recommended.length > 0 && (
               <section className="ca-article-section ca-article-section--accent mt-10 pt-8">
                 <h2 className="ca-article-section__title ca-article-section__title--accent font-bold text-xl mb-6">
                   Recomendados
                 </h2>
-                <div className="ca-card-grid--compact grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4">
-                  {sidebarData.recommendedArticles.map((a) => (
+                <div className="ca-card-grid--compact grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {recommended.map((a) => (
                     <ArticleCard key={a.id} {...a} />
                   ))}
                 </div>
