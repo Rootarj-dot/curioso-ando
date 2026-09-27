@@ -43,8 +43,12 @@ function renderArticleMetaTags(params: {
   authorName?: string | null;
   /** "article" for stories, "website" for listings and static pages. */
   ogType?: "article" | "website";
+  /** Overrides the robots directive; used to keep search results out of the index. */
+  robots?: string;
 }): string {
   const ogType = params.ogType ?? "article";
+  const robots =
+    params.robots ?? "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
   const fullTitle = params.title.includes(SITE_NAME) ? params.title : `${params.title} | ${SITE_NAME}`;
   const escapedTitle = escapeHtml(params.title);
   const escapedFullTitle = escapeHtml(fullTitle);
@@ -99,7 +103,7 @@ function renderArticleMetaTags(params: {
     <title>${escapedFullTitle}</title>
     <meta name="description" content="${escapedDescription}" />
     <meta name="author" content="${escapedAuthor}" />
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="robots" content="${escapeHtml(robots)}" />
     <meta name="theme-color" content="#2B037D" />
 
     <meta property="og:type" content="${ogType}" />
@@ -233,6 +237,31 @@ export function registerSeoRoutes(app: Express) {
     });
   }
 
+  // ── Internal search ────────────────────────────────────────────────────────
+  // Search results are thin and endless: every ?q= is a different URL. robots.txt
+  // keeps crawlers out; this handler stops the page from inheriting the home
+  // page's title and canonical for anything that walks in anyway.
+  app.get("/buscar", async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const baseUrl = `${req.protocol}://${req.get("host")}`;
+      const metaTags = renderArticleMetaTags({
+        title: "Buscar",
+        description: `Busca entre las historias y datos curiosos publicados en ${SITE_NAME}.`,
+        canonicalUrl: `${baseUrl}/buscar`,
+        ogType: "website",
+        robots: "noindex, follow",
+      });
+      const template = await fs.promises.readFile(getIndexHtmlPath(), "utf-8");
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.setHeader("X-Robots-Tag", "noindex, follow");
+      res.setHeader("Cache-Control", "public, max-age=300");
+      res.send(injectMetaTags(template, metaTags));
+    } catch (err) {
+      console.error("[SEO] search page error:", err);
+      next();
+    }
+  });
+
   app.get("/robots.txt", (req, res) => {
     const baseUrl = `${req.protocol}://${req.get("host")}`;
     res.setHeader("Content-Type", "text/plain");
@@ -243,6 +272,7 @@ Allow: /
 Disallow: /admin/
 Disallow: /api/
 Disallow: /*.json$
+Disallow: /buscar
 
 # Google AdSense verification
 User-agent: Mediapartners-Google
