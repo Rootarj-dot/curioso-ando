@@ -1,15 +1,18 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useParams, useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { AdminLayout } from "./AdminLayout";
 import { BlockEditor, insertImageIntoEditor } from "@/components/Editor/BlockEditor";
 import { MediaGallery } from "@/components/MediaGallery";
+import { readingStats, excerptFromContent } from "@shared/excerpt";
 import { toast } from "sonner";
-import { Save, Eye, ArrowLeft, Image as ImageIcon } from "lucide-react";
+import { Save, Eye, ArrowLeft, Image as ImageIcon, Check, AlertTriangle, Search, Share2, BookOpen, X } from "lucide-react";
 import { SidebarArticlesPanel } from "@/components/Admin/SidebarArticlesPanel";
-import { TriviaEditor } from "@/components/Admin/TriviaEditor";
-import type { DraftTriviaItem } from "@/components/Admin/TriviaEditor";
 import type { LexicalEditor } from "lexical";
+
+/** Google truncates around these; going over is not an error, just a warning. */
+const TITLE_LIMIT = 60;
+const DESCRIPTION_LIMIT = 155;
 
 function toDatetimeLocalValue(value: Date | string) {
   const date = new Date(value);
@@ -28,6 +31,20 @@ function isFutureDatetimeLocal(value: string) {
   if (!value) return false;
   const date = new Date(value);
   return !Number.isNaN(date.getTime()) && date.getTime() > Date.now();
+}
+
+function countState(length: number, limit: number) {
+  if (length > limit) return "over";
+  if (length > limit * 0.9) return "warn";
+  return "ok";
+}
+
+function Counter({ value, limit }: { value: string; limit: number }) {
+  return (
+    <span className="ca-adm-count" data-state={countState(value.length, limit)}>
+      {value.length} / {limit}
+    </span>
+  );
 }
 
 export default function ArticleEditor() {
@@ -52,7 +69,7 @@ export default function ArticleEditor() {
   const [publishedAt, setPublishedAt] = useState("");
   const [showGallery, setShowGallery] = useState(false);
   const [galleryTarget, setGalleryTarget] = useState<"featured" | "og" | "editor">("editor");
-  const [pendingTriviaItems, setPendingTriviaItems] = useState<DraftTriviaItem[]>([]);
+  const [dirty, setDirty] = useState(false);
   const editorRef = useRef<LexicalEditor | null>(null);
   const handleEditorReady = useCallback((editor: LexicalEditor) => {
     editorRef.current = editor;
@@ -64,46 +81,20 @@ export default function ArticleEditor() {
     select: (articles) => articles.find((a) => a.id === articleId),
   });
 
-  const createTriviaMutation = trpc.trivia.create.useMutation();
-
   const createMutation = trpc.articles.create.useMutation({
-    onSuccess: async ({ id: newArticleId }) => {
-      try {
-        if (pendingTriviaItems.length > 0) {
-          await Promise.all(
-            pendingTriviaItems.map((item) =>
-              createTriviaMutation.mutateAsync({
-                articleId: newArticleId,
-                pregunta: item.pregunta,
-                respuesta: item.respuesta,
-                opcionCorrecta: item.opcionCorrecta,
-                opcionIncorrecta: item.opcionIncorrecta,
-                opciones: item.opciones || undefined,
-                opcionCorrectaIndex: item.opcionCorrectaIndex ?? undefined,
-                icono: item.icono || undefined,
-                color: item.color || undefined,
-              })
-            )
-          );
-          setPendingTriviaItems([]);
-          toast.success(
-            `Artículo guardado con ${pendingTriviaItems.length} pregunta${pendingTriviaItems.length === 1 ? "" : "s"} trivia`
-          );
-        } else {
-          toast.success("Artículo guardado");
-        }
-      } catch (e) {
-        const message = e instanceof Error ? e.message : "Error desconocido";
-        toast.error("El artículo se guardó, pero no se pudieron guardar las preguntas trivia: " + message);
-      } finally {
-        navigate(`/admin/editar/${newArticleId}`);
-      }
+    onSuccess: ({ id: newArticleId }) => {
+      setDirty(false);
+      toast.success("Artículo guardado");
+      navigate(`/admin/editar/${newArticleId}`);
     },
     onError: (e) => toast.error("Error: " + e.message),
   });
 
   const updateMutation = trpc.articles.update.useMutation({
-    onSuccess: () => toast.success("Artículo actualizado"),
+    onSuccess: () => {
+      setDirty(false);
+      toast.success("Artículo actualizado");
+    },
     onError: (e) => toast.error("Error: " + e.message),
   });
 
@@ -118,6 +109,7 @@ export default function ArticleEditor() {
       if (existingArticle.publishedAt) {
         setPublishedAt(toDatetimeLocalValue(existingArticle.publishedAt));
       }
+      setDirty(false);
     }
   }, [existingArticle]);
 
@@ -136,6 +128,7 @@ export default function ArticleEditor() {
       setOgDescription(fullArticle.ogDescription || "");
       setOgImage(fullArticle.ogImage || "");
       setFuentes(fullArticle.fuentes || "");
+      setDirty(false);
     }
   }, [fullArticle]);
 
@@ -145,7 +138,7 @@ export default function ArticleEditor() {
       const generated = title
         .toLowerCase()
         .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[̀-ͯ]/g, "")
         .replace(/[^a-z0-9\s-]/g, "")
         .replace(/\s+/g, "-")
         .replace(/-+/g, "-")
@@ -154,7 +147,9 @@ export default function ArticleEditor() {
     }
   }, [title, isEditing]);
 
-  const handleSave = (saveStatus?: "draft" | "published") => {
+  const isSaving = createMutation.isPending || updateMutation.isPending;
+
+  const handleSave = useCallback((saveStatus?: "draft" | "published") => {
     const finalStatus = saveStatus || status;
     if (!title.trim()) {
       toast.error("El título es obligatorio");
@@ -187,7 +182,32 @@ export default function ArticleEditor() {
     } else {
       createMutation.mutate(data);
     }
-  };
+  }, [status, title, publishedAt, slug, excerpt, content, featuredImage, ogTitle, ogDescription, ogImage, fuentes, featured, categoryId, isEditing, articleId, updateMutation, createMutation]);
+
+  // Losing a half-written article to a stray click is the worst thing a CMS can
+  // do, so unsaved work both warns on the way out and answers Ctrl+S.
+  useEffect(() => {
+    if (!dirty) return;
+    const warn = (e: BeforeUnloadEvent) => { e.preventDefault(); e.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [dirty]);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        if (!isSaving) handleSave("draft");
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [handleSave, isSaving]);
+
+  /** Marks the form dirty on every edit without repeating the setter everywhere. */
+  function edit<T>(setter: (value: T) => void) {
+    return (value: T) => { setter(value); setDirty(true); };
+  }
 
   const openGallery = (target: "featured" | "og" | "editor") => {
     setGalleryTarget(target);
@@ -195,313 +215,274 @@ export default function ArticleEditor() {
   };
 
   const handleGallerySelect = (url: string) => {
-    if (galleryTarget === "featured") setFeaturedImage(url);
-    else if (galleryTarget === "og") setOgImage(url);
+    if (galleryTarget === "featured") { setFeaturedImage(url); setDirty(true); }
+    else if (galleryTarget === "og") { setOgImage(url); setDirty(true); }
     else if (galleryTarget === "editor" && editorRef.current) {
       insertImageIntoEditor(editorRef.current, url);
+      setDirty(true);
     }
   };
 
-  const isSaving = createMutation.isPending || updateMutation.isPending || createTriviaMutation.isPending;
+  const stats = useMemo(() => readingStats(content), [content]);
   const publishActionLabel = isFutureDatetimeLocal(publishedAt) ? "Programar" : "Publicar";
   const selectedStatusLabel = status === "published" && isFutureDatetimeLocal(publishedAt) ? "Programado" : status === "published" ? "Publicado" : "Borrador";
+  const statusAccent = selectedStatusLabel === "Programado" ? "#5b2c8f" : selectedStatusLabel === "Publicado" ? "#15803d" : "#b45309";
+
+  // What Google would show. The excerpt is what the server falls back to, so the
+  // preview has to follow the same order the server uses.
+  const serpTitle = (ogTitle || title || "Título del artículo") + " | Curioseando Ando";
+  const serpDescription = ogDescription || excerpt || excerptFromContent(content) || "";
+
+  const sourceCount = fuentes.split(/\r?\n/).map((l) => l.trim()).filter((l) => l && !l.startsWith("!")).length;
+  const checks = [
+    { ok: title.trim().length > 0 && title.length <= TITLE_LIMIT + 15, label: title.trim() ? "Título dentro de lo razonable" : "Falta el título" },
+    { ok: !!categoryId, label: categoryId ? "Categoría asignada" : "Sin categoría: no aparecerá en ninguna sección" },
+    { ok: !!featuredImage, label: featuredImage ? "Imagen destacada lista" : "Sin imagen destacada: se verá vacía al compartir" },
+    { ok: serpDescription.length > 0, label: serpDescription ? "Hay descripción para Google" : "Sin extracto: Google inventará el resumen" },
+    { ok: sourceCount > 0, label: sourceCount > 0 ? `${sourceCount} fuente${sourceCount === 1 ? "" : "s"} citada${sourceCount === 1 ? "" : "s"}` : "Sin fuentes: AdSense penaliza esto" },
+    { ok: stats.words >= 300, label: stats.words >= 300 ? `${stats.words} palabras` : `Solo ${stats.words} palabras: Google lo puede leer como contenido pobre` },
+  ];
+  const pending = checks.filter((c) => !c.ok).length;
 
   return (
     <AdminLayout>
-      <div className="p-6">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => navigate("/admin/articulos")}
-              className="p-2 rounded-lg transition-colors"
-              style={{ color: "#6B6B6B" }}
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div>
-              <h1 className="font-bold text-xl" style={{ fontFamily: "Poppins, sans-serif" }}>
-                {isEditing ? "Editar Artículo" : "Nuevo Artículo"}
-              </h1>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            {isEditing && existingArticle?.slug && (
-              <a
-                href={`/articulo/${existingArticle.slug}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm no-underline"
-                style={{ color: "#6B6B6B", border: "1px solid #E5E3DE" }}
-              >
-                <Eye className="w-4 h-4" />
-                Vista previa
-              </a>
-            )}
-            <button
-              onClick={() => handleSave("draft")}
-              disabled={isSaving}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium"
-              style={{ color: "#6B6B6B", border: "1px solid #E5E3DE" }}
-            >
-              <Save className="w-4 h-4" />
-              Borrador
-            </button>
-            <button
-              onClick={() => handleSave("published")}
-              disabled={isSaving}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium"
-              style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#FFFFFF" }}
-            >
-              {isSaving ? "Guardando..." : publishActionLabel}
-            </button>
-          </div>
+      <div className="ca-adm-page">
+        <div className="ca-adm-bar">
+          <button onClick={() => navigate("/admin/articulos")} className="ca-adm-btn" style={{ padding: "0.4rem" }} aria-label="Volver">
+            <ArrowLeft />
+          </button>
+          <h1 className="ca-adm-bar__title">{isEditing ? "Editar artículo" : "Nuevo artículo"}</h1>
+          {dirty && <span className="ca-adm-bar__dirty">Sin guardar</span>}
+          <span className="ca-adm-pill" style={{ ["--adm-accent" as string]: statusAccent }}>{selectedStatusLabel}</span>
+          {isEditing && existingArticle?.slug && (
+            <a href={`/articulo/${existingArticle.slug}`} target="_blank" rel="noopener noreferrer" className="ca-adm-btn ca-adm-btn--ghost">
+              <Eye />
+              Ver
+            </a>
+          )}
+          <button onClick={() => handleSave("draft")} disabled={isSaving} className="ca-adm-btn ca-adm-btn--ghost" title="Ctrl + S">
+            <Save />
+            Borrador
+          </button>
+          <button onClick={() => handleSave("published")} disabled={isSaving} className="ca-adm-btn ca-adm-btn--primary">
+            {isSaving ? "Guardando..." : publishActionLabel}
+          </button>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Editor */}
-          <div className="lg:col-span-2 flex flex-col gap-4">
-            {/* Title */}
-            <div>
-              <input
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Título del artículo..."
-                className="w-full bg-transparent text-2xl font-bold border-0 border-b-2 pb-3 outline-none placeholder:text-gray-400"
-                style={{ borderColor: "#E5E3DE", fontFamily: "Poppins, sans-serif" }}
-              />
-            </div>
+        <div className="ca-adm-editor">
+          {/* ── Cuerpo ─────────────────────────────────────────────────────── */}
+          <div>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => edit(setTitle)(e.target.value)}
+              placeholder="Título del artículo..."
+              className="ca-adm-title-input"
+            />
+            <Counter value={title} limit={TITLE_LIMIT} />
 
-            {/* Excerpt */}
-            <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: "#6B6B6B" }}>Extracto / Descripción corta</label>
+            <div className="ca-adm-field" style={{ marginTop: "1rem" }}>
+              <label htmlFor="excerpt">Extracto</label>
               <textarea
+                id="excerpt"
                 value={excerpt}
-                onChange={(e) => setExcerpt(e.target.value)}
-                placeholder="Breve descripción del artículo..."
+                onChange={(e) => edit(setExcerpt)(e.target.value)}
+                placeholder="La frase que Google y las redes usarán como resumen."
                 rows={2}
-                className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none"
-                style={{ backgroundColor: "#FFFFFF", border: "1px solid #E5E3DE", color: "#1A1A1A" }}
+                className="ca-adm-input resize-none"
               />
+              <Counter value={excerpt} limit={DESCRIPTION_LIMIT} />
             </div>
 
-            {/* Block Editor */}
-            <div>
-              <label className="block text-xs font-medium mb-1.5" style={{ color: "#6B6B6B" }}>Contenido</label>
+            <div className="ca-adm-field">
+              <label>Contenido</label>
               <BlockEditor
                 initialContent={content !== "{}" ? content : undefined}
-                onChange={setContent}
+                onChange={edit(setContent)}
                 onInsertImageRequest={() => openGallery("editor")}
                 onEditorReady={handleEditorReady}
               />
+              <div className="ca-adm-metrics">
+                <span><b>{stats.words}</b> palabras</span>
+                <span><b>{stats.minutes}</b> min de lectura</span>
+                <span><b>{sourceCount}</b> fuentes</span>
+              </div>
             </div>
           </div>
 
-          {/* Sidebar settings */}
-          <div className="flex flex-col gap-4">
-            {/* Publish settings */}
-            <div className="ca-card p-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-sm">Publicación</h3>
-                    <span
-                      className="text-xs px-2 py-1 rounded-full font-medium"
-                      style={{
-                        background: selectedStatusLabel === "Programado" ? "rgba(91,44,143,0.15)" : selectedStatusLabel === "Publicado" ? "rgba(22,163,74,0.2)" : "rgba(217,119,6,0.2)",
-                        color: selectedStatusLabel === "Programado" ? "#5B2C8F" : selectedStatusLabel === "Publicado" ? "#16a34a" : "#d97706",
-                      }}
-                    >
-                      {selectedStatusLabel}
-                    </span>
+          {/* ── Ajustes ────────────────────────────────────────────────────── */}
+          <div className="ca-adm-editor__side">
+            <section className="ca-adm-card">
+              <div className="ca-adm-card__head">
+                <h2 className="ca-adm-card__title"><Check />Antes de publicar</h2>
+                {pending > 0 && <span className="ca-adm-pill" style={{ ["--adm-accent" as string]: "#b45309" }}>{pending}</span>}
+              </div>
+              <div className="ca-adm-card__body" style={{ paddingTop: "0.35rem", paddingBottom: "0.55rem" }}>
+                {checks.map((check) => (
+                  <div key={check.label} className="ca-adm-check" data-ok={check.ok}>
+                    {check.ok ? <Check /> : <AlertTriangle />}
+                    <span>{check.label}</span>
                   </div>
-              <div className="flex flex-col gap-3">
+                ))}
+              </div>
+            </section>
+
+            <section className="ca-adm-card">
+              <div className="ca-adm-card__head">
                 <div>
-                  <label className="block text-xs mb-1.5" style={{ color: "#6B6B6B" }}>Estado</label>
-                  <select
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value as "draft" | "published")}
-                    className="w-full rounded-lg px-3 py-2 text-sm outline-none"
-                    style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE", color: "#1A1A1A" }}
-                  >
+                  <h2 className="ca-adm-card__title"><Search />Así se verá en Google</h2>
+                  <p className="ca-adm-card__hint">Aproximado: Google puede reescribirlo.</p>
+                </div>
+              </div>
+              <div className="ca-adm-card__body">
+                <div className="ca-adm-serp">
+                  <div className="ca-adm-serp__crumb">curioseandoando.com › articulo › {slug || "mi-articulo"}</div>
+                  <p className="ca-adm-serp__title">{serpTitle}</p>
+                  <p className="ca-adm-serp__desc">
+                    {serpDescription || <em>Escribe un extracto o más contenido y aquí aparecerá el resumen.</em>}
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <section className="ca-adm-card">
+              <div className="ca-adm-card__head">
+                <h2 className="ca-adm-card__title"><BookOpen />Publicación</h2>
+              </div>
+              <div className="ca-adm-card__body">
+                <div className="ca-adm-field">
+                  <label htmlFor="status">Estado</label>
+                  <select id="status" value={status} onChange={(e) => edit(setStatus)(e.target.value as "draft" | "published")} className="ca-adm-input">
                     <option value="draft">Borrador</option>
                     <option value="published">Publicado / Programado</option>
                   </select>
                 </div>
-                <div>
-                  <label className="block text-xs mb-1.5" style={{ color: "#6B6B6B" }}>Fecha de publicación</label>
-                  <input
-                    type="datetime-local"
-                    value={publishedAt}
-                    onChange={(e) => setPublishedAt(e.target.value)}
-                    className="w-full rounded-lg px-3 py-2 text-sm outline-none"
-                    style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE", color: "#1A1A1A" }}
-                  />
+                <div className="ca-adm-field">
+                  <label htmlFor="publishedAt">Fecha de publicación</label>
+                  <input id="publishedAt" type="datetime-local" value={publishedAt} onChange={(e) => edit(setPublishedAt)(e.target.value)} className="ca-adm-input" />
+                  <p className="ca-adm-help">Una fecha futura programa la nota en lugar de publicarla.</p>
                 </div>
-                <div>
-                  <label className="block text-xs mb-1.5" style={{ color: "#6B6B6B" }}>Categoría</label>
-                  <select
-                    value={categoryId ?? ""}
-                    onChange={(e) => setCategoryId(e.target.value ? parseInt(e.target.value) : undefined)}
-                    className="w-full rounded-lg px-3 py-2 text-sm outline-none"
-                    style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE", color: "#1A1A1A" }}
-                  >
+                <div className="ca-adm-field">
+                  <label htmlFor="category">Categoría</label>
+                  <select id="category" value={categoryId ?? ""} onChange={(e) => edit(setCategoryId)(e.target.value ? parseInt(e.target.value) : undefined)} className="ca-adm-input">
                     <option value="">Sin categoría</option>
                     {categories?.map((cat) => (
                       <option key={cat.id} value={cat.id}>{cat.name}</option>
                     ))}
                   </select>
                 </div>
-                <div>
-                  <label className="block text-xs mb-1.5" style={{ color: "#6B6B6B" }}>Slug (URL)</label>
-                  <input
-                    type="text"
-                    value={slug}
-                    onChange={(e) => setSlug(e.target.value)}
-                    placeholder="mi-articulo"
-                    className="w-full rounded-lg px-3 py-2 text-sm outline-none"
-                    style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE", color: "#1A1A1A" }}
-                  />
+                <div className="ca-adm-field">
+                  <label htmlFor="slug">Slug (URL)</label>
+                  <input id="slug" type="text" value={slug} onChange={(e) => edit(setSlug)(e.target.value)} placeholder="mi-articulo" className="ca-adm-input font-mono" />
+                  {isEditing && <p className="ca-adm-help">Cambiarlo rompe los enlaces que ya apuntan a esta nota.</p>}
                 </div>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={featured}
-                    onChange={(e) => setFeatured(e.target.checked)}
-                    className="w-4 h-4 rounded"
-                    style={{ accentColor: "#5B2C8F" }}
-                  />
-                  <span className="text-sm" style={{ color: "#1A1A1A" }}>Artículo destacado</span>
+                <label className="flex items-center gap-2 cursor-pointer" style={{ marginTop: "0.9rem" }}>
+                  <input type="checkbox" checked={featured} onChange={(e) => edit(setFeatured)(e.target.checked)} className="w-4 h-4" style={{ accentColor: "#5b2c8f" }} />
+                  <span style={{ fontSize: "0.82rem" }}>Artículo destacado</span>
                 </label>
               </div>
-            </div>
+            </section>
 
-            {/* Featured Image */}
-            <div className="ca-card p-4">
-              <h3 className="font-semibold text-sm mb-3">Imagen Destacada</h3>
-              {featuredImage ? (
-                <div className="relative rounded-lg overflow-hidden mb-2" style={{ aspectRatio: "16/9" }}>
-                  <img src={featuredImage} alt="" className="w-full h-full object-cover" />
+            <section className="ca-adm-card">
+              <div className="ca-adm-card__head">
+                <h2 className="ca-adm-card__title"><ImageIcon />Imagen destacada</h2>
+              </div>
+              <div className="ca-adm-card__body">
+                {featuredImage ? (
+                  <div className="relative rounded-lg overflow-hidden mb-2" style={{ aspectRatio: "16/9" }}>
+                    <img src={featuredImage} alt="" className="w-full h-full object-cover" />
+                    <button
+                      onClick={() => edit(setFeaturedImage)("")}
+                      className="absolute top-2 right-2"
+                      style={{ padding: "0.3rem", borderRadius: "999px", background: "rgba(0,0,0,0.7)", color: "#fff" }}
+                      aria-label="Quitar imagen"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ) : (
                   <button
-                    onClick={() => setFeaturedImage("")}
-                    className="absolute top-2 right-2 p-1 rounded-full"
-                    style={{ background: "rgba(0,0,0,0.7)", color: "#ef4444" }}
+                    className="w-full grid place-items-center mb-2"
+                    style={{ aspectRatio: "16/9", borderRadius: "0.6rem", background: "var(--adm-surface-2)", border: "1px dashed var(--adm-line)", color: "var(--adm-ink-3)" }}
+                    onClick={() => openGallery("featured")}
                   >
-                    ✕
+                    <ImageIcon className="w-7 h-7" />
                   </button>
-                </div>
-              ) : (
-                <div
-                  className="rounded-lg flex items-center justify-center cursor-pointer mb-2"
-                  style={{ aspectRatio: "16/9", backgroundColor: "#F8F7F4", border: "1px dashed #E5E3DE" }}
-                  onClick={() => openGallery("featured")}
-                >
-                  <ImageIcon className="w-8 h-8" style={{ color: "#5A5C5E" }} />
-                </div>
-              )}
-              <button
-                onClick={() => openGallery("featured")}
-                className="w-full py-2 rounded-lg text-sm font-medium"
-                style={{ border: "1px solid #E5E3DE", color: "#6B6B6B" }}
-              >
-                {featuredImage ? "Cambiar imagen" : "Seleccionar imagen"}
-              </button>
-            </div>
+                )}
+                <button onClick={() => openGallery("featured")} className="ca-adm-btn ca-adm-btn--ghost ca-adm-btn--block">
+                  {featuredImage ? "Cambiar imagen" : "Seleccionar imagen"}
+                </button>
+              </div>
+            </section>
 
-            {/* Fuentes */}
-            <div className="ca-card p-4">
-              <h3 className="font-semibold text-sm mb-1">Fuentes consultadas</h3>
-              <p className="text-xs mb-3" style={{ color: "#6B6B6B" }}>
-                Una por línea. Puedes pegar solo el enlace, o escribir{" "}
-                <code style={{ background: "#F8F7F4", padding: "0 3px" }}>Nombre | enlace</code>.
-                Una línea que empiece con{" "}
-                <code style={{ background: "#F8F7F4", padding: "0 3px" }}>!</code> se muestra como
-                aviso, no como fuente. Útil para folclore sin origen documentado.
-              </p>
-              <textarea
-                value={fuentes}
-                onChange={(e) => setFuentes(e.target.value)}
-                rows={5}
-                placeholder={"BBC Mundo | https://www.bbc.com/mundo/articulo\nhttps://es.wikipedia.org/wiki/Ejemplo"}
-                className="w-full rounded-lg px-3 py-2 text-sm outline-none"
-                style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE", color: "#1A1A1A", fontFamily: "inherit" }}
-              />
-              <p className="text-xs mt-2" style={{ color: "#9B9890" }}>
-                Se muestran al final de la nota. Si lo dejas vacío, no aparece nada.
-              </p>
-            </div>
+            <section className="ca-adm-card">
+              <div className="ca-adm-card__head">
+                <div>
+                  <h2 className="ca-adm-card__title"><BookOpen />Fuentes consultadas</h2>
+                  <p className="ca-adm-card__hint">Se muestran al final de la nota.</p>
+                </div>
+              </div>
+              <div className="ca-adm-card__body">
+                <textarea
+                  value={fuentes}
+                  onChange={(e) => edit(setFuentes)(e.target.value)}
+                  rows={5}
+                  placeholder={"BBC Mundo | https://www.bbc.com/mundo/articulo\nhttps://es.wikipedia.org/wiki/Ejemplo"}
+                  className="ca-adm-input"
+                />
+                <p className="ca-adm-help">
+                  Una por línea: solo el enlace, o <code>Nombre | enlace</code>. Una línea que empiece
+                  con <code>!</code> se muestra como aviso y no como fuente — para folclore sin origen documentado.
+                </p>
+              </div>
+            </section>
 
-            {/* Open Graph */}
-            <div className="ca-card p-4">
-              <h3 className="font-semibold text-sm mb-3">Open Graph (Facebook)</h3>
-              <div className="flex flex-col gap-3">
+            <section className="ca-adm-card">
+              <div className="ca-adm-card__head">
                 <div>
-                  <label className="block text-xs mb-1.5" style={{ color: "#6B6B6B" }}>OG Title</label>
-                  <input
-                    type="text"
-                    value={ogTitle}
-                    onChange={(e) => setOgTitle(e.target.value)}
-                    placeholder={title || "Título para redes sociales"}
-                    className="w-full rounded-lg px-3 py-2 text-sm outline-none"
-                    style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE", color: "#1A1A1A" }}
-                  />
+                  <h2 className="ca-adm-card__title"><Share2 />Al compartir en redes</h2>
+                  <p className="ca-adm-card__hint">Vacío usa el título y el extracto.</p>
                 </div>
-                <div>
-                  <label className="block text-xs mb-1.5" style={{ color: "#6B6B6B" }}>OG Description</label>
-                  <textarea
-                    value={ogDescription}
-                    onChange={(e) => setOgDescription(e.target.value)}
-                    placeholder={excerpt || "Descripción para redes sociales"}
-                    rows={2}
-                    className="w-full rounded-lg px-3 py-2 text-sm outline-none resize-none"
-                    style={{ backgroundColor: "#F8F7F4", border: "1px solid #E5E3DE", color: "#1A1A1A" }}
-                  />
+              </div>
+              <div className="ca-adm-card__body">
+                <div className="ca-adm-field">
+                  <label htmlFor="ogTitle">Título</label>
+                  <input id="ogTitle" type="text" value={ogTitle} onChange={(e) => edit(setOgTitle)(e.target.value)} placeholder={title || "Título para redes"} className="ca-adm-input" />
                 </div>
-                <div>
-                  <label className="block text-xs mb-1.5" style={{ color: "#6B6B6B" }}>
-                    OG Image (1200×630)
-                  </label>
-                  {ogImage ? (
+                <div className="ca-adm-field">
+                  <label htmlFor="ogDescription">Descripción</label>
+                  <textarea id="ogDescription" value={ogDescription} onChange={(e) => edit(setOgDescription)(e.target.value)} placeholder={excerpt || "Descripción para redes"} rows={2} className="ca-adm-input resize-none" />
+                  <Counter value={ogDescription} limit={DESCRIPTION_LIMIT} />
+                </div>
+                <div className="ca-adm-field">
+                  <label>Imagen (1200×630)</label>
+                  {ogImage && (
                     <div className="relative rounded-lg overflow-hidden mb-2" style={{ aspectRatio: "1200/630" }}>
                       <img src={ogImage} alt="" className="w-full h-full object-cover" />
                       <button
-                        onClick={() => setOgImage("")}
-                        className="absolute top-2 right-2 p-1 rounded-full"
-                        style={{ background: "rgba(0,0,0,0.7)", color: "#ef4444" }}
+                        onClick={() => edit(setOgImage)("")}
+                        className="absolute top-2 right-2"
+                        style={{ padding: "0.3rem", borderRadius: "999px", background: "rgba(0,0,0,0.7)", color: "#fff" }}
+                        aria-label="Quitar imagen"
                       >
-                        ✕
+                        <X className="w-3.5 h-3.5" />
                       </button>
                     </div>
-                  ) : null}
-                  <button
-                    onClick={() => openGallery("og")}
-                    className="w-full py-2 rounded-lg text-sm font-medium"
-                    style={{ border: "1px solid #E5E3DE", color: "#6B6B6B" }}
-                  >
-                    {ogImage ? "Cambiar OG Image" : "Seleccionar OG Image"}
+                  )}
+                  <button onClick={() => openGallery("og")} className="ca-adm-btn ca-adm-btn--ghost ca-adm-btn--block">
+                    {ogImage ? "Cambiar imagen" : "Seleccionar imagen"}
                   </button>
                 </div>
               </div>
-            </div>
+            </section>
 
-            {/* Trivia Editor */}
-            <TriviaEditor
-              articleId={articleId}
-              draftItems={pendingTriviaItems}
-              onDraftItemsChange={setPendingTriviaItems}
-            />
-
-            {/* Sidebar Articles Panel */}
             <SidebarArticlesPanel />
-
           </div>
         </div>
       </div>
 
       {showGallery && (
-        <MediaGallery
-          onSelect={handleGallerySelect}
-          onClose={() => setShowGallery(false)}
-        />
+        <MediaGallery onSelect={handleGallerySelect} onClose={() => setShowGallery(false)} />
       )}
     </AdminLayout>
   );

@@ -23,14 +23,22 @@ import {
 import { $createHeadingNode, $createQuoteNode, HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { $setBlocksType } from "@lexical/selection";
 import { INSERT_ORDERED_LIST_COMMAND, INSERT_UNORDERED_LIST_COMMAND, ListNode, ListItemNode } from "@lexical/list";
-import { AutoLinkNode, LinkNode } from "@lexical/link";
+import { AutoLinkNode, LinkNode, TOGGLE_LINK_COMMAND, $isLinkNode } from "@lexical/link";
 import { $createImageNode, ImageNode } from "./ImageNode";
 import {
   $createArticlesBlockNode,
   ArticlesBlockNode,
   ArticlesBlockType,
 } from "./ArticlesBlockNode";
-import { Bold, Italic, Underline, List, ListOrdered, Quote, Image as ImageIcon, Type, Newspaper } from "lucide-react";
+import { Bold, Italic, Underline, List, ListOrdered, Quote, Image as ImageIcon, Type, Newspaper, Link2, Link2Off } from "lucide-react";
+
+/** Bare domains typed without a scheme would otherwise resolve as a relative path. */
+function normalizeHref(raw: string): string {
+  const url = raw.trim();
+  if (!url) return "";
+  if (/^(https?:|mailto:|tel:|\/)/i.test(url)) return url;
+  return `https://${url}`;
+}
 
 interface BlockEditorProps {
   initialContent?: string;
@@ -265,8 +273,43 @@ function Toolbar({
 }) {
   const [editor] = useLexicalComposerContext();
   const [showArticlesPicker, setShowArticlesPicker] = useState(false);
+  const [linkDraft, setLinkDraft] = useState<string | null>(null);
+  const [onLink, setOnLink] = useState(false);
 
   const format = (type: "bold" | "italic" | "underline") => editor.dispatchCommand(FORMAT_TEXT_COMMAND, type);
+
+  // Whether the caret sits inside a link, so the button can offer to remove it.
+  useEffect(() => {
+    return editor.registerCommand(
+      SELECTION_CHANGE_COMMAND,
+      () => {
+        const selection = $getSelection();
+        if (!$isRangeSelection(selection)) return false;
+        const node = selection.anchor.getNode();
+        setOnLink($isLinkNode(node) || $isLinkNode(node.getParent()));
+        return false;
+      },
+      COMMAND_PRIORITY_LOW
+    );
+  }, [editor]);
+
+  const openLinkBox = () => {
+    let current = "";
+    editor.getEditorState().read(() => {
+      const selection = $getSelection();
+      if (!$isRangeSelection(selection)) return;
+      const node = selection.anchor.getNode();
+      const link = $isLinkNode(node) ? node : $isLinkNode(node.getParent()) ? node.getParent() : null;
+      if (link && $isLinkNode(link)) current = link.getURL();
+    });
+    setLinkDraft(current);
+  };
+
+  const applyLink = () => {
+    const href = normalizeHref(linkDraft ?? "");
+    editor.dispatchCommand(TOGGLE_LINK_COMMAND, href || null);
+    setLinkDraft(null);
+  };
 
   const setHeading = (tag: "h1" | "h2" | "h3") => {
     editor.update(() => {
@@ -321,6 +364,48 @@ function Toolbar({
       >
         <Quote className="w-4 h-4" />
       </button>
+      <div style={{ width: 1, height: 20, background: "#E5E3DE", margin: "0 4px" }} />
+      <button
+        onClick={openLinkBox}
+        className="px-2 py-1 rounded transition-colors"
+        style={{ color: onLink ? "#2B037D" : "#6B6B6B" }}
+        title="Insertar enlace"
+      >
+        <Link2 className="w-4 h-4" />
+      </button>
+      {onLink && (
+        <button
+          onClick={() => editor.dispatchCommand(TOGGLE_LINK_COMMAND, null)}
+          className="px-2 py-1 rounded transition-colors"
+          style={{ color: "#6B6B6B" }}
+          title="Quitar enlace"
+        >
+          <Link2Off className="w-4 h-4" />
+        </button>
+      )}
+      {linkDraft !== null && (
+        <span className="flex items-center gap-1">
+          <input
+            autoFocus
+            type="url"
+            value={linkDraft}
+            onChange={(e) => setLinkDraft(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") { e.preventDefault(); applyLink(); }
+              if (e.key === "Escape") setLinkDraft(null);
+            }}
+            placeholder="https://ejemplo.com"
+            className="px-2 py-1 rounded text-xs outline-none"
+            style={{ width: "15rem", border: "1px solid #2B037D", background: "#fff", color: "#1A1A1A" }}
+          />
+          <button onClick={applyLink} className="px-2 py-1 rounded text-xs font-semibold" style={{ background: "#2B037D", color: "#fff" }}>
+            Aplicar
+          </button>
+          <button onClick={() => setLinkDraft(null)} className="px-2 py-1 rounded text-xs" style={{ color: "#6B6B6B" }}>
+            Cancelar
+          </button>
+        </span>
+      )}
       {onInsertImageRequest && (
         <>
           <div style={{ width: 1, height: 20, background: "#E5E3DE", margin: "0 4px" }} />

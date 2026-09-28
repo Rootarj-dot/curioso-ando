@@ -32,11 +32,11 @@ function truncate(text: string, max = MAX_LENGTH): string {
 }
 
 /**
- * Returns a one-line summary taken from Lexical content, or undefined when the
- * body holds no usable text.
+ * Flattens Lexical content to plain text. Older rows hold raw HTML rather than
+ * Lexical JSON, so both shapes have to work.
  */
-export function excerptFromContent(content: string | null | undefined): string | undefined {
-  if (!content) return undefined;
+export function plainTextFromContent(content: string | null | undefined): string {
+  if (!content) return "";
 
   let text = "";
   try {
@@ -45,11 +45,25 @@ export function excerptFromContent(content: string | null | undefined): string |
     collectText(parsed?.root, out);
     text = out.join("");
   } catch {
-    // Older rows hold raw HTML rather than Lexical JSON.
     text = String(content).replace(/<[^>]*>/g, " ");
   }
 
-  text = text.replace(/\s+/g, " ").trim();
+  return text.replace(/\s+/g, " ").trim();
+}
+
+/** Words in the body. 200 words per minute is the usual reading estimate. */
+export function readingStats(content: string | null | undefined): { words: number; minutes: number } {
+  const text = plainTextFromContent(content);
+  const words = text ? text.split(" ").filter(Boolean).length : 0;
+  return { words, minutes: Math.max(1, Math.round(words / 200)) };
+}
+
+/**
+ * Returns a one-line summary taken from Lexical content, or undefined when the
+ * body holds no usable text.
+ */
+export function excerptFromContent(content: string | null | undefined): string | undefined {
+  const text = plainTextFromContent(content);
   if (text.length < 40) return undefined;
   return truncate(text);
 }
