@@ -119,7 +119,7 @@ export function Navbar() {
             <MobileSearch onClose={() => setMenuOpen(false)} />
             <nav aria-label="Categorías móviles" className="ca-mobile-menu__links">
               {(categories ?? []).map((category) => (
-                <Link key={category.slug} href={`/categoria/${category.slug}`} className="ca-mobile-menu__link" onClick={() => setMenuOpen(false)}>
+                <Link key={category.slug} href={`/categoria/${category.slug}`} className="ca-mobile-menu__link" data-category={category.slug} onClick={() => setMenuOpen(false)}>
                   {category.name}<ArrowUpRight className="w-4 h-4" aria-hidden="true" />
                 </Link>
               ))}

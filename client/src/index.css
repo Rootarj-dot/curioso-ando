@@ -517,8 +517,21 @@
 .ca-mobile-search__results { margin-top: 0.5rem; overflow: hidden; border: 1px solid rgba(226, 213, 255, 0.12); border-radius: 0.7rem; background: rgba(255, 255, 255, 0.03); }
 .ca-mobile-search__results p { padding: 0.75rem; color: #b8b0c8; font-size: 0.78rem; text-align: center; }
 .ca-mobile-search__result { display: block; padding: 0.75rem; border-bottom: 1px solid rgba(226, 213, 255, 0.08); color: #f3efff; font-size: 0.82rem; text-decoration: none; }
-.ca-mobile-menu__links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.45rem; margin-top: 0.9rem; }
-.ca-mobile-menu__link { display: flex; align-items: center; justify-content: space-between; padding: 0.8rem; border: 1px solid rgba(226, 213, 255, 0.10); border-radius: 0.7rem; background: rgba(255, 255, 255, 0.035); color: #eee9fb; font-size: 0.78rem; text-decoration: none; }
+/* Flex rather than a fixed column count: five categories in a two-column grid
+   always left a hole in the last row, and this panel is the main navigation on
+   the wide home page, where a hole is the first thing you see. Items grow to
+   fill whatever row they land in, so no count of categories can leave a gap. */
+.ca-mobile-menu__links { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.9rem; }
+.ca-mobile-menu__link { position: relative; flex: 1 1 12rem; display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; overflow: hidden; padding: 0.85rem 0.9rem 0.85rem 1.05rem; border: 1px solid rgba(226, 213, 255, 0.10); border-radius: 0.75rem; background: rgba(255, 255, 255, 0.035); color: #eee9fb; font-size: 0.84rem; font-weight: 600; letter-spacing: -0.01em; text-decoration: none; transition: border-color 150ms ease, background 150ms ease, transform 150ms ease; }
+.ca-mobile-menu__link::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 3px; background: var(--ca-cat-accent, #8b5cf6); }
+.ca-mobile-menu__link svg { flex: none; color: var(--ca-cat-accent, #a78bfa); opacity: 0.7; transition: transform 150ms ease, opacity 150ms ease; }
+.ca-mobile-menu__link:hover { border-color: color-mix(in srgb, var(--ca-cat-accent, #8b5cf6) 55%, transparent); background: color-mix(in srgb, var(--ca-cat-accent, #8b5cf6) 12%, rgba(255, 255, 255, 0.035)); transform: translateY(-1px); }
+.ca-mobile-menu__link:hover svg { opacity: 1; transform: translate(2px, -2px); }
+.ca-mobile-menu__link[data-category="entretenimiento"] { --ca-cat-accent: #f472b6; }
+.ca-mobile-menu__link[data-category="geek"] { --ca-cat-accent: #38bdf8; }
+.ca-mobile-menu__link[data-category="noticias"] { --ca-cat-accent: #fbbf24; }
+.ca-mobile-menu__link[data-category="salud"] { --ca-cat-accent: #34d399; }
+.ca-mobile-menu__link[data-category="tecnologia"] { --ca-cat-accent: #a78bfa; }
 .ca-mobile-panel-link { width: 100%; justify-content: center; margin-top: 0.9rem; }
 
 /* Hero */
@@ -646,11 +659,10 @@
 @media (max-width: 390px) {
   .ca-story-grid { grid-template-columns: 1fr; }
   .ca-story-card__media { aspect-ratio: 16 / 9; }
-  .ca-mobile-menu__links { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .ca-primary-action, .ca-panel-link, .ca-mobile-panel-link, .ca-story-card, .ca-story-card__image, .ca-story-card__open, .ca-footer-socials a, .ca-nav-icon-button, .ca-menu-toggle, .ca-main-navigation__link::after { transition: none; }
+  .ca-primary-action, .ca-panel-link, .ca-mobile-panel-link, .ca-story-card, .ca-story-card__image, .ca-story-card__open, .ca-footer-socials a, .ca-nav-icon-button, .ca-menu-toggle, .ca-mobile-menu__link, .ca-mobile-menu__link svg, .ca-main-navigation__link::after { transition: none; }
 }
 
 /* ─── Reference-aligned homepage composition ─────────────────────────────── */
@@ -782,6 +794,7 @@
   .ca-reference-home .ca-mobile-search__results p { color: #6b6b6b; }
   .ca-reference-home .ca-mobile-search__result { border-bottom-color: #f0eee9; color: #1a1a1a; }
   .ca-reference-home .ca-mobile-menu__link { border-color: #e5e3de; background: #fff; color: #1a1a1a; }
+  .ca-reference-home .ca-mobile-menu__link:hover { border-color: color-mix(in srgb, var(--ca-cat-accent, #2b037d) 45%, transparent); background: color-mix(in srgb, var(--ca-cat-accent, #2b037d) 8%, #fff); }
   .ca-reference-home .ca-mobile-panel-link { border-color: #2b037d; background: #2b037d; color: #fff; box-shadow: none; }
 
   .ca-reference-hero { min-height: 0; background: transparent; }
