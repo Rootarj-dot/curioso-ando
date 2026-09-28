@@ -150,11 +150,19 @@
 .ca-adm-who__role { color: var(--adm-ink-3); font-size: 0.68rem; }
 
 /* ── Shell ───────────────────────────────────────────────────────────────── */
+/* Hidden on desktop from here rather than with Tailwind's lg:hidden: this file
+   is imported after the utilities, so an equal-specificity display rule here
+   wins and the bar leaked onto wide screens, doubling the sidebar. */
+.ca-adm-topbar { display: none; }
+.ca-adm-only-narrow { display: none; }
+@media (max-width: 1023px) {
+  .ca-adm-topbar { display: flex; }
+  .ca-adm-only-narrow { display: inline-flex; }
+}
 .ca-adm-topbar {
   position: sticky;
   top: 0;
   z-index: 30;
-  display: flex;
   align-items: center;
   gap: 0.7rem;
   height: 3.5rem;

@@ -105,7 +105,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
             <span className="ca-adm-side__role">Panel</span>
           </span>
           <button
-            className="ca-adm-btn lg:hidden"
+            className="ca-adm-btn ca-adm-only-narrow"
             style={{ padding: "0.35rem" }}
             onClick={() => setSidebarOpen(false)}
             aria-label="Cerrar menú"
@@ -158,7 +158,7 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
       </aside>
 
       <div className="flex flex-col flex-1 min-w-0">
-        <header className="ca-adm-topbar lg:hidden">
+        <header className="ca-adm-topbar">
           <button className="ca-adm-btn" style={{ padding: "0.4rem" }} onClick={() => setSidebarOpen(true)} aria-label="Abrir menú">
             <Menu />
           </button>
