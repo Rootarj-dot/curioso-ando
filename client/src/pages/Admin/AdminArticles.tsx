@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "wouter";
 import { trpc } from "@/lib/trpc";
 import { AdminLayout } from "./AdminLayout";
-import { Plus, Edit, Trash2, Eye, EyeOff, Star, CalendarClock } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, EyeOff, Star, CalendarClock, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { toast } from "sonner";
+
+const PER_PAGE = 20;
 
 function isScheduledArticle(article: { status: string; publishedAt?: Date | string | null }) {
   if (article.status !== "published" || !article.publishedAt) return false;
@@ -13,33 +15,36 @@ function isScheduledArticle(article: { status: string; publishedAt?: Date | stri
 
 function getArticleStatusDisplay(article: { status: string; publishedAt?: Date | string | null }) {
   if (isScheduledArticle(article)) {
-    return {
-      label: "Programado",
-      background: "rgba(91,44,143,0.15)",
-      color: "#5B2C8F",
-      icon: <CalendarClock className="w-3 h-3" />,
-    };
+    return { label: "Programado", accent: "#5b2c8f", icon: <CalendarClock /> };
   }
-
   if (article.status === "published") {
-    return {
-      label: "Publicado",
-      background: "rgba(22,163,74,0.2)",
-      color: "#16a34a",
-      icon: <Eye className="w-3 h-3" />,
-    };
+    return { label: "Publicado", accent: "#15803d", icon: <Eye /> };
   }
+  return { label: "Borrador", accent: "#b45309", icon: <EyeOff /> };
+}
 
-  return {
-    label: "Borrador",
-    background: "rgba(217,119,6,0.2)",
-    color: "#d97706",
-    icon: <EyeOff className="w-3 h-3" />,
-  };
+/**
+ * Page numbers around the current one, with gaps as nulls. Seven pages fit
+ * without collapsing; beyond that the ends stay reachable in one click.
+ */
+function pageWindow(current: number, total: number): (number | null)[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const pages = new Set([1, total, current, current - 1, current + 1]);
+  if (current <= 3) [2, 3, 4].forEach((p) => pages.add(p));
+  if (current >= total - 2) [total - 3, total - 2, total - 1].forEach((p) => pages.add(p));
+
+  const sorted = [...pages].filter((p) => p >= 1 && p <= total).sort((a, b) => a - b);
+  const out: (number | null)[] = [];
+  sorted.forEach((page, i) => {
+    if (i > 0 && page - sorted[i - 1] > 1) out.push(null);
+    out.push(page);
+  });
+  return out;
 }
 
 export default function AdminArticles() {
   const { data: articles, refetch } = trpc.articles.adminList.useQuery();
+  const { data: categories } = trpc.categories.list.useQuery();
   const deleteMutation = trpc.articles.delete.useMutation({
     onSuccess: () => { refetch(); toast.success("Artículo eliminado"); },
     onError: (e) => toast.error("Error: " + e.message),
@@ -47,6 +52,11 @@ export default function AdminArticles() {
   const updateMutation = trpc.articles.update.useMutation({
     onSuccess: () => { refetch(); },
   });
+
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [page, setPage] = useState(1);
 
   const toggleStatus = (id: number, current: string) => {
     updateMutation.mutate({
@@ -60,117 +70,199 @@ export default function AdminArticles() {
     updateMutation.mutate({ id, featured: !current });
   };
 
+  const filtered = useMemo(() => {
+    const term = search.trim().toLowerCase();
+    return (articles ?? []).filter((article) => {
+      if (term && !article.title.toLowerCase().includes(term) && !article.slug.toLowerCase().includes(term)) return false;
+      if (categoryFilter !== "all" && String(article.categoryId ?? "") !== categoryFilter) return false;
+      if (statusFilter === "all") return true;
+      if (statusFilter === "scheduled") return isScheduledArticle(article);
+      if (statusFilter === "published") return article.status === "published" && !isScheduledArticle(article);
+      return article.status === "draft";
+    });
+  }, [articles, search, statusFilter, categoryFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
+
+  // A filter that shortens the list can leave you stranded past the last page.
+  useEffect(() => { setPage(1); }, [search, statusFilter, categoryFilter]);
+  useEffect(() => { if (page > totalPages) setPage(totalPages); }, [page, totalPages]);
+
+  const start = (page - 1) * PER_PAGE;
+  const visible = filtered.slice(start, start + PER_PAGE);
+  const isFiltering = search.trim() !== "" || statusFilter !== "all" || categoryFilter !== "all";
+
   return (
     <AdminLayout>
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="font-bold text-2xl" style={{ fontFamily: "Poppins, sans-serif" }}>Artículos</h1>
-            <p style={{ color: "#6B6B6B" }}>{articles?.length ?? 0} artículos en total</p>
+      <div className="ca-adm-page">
+        <div className="ca-adm-bar">
+          <div className="flex-1 min-w-0">
+            <h1 className="ca-adm-bar__title">Artículos</h1>
           </div>
-          <Link
-            href="/admin/nuevo"
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium no-underline"
-            style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#FFFFFF" }}
-          >
-            <Plus className="w-4 h-4" />
+          <span className="ca-adm-pager__count">
+            {isFiltering ? `${filtered.length} de ${articles?.length ?? 0}` : `${articles?.length ?? 0} en total`}
+          </span>
+          <Link href="/admin/nuevo" className="ca-adm-btn ca-adm-btn--primary">
+            <Plus />
             Nuevo
           </Link>
         </div>
 
-        <div className="ca-card overflow-hidden">
-          {!articles || articles.length === 0 ? (
-            <div className="p-12 text-center" style={{ color: "#6B6B6B" }}>
-              <p className="text-lg font-semibold mb-2" style={{ color: "#1A1A1A" }}>Sin artículos</p>
-              <p className="mb-4">Crea tu primer artículo para comenzar.</p>
-              <Link href="/admin/nuevo" className="px-4 py-2 rounded-lg text-sm font-medium no-underline" style={{ background: "linear-gradient(135deg, #2B037D, #5B2C8F)", color: "#FFFFFF" }}>
-                Crear artículo
-              </Link>
+        <section className="ca-adm-card">
+          <div className="ca-adm-toolbar">
+            <div className="ca-adm-search">
+              <Search />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Buscar por título o slug..."
+                aria-label="Buscar artículos"
+              />
+            </div>
+            <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="ca-adm-input" aria-label="Filtrar por estado">
+              <option value="all">Todos los estados</option>
+              <option value="published">Publicados</option>
+              <option value="scheduled">Programados</option>
+              <option value="draft">Borradores</option>
+            </select>
+            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className="ca-adm-input" aria-label="Filtrar por categoría">
+              <option value="all">Todas las categorías</option>
+              {categories?.map((cat) => (
+                <option key={cat.id} value={String(cat.id)}>{cat.name}</option>
+              ))}
+            </select>
+          </div>
+
+          {filtered.length === 0 ? (
+            <div className="ca-adm-empty">
+              {articles && articles.length > 0 ? (
+                <>Ningún artículo coincide con esa búsqueda.</>
+              ) : (
+                <>
+                  Todavía no hay artículos.{" "}
+                  <Link href="/admin/nuevo" style={{ color: "var(--adm-brand)", fontWeight: 600 }}>Crear el primero</Link>
+                </>
+              )}
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr style={{ borderBottom: "1px solid #E5E3DE" }}>
-                    {["Título", "Categoría", "Estado", "Destacado", "Fecha", "Acciones"].map((h) => (
-                      <th key={h} className="text-left px-4 py-3 font-semibold" style={{ color: "#6B6B6B" }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {articles.map((article) => {
-                    const statusDisplay = getArticleStatusDisplay(article);
-                    return (
-                    <tr key={article.id} style={{ borderBottom: "1px solid #E5E3DE" }}>
-                      <td className="px-4 py-3">
-                        <p className="font-medium line-clamp-1 max-w-xs" style={{ color: "#1A1A1A" }}>{article.title}</p>
-                        <p className="text-xs mt-0.5" style={{ color: "#5A5C5E" }}>/{article.slug}</p>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="ca-badge">{article.categoryName || "—"}</span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <button
-                          onClick={() => toggleStatus(article.id, article.status)}
-                          className="flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium transition-opacity hover:opacity-80"
-                          style={{
-                            background: statusDisplay.background,
-                            color: statusDisplay.color,
-                          }}
-                        >
-                          {statusDisplay.icon}
-                          {statusDisplay.label}
-                        </button>
-                      </td>
-                      <td className="px-4 py-3">
-                        <button
-                          onClick={() => toggleFeatured(article.id, article.featured)}
-                          className="p-1.5 rounded transition-colors"
-                          style={{ color: article.featured ? "#f59e0b" : "#5A5C5E" }}
-                        >
-                          <Star className="w-4 h-4" fill={article.featured ? "#f59e0b" : "none"} />
-                        </button>
-                      </td>
-                      <td className="px-4 py-3" style={{ color: "#6B6B6B" }}>
-                        {new Date(article.createdAt).toLocaleDateString("es-ES")}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <Link
-                            href={`/articulo/${article.slug}`}
-                            className="p-1.5 rounded no-underline transition-colors"
-                            style={{ color: "#6B6B6B" }}
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Link>
-                          <Link
-                            href={`/admin/editar/${article.id}`}
-                            className="p-1.5 rounded no-underline transition-colors"
-                            style={{ color: "#7B4FB8" }}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Link>
-                          <button
-                            onClick={() => {
-                              if (confirm("¿Eliminar este artículo?")) {
-                                deleteMutation.mutate({ id: article.id });
-                              }
-                            }}
-                            className="p-1.5 rounded transition-colors"
-                            style={{ color: "#ef4444" }}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
+            <>
+              <div className="ca-adm-tablewrap">
+                <table className="ca-adm-table">
+                  <thead>
+                    <tr>
+                      <th>Título</th>
+                      <th>Categoría</th>
+                      <th>Estado</th>
+                      <th>Destacado</th>
+                      <th>Fecha</th>
+                      <th>Acciones</th>
                     </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {visible.map((article) => {
+                      const status = getArticleStatusDisplay(article);
+                      return (
+                        <tr key={article.id}>
+                          <td>
+                            <span className="ca-adm-table__title">{article.title}</span>
+                            <span className="ca-adm-table__slug">/{article.slug}</span>
+                          </td>
+                          <td>{article.categoryName || "—"}</td>
+                          <td>
+                            <button
+                              onClick={() => toggleStatus(article.id, article.status)}
+                              className="ca-adm-pill"
+                              style={{ ["--adm-accent" as string]: status.accent, border: 0, cursor: "pointer" }}
+                              title="Cambiar entre publicado y borrador"
+                            >
+                              {status.icon}
+                              {status.label}
+                            </button>
+                          </td>
+                          <td>
+                            <button
+                              onClick={() => toggleFeatured(article.id, article.featured)}
+                              className="ca-adm-iconbtn ca-adm-iconbtn--star"
+                              data-on={article.featured}
+                              aria-label={article.featured ? "Quitar de destacados" : "Marcar como destacado"}
+                            >
+                              <Star fill={article.featured ? "#f59e0b" : "none"} />
+                            </button>
+                          </td>
+                          <td style={{ whiteSpace: "nowrap", fontVariantNumeric: "tabular-nums" }}>
+                            {new Date(article.createdAt).toLocaleDateString("es-MX")}
+                          </td>
+                          <td>
+                            <div className="ca-adm-table__actions">
+                              <a href={`/articulo/${article.slug}`} target="_blank" rel="noopener noreferrer" className="ca-adm-iconbtn" aria-label="Ver en el sitio">
+                                <Eye />
+                              </a>
+                              <Link href={`/admin/editar/${article.id}`} className="ca-adm-iconbtn ca-adm-iconbtn--edit" aria-label="Editar">
+                                <Edit />
+                              </Link>
+                              <button
+                                onClick={() => {
+                                  if (confirm(`¿Eliminar "${article.title}"? No se puede deshacer.`)) {
+                                    deleteMutation.mutate({ id: article.id });
+                                  }
+                                }}
+                                className="ca-adm-iconbtn ca-adm-iconbtn--danger"
+                                aria-label="Eliminar"
+                              >
+                                <Trash2 />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="ca-adm-pager">
+                <span className="ca-adm-pager__count">
+                  {start + 1}–{Math.min(start + PER_PAGE, filtered.length)} de {filtered.length}
+                </span>
+                {totalPages > 1 && (
+                  <div className="ca-adm-pager__pages">
+                    <button
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                      className="ca-adm-pager__page"
+                      aria-label="Página anterior"
+                    >
+                      <ChevronLeft className="w-4 h-4 mx-auto" />
+                    </button>
+                    {pageWindow(page, totalPages).map((p, i) =>
+                      p === null ? (
+                        <span key={`gap-${i}`} className="ca-adm-pager__gap">…</span>
+                      ) : (
+                        <button
+                          key={p}
+                          onClick={() => setPage(p)}
+                          className="ca-adm-pager__page"
+                          aria-current={p === page ? "page" : undefined}
+                        >
+                          {p}
+                        </button>
+                      )
+                    )}
+                    <button
+                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={page === totalPages}
+                      className="ca-adm-pager__page"
+                      aria-label="Página siguiente"
+                    >
+                      <ChevronRight className="w-4 h-4 mx-auto" />
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
           )}
-        </div>
+        </section>
       </div>
     </AdminLayout>
   );
