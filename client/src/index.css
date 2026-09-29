@@ -684,7 +684,9 @@
 .ca-reference-hero__image { filter: brightness(0.86) saturate(0.85) contrast(1.12); transform: scale(1.012); }
 .ca-reference-hero__overlay { position: absolute; z-index: 1; inset: 0; background: linear-gradient(90deg, rgba(3, 2, 7, 0.98) 0%, rgba(3, 2, 7, 0.91) 24%, rgba(3, 2, 7, 0.42) 57%, rgba(3, 2, 7, 0.20) 100%), linear-gradient(0deg, #07060b 0%, rgba(7, 6, 11, 0.32) 18%, transparent 44%, rgba(6, 4, 10, 0.42) 100%); }
 .ca-reference-hero__stars { position: absolute; z-index: 1; inset: 0; opacity: 0.36; background-image: radial-gradient(circle at 18% 28%, rgba(231, 216, 255, 0.72) 0 1px, transparent 1.5px), radial-gradient(circle at 48% 17%, rgba(205, 178, 255, 0.63) 0 1px, transparent 1.5px), radial-gradient(circle at 59% 34%, rgba(255,255,255,0.5) 0 0.8px, transparent 1.3px), radial-gradient(circle at 35% 62%, rgba(210, 183, 255, 0.45) 0 0.8px, transparent 1.3px); background-size: 16rem 14rem, 19rem 17rem, 11rem 10rem, 22rem 20rem; pointer-events: none; }
-.ca-reference-hero__inner { position: relative; z-index: 2; min-height: 43.5rem; padding-top: 5.4rem; padding-bottom: 1.5rem; }
+/* padding-bottom carries the rail's bottom offset plus its own breathing room:
+   raising one without the other either crowds the copy or leaves the gap. */
+.ca-reference-hero__inner { position: relative; z-index: 2; min-height: 43.5rem; padding-top: 5.4rem; padding-bottom: 3rem; }
 .ca-reference-hero__copy { width: min(34rem, 51%); padding-top: clamp(7.5rem, 12vw, 10.5rem); }
 .ca-reference-hero__labels { display: flex; flex-wrap: wrap; gap: 0.45rem; }
 .ca-reference-kicker, .ca-reference-category { display: inline-flex; align-items: center; gap: 0.33rem; border-radius: 999px; font-size: 0.61rem; font-weight: 800; letter-spacing: 0.09em; line-height: 1; text-transform: uppercase; }
@@ -697,7 +699,12 @@
 .ca-reference-hero__cta:hover { background: rgba(122, 63, 225, 0.38); box-shadow: 0 12px 28px rgba(112, 55, 220, 0.32); color: white; transform: translateY(-2px); }
 .ca-reference-hero__date { display: inline-flex; align-items: center; gap: 0.38rem; color: #c2b8d1; font-size: 0.74rem; }
 
-.ca-reference-rail { position: absolute; right: 2rem; bottom: 2.5rem; left: 2rem; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1rem; }
+/* The rail is pinned to the hero's bottom edge and the category dock's border
+   runs directly under it, so 2.5rem read as the cards resting on a line. Only
+   24px separate the rail from the hero copy above, so the extra room is bought
+   by growing the hero (see __inner's padding-bottom) by the same 1.5rem this
+   offset gains: the rail keeps its place on screen and the line moves down. */
+.ca-reference-rail { position: absolute; right: 2rem; bottom: 4rem; left: 2rem; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1rem; }
 .ca-reference-rail__skeleton { min-height: 11.1rem; border: 1px solid rgba(231, 218, 255, 0.12); border-radius: 0.42rem; background: rgba(24, 16, 35, 0.86); }
 .ca-rail-card { position: relative; min-height: 11.1rem; overflow: hidden; border: 1px solid rgba(228, 213, 255, 0.13); border-radius: 0.42rem; background: #171020; box-shadow: 0 14px 28px rgba(0, 0, 0, 0.24); transition: border-color 190ms ease, transform 190ms ease, box-shadow 190ms ease; }
 .ca-rail-card:hover { border-color: rgba(179, 123, 255, 0.72); box-shadow: 0 18px 36px rgba(0, 0, 0, 0.35); transform: translateY(-4px); }
