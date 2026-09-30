@@ -570,6 +570,14 @@
 
 /* Story grid and cards */
 .ca-stories-section { padding: clamp(3.6rem, 6vw, 5.8rem) 0 clamp(4.4rem, 8vw, 7.5rem); }
+/* On the desktop home that section is display:contents (ca-desktop-home-redesign),
+   so it generates no box and the padding above never rendered: the last row of
+   cards ended flush against the footer's top border. The spacing has to live on
+   an element that actually exists, which is the container inside it. */
+.ca-stories-section.ca-desktop-home-redesign > .container {
+  padding-top: clamp(3.6rem, 6vw, 5.8rem);
+  padding-bottom: clamp(4.4rem, 8vw, 7.5rem);
+}
 .ca-section-heading { display: flex; align-items: flex-end; justify-content: space-between; gap: 1.5rem; margin-bottom: clamp(1.45rem, 3vw, 2.2rem); }
 .ca-section-kicker { margin-bottom: 0.7rem; padding-left: 0; color: #ad82fb; }
 .ca-section-heading h2 { margin: 0; color: #fbfaff; font-family: "Poppins", "Inter", sans-serif; font-size: clamp(1.7rem, 3vw, 2.5rem); font-weight: 700; letter-spacing: -0.035em; line-height: 1.1; }
