@@ -46,7 +46,8 @@ export default function Home() {
   const moreArticles = articles?.slice(5, 17) ?? [];
 
   useSeoMeta({
-    title: "Datos curiosos, historias sorprendentes y cosas que no sabías",
+    // Must match index.html's <title>, or the client overwrites it on mount.
+    title: "Curioseando Ando | Datos curiosos y cosas que no sabías",
     description:
       "Datos curiosos, curiosidades y historias sorprendentes que casi nadie conoce. Ciencia, historia, entretenimiento, geek, salud y tecnología, contadas de forma sencilla y verificadas antes de publicarlas.",
     url: window.location.origin,
