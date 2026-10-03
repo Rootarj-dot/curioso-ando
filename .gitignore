@@ -111,3 +111,6 @@ temp/
 
 # Local tooling (engram memory project mapping)
 .engram/
+
+# Cache local de la inspeccion de indexacion (se regenera)
+scripts/gsc-indice.csv
