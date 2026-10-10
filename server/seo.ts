@@ -5,6 +5,7 @@ import { getPublishedArticles, getAllCategories, getArticleBySlug, isArticleCurr
 import { excerptFromContent } from "@shared/excerpt";
 import { categoryIntro } from "@shared/categories";
 import { contentSegments, parseSources } from "@shared/articleHtml";
+import { INDEXNOW_KEY } from "./indexNow";
 
 const SITE_NAME = "Curioseando Ando";
 const DEFAULT_DESCRIPTION = "Datos raros, curiosos y sorprendentes. Noticias, entretenimiento, geek y tecnología en un solo lugar.";
@@ -405,6 +406,11 @@ Disallow: /
 Sitemap: ${baseUrl}/sitemap.xml
 `
     );
+  });
+
+  // ── IndexNow key ──────────────────────────────────────────────────────────
+  app.get(`/${INDEXNOW_KEY}.txt`, (_req, res) => {
+    res.type("text/plain").send(INDEXNOW_KEY);
   });
 
   // ── llms.txt ──────────────────────────────────────────────────────────────

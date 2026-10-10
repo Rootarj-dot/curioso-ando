@@ -44,6 +44,7 @@ import {
 } from "./db";
 import { uploadToCloudinary, deleteFromCloudinary } from "./cloudinaryStorage";
 import { nanoid } from "nanoid";
+import { notifyIndexNow } from "./indexNow";
 import { sendContactMessage, isMailerConfigured, rateLimitOk } from "./contactMailer";
 
 function slugify(text: string): string {
@@ -206,6 +207,9 @@ export const appRouter = router({
         if (!createdArticle) {
           throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "No se pudo recuperar el artículo creado" });
         }
+        if (isArticleCurrentlyPublished(createdArticle)) {
+          notifyIndexNow([`/articulo/${createdArticle.slug}`, "/"]);
+        }
         return { id: createdArticle.id, slug: createdArticle.slug };
       }),
 
@@ -235,6 +239,10 @@ export const appRouter = router({
           updateData.publishedAt = new Date();
         }
         await updateArticle(id, updateData as Parameters<typeof updateArticle>[1]);
+        const updated = await getArticleById(id);
+        if (updated && isArticleCurrentlyPublished(updated)) {
+          notifyIndexNow([`/articulo/${updated.slug}`]);
+        }
         return { success: true };
       }),
 
