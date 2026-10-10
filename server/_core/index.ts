@@ -48,6 +48,23 @@ async function startServer() {
     res.setHeader("X-Content-Type-Options", "nosniff");
     res.setHeader("X-Frame-Options", "SAMEORIGIN");
     res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+    res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+    next();
+  });
+
+  // Turn away AI-training and SEO-tool crawlers. robots.txt already asks them to
+  // stay out; this enforces it for those that ignore it. Assistants that cite
+  // the source (ChatGPT-User, OAI-SearchBot, PerplexityBot, ClaudeBot) and plain
+  // Applebot are left alone on purpose. robots.txt stays readable so they can
+  // see why.
+  const BLOCKED_BOTS = /GPTBot|CCBot|Bytespider|AhrefsBot|SemrushBot|MJ12bot|DotBot/i;
+  app.use((req, res, next) => {
+    if (req.path !== "/robots.txt" && BLOCKED_BOTS.test(req.get("user-agent") || "")) {
+      // Never let a CDN cache this answer and hand it to readers.
+      res.setHeader("Cache-Control", "no-store");
+      res.setHeader("Vary", "User-Agent");
+      return res.status(403).type("text/plain").send("Forbidden");
+    }
     next();
   });
 
