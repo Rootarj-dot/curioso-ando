@@ -49,6 +49,8 @@ async function startServer() {
     res.setHeader("X-Frame-Options", "SAMEORIGIN");
     res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
     res.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+    // Only device features the site never uses; AdSense's ad features stay untouched.
+    res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=(), usb=()");
     next();
   });
 
