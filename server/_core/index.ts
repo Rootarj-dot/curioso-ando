@@ -59,7 +59,21 @@ async function startServer() {
   // the source (ChatGPT-User, OAI-SearchBot, PerplexityBot, ClaudeBot) and plain
   // Applebot are left alone on purpose. robots.txt stays readable so they can
   // see why.
-  const BLOCKED_BOTS = /GPTBot|CCBot|Bytespider|AhrefsBot|SemrushBot|MJ12bot|DotBot/i;
+  // Log every visit from search and AI crawlers. The host keeps no access log,
+  // and this is the only way to tell whether a bot reached the app at all or
+  // was stopped earlier by the CDN.
+  const LOGGED_BOTS =
+    /ChatGPT-User|OAI-SearchBot|GPTBot|PerplexityBot|Perplexity-User|ClaudeBot|Claude-User|Claude-SearchBot|Googlebot|Google-Extended|bingbot|Applebot|CCBot|Bytespider|meta-externalagent|DuckAssistBot/i;
+  app.use((req, res, next) => {
+    const ua = req.get("user-agent") || "";
+    const bot = ua.match(LOGGED_BOTS)?.[0];
+    if (bot) {
+      res.on("finish", () => console.log(`[bot] ${bot} ${res.statusCode} ${req.originalUrl}`));
+    }
+    next();
+  });
+
+  const BLOCKED_BOTS =/GPTBot|CCBot|Bytespider|AhrefsBot|SemrushBot|MJ12bot|DotBot/i;
   app.use((req, res, next) => {
     if (req.path !== "/robots.txt" && BLOCKED_BOTS.test(req.get("user-agent") || "")) {
       // Never let a CDN cache this answer and hand it to readers.
